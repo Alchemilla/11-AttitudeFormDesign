@@ -31,6 +31,7 @@ namespace AttSimCPP
         string path;
         public double[] qMeas, dq, bias, berr, dq2, bias2, berr2, qNs, xestAll, xestAll2;
 
+
         /// <summary>
         /// 功能：星敏陀螺仿真主程序
         /// 说明：点击该按钮，根据时间间隔和总时长仿真
@@ -142,8 +143,6 @@ namespace AttSimCPP
         /// <summary>
         /// 功能：显示四元数
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void button6_Click(object sender, EventArgs e)
         {
             ShowInfo("显示测量四元数");
@@ -179,6 +178,12 @@ namespace AttSimCPP
             textBox9.ForeColor = Color.Gray;
             textBox10.Text = "0,0,0,0,0,0,0,0,0";
             textBox10.Enabled = false;
+            textBox15.Text = "0.5,0.1,-0.1";
+            textBox15.ForeColor = Color.Gray;
+            textBox16.Text = "10";
+            textBox16.ForeColor = Color.Gray;
+            textBox17.Text = "10";
+            textBox17.ForeColor = Color.Gray;
             ShowInfo("已加载姿态仿真默认参数!");
             ShowInfo("请设置仿真文件保存目录！!");
         }
@@ -262,6 +267,29 @@ namespace AttSimCPP
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Text = "双向星敏噪声";
             simAtt1.Show();
+        }
+        
+        /// <summary>
+        /// 功能：将外部程序仿真的姿态转换为陀螺角速度
+        /// 日期：2017.09.06
+        /// 作者：GZC
+        /// </summary>
+        private void button11_Click(object sender, EventArgs e)
+        {
+            //陀螺漂移
+            string[] strW = textBox15.Text.Split(',');
+            for (int i = 0; i < 3; i++)
+                wBias[i] = double.Parse(strW[i]);
+
+            //漂移噪声
+            sigu = double.Parse(textBox16.Text);
+            sigu = Math.Sqrt(sigu) * 1e-10;
+
+            //陀螺噪声
+            sigv = double.Parse(textBox17.Text);
+            sigv = Math.Sqrt(sigv) * 1e-7;
+
+            DLLImport.ExternalData(path,wBias,sigu,sigv);
         }
 
         private void button4_Click(object sender, EventArgs e)

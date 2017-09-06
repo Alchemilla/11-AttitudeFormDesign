@@ -36,6 +36,12 @@
     <ClInclude Include="DateTime.h">
       <Filter>1-基本函数</Filter>
     </ClInclude>
+    <ClInclude Include="ExtData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AttSimDLL.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -52,6 +58,9 @@
     </ClCompile>
     <ClCompile Include="DateTime.cpp">
       <Filter>1-基本函数</Filter>
+    </ClCompile>
+    <ClCompile Include="ExtData.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
