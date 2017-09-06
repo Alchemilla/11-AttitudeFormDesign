@@ -60,6 +60,8 @@
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button10 = new System.Windows.Forms.Button();
+            this.button9 = new System.Windows.Forms.Button();
             this.TabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -73,14 +75,21 @@
             this.textBox13 = new System.Windows.Forms.TextBox();
             this.textBox14 = new System.Windows.Forms.TextBox();
             this.button8 = new System.Windows.Forms.Button();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.button11 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.button9 = new System.Windows.Forms.Button();
-            this.button10 = new System.Windows.Forms.Button();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.textBox15 = new System.Windows.Forms.TextBox();
+            this.textBox16 = new System.Windows.Forms.TextBox();
+            this.textBox17 = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.TabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -406,10 +415,33 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "操作";
             // 
+            // button10
+            // 
+            this.button10.Location = new System.Drawing.Point(262, 248);
+            this.button10.Margin = new System.Windows.Forms.Padding(2);
+            this.button10.Name = "button10";
+            this.button10.Size = new System.Drawing.Size(213, 69);
+            this.button10.TabIndex = 28;
+            this.button10.Text = "双向星敏噪声";
+            this.button10.UseVisualStyleBackColor = true;
+            this.button10.Click += new System.EventHandler(this.button10_Click);
+            // 
+            // button9
+            // 
+            this.button9.Location = new System.Drawing.Point(30, 248);
+            this.button9.Margin = new System.Windows.Forms.Padding(2);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(213, 69);
+            this.button9.TabIndex = 27;
+            this.button9.Text = "EKF星敏噪声";
+            this.button9.UseVisualStyleBackColor = true;
+            this.button9.Click += new System.EventHandler(this.button9_Click);
+            // 
             // TabControl
             // 
             this.TabControl.Controls.Add(this.tabPage1);
             this.TabControl.Controls.Add(this.tabPage2);
+            this.TabControl.Controls.Add(this.tabPage3);
             this.TabControl.Location = new System.Drawing.Point(0, 1);
             this.TabControl.Margin = new System.Windows.Forms.Padding(2);
             this.TabControl.Name = "TabControl";
@@ -587,6 +619,33 @@
             this.button8.Text = "开始仿真";
             this.button8.UseVisualStyleBackColor = true;
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.label15);
+            this.tabPage3.Controls.Add(this.label16);
+            this.tabPage3.Controls.Add(this.label17);
+            this.tabPage3.Controls.Add(this.textBox15);
+            this.tabPage3.Controls.Add(this.textBox16);
+            this.tabPage3.Controls.Add(this.textBox17);
+            this.tabPage3.Controls.Add(this.button11);
+            this.tabPage3.Location = new System.Drawing.Point(10, 48);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(1124, 624);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "仿真数据接口";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // button11
+            // 
+            this.button11.Location = new System.Drawing.Point(696, 87);
+            this.button11.Name = "button11";
+            this.button11.Size = new System.Drawing.Size(215, 84);
+            this.button11.TabIndex = 0;
+            this.button11.Text = "生成陀螺数据";
+            this.button11.UseVisualStyleBackColor = true;
+            this.button11.Click += new System.EventHandler(this.button11_Click);
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.txtInfo);
@@ -597,27 +656,59 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "程序日志";
             // 
-            // button9
+            // label15
             // 
-            this.button9.Location = new System.Drawing.Point(30, 248);
-            this.button9.Margin = new System.Windows.Forms.Padding(2);
-            this.button9.Name = "button9";
-            this.button9.Size = new System.Drawing.Size(213, 69);
-            this.button9.TabIndex = 27;
-            this.button9.Text = "EKF星敏噪声";
-            this.button9.UseVisualStyleBackColor = true;
-            this.button9.Click += new System.EventHandler(this.button9_Click);
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(54, 114);
+            this.label15.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(232, 30);
+            this.label15.TabIndex = 17;
+            this.label15.Text = "漂移噪声(°/h)";
             // 
-            // button10
+            // label16
             // 
-            this.button10.Location = new System.Drawing.Point(262, 248);
-            this.button10.Margin = new System.Windows.Forms.Padding(2);
-            this.button10.Name = "button10";
-            this.button10.Size = new System.Drawing.Size(213, 69);
-            this.button10.TabIndex = 28;
-            this.button10.Text = "双向星敏噪声";
-            this.button10.UseVisualStyleBackColor = true;
-            this.button10.Click += new System.EventHandler(this.button10_Click);
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(54, 163);
+            this.label16.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(232, 30);
+            this.label16.TabIndex = 15;
+            this.label16.Text = "陀螺噪声(°/h)";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(54, 65);
+            this.label17.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(232, 30);
+            this.label17.TabIndex = 16;
+            this.label17.Text = "陀螺漂移(°/h)";
+            // 
+            // textBox15
+            // 
+            this.textBox15.Location = new System.Drawing.Point(381, 57);
+            this.textBox15.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox15.Name = "textBox15";
+            this.textBox15.Size = new System.Drawing.Size(205, 42);
+            this.textBox15.TabIndex = 18;
+            // 
+            // textBox16
+            // 
+            this.textBox16.Location = new System.Drawing.Point(381, 106);
+            this.textBox16.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox16.Name = "textBox16";
+            this.textBox16.Size = new System.Drawing.Size(205, 42);
+            this.textBox16.TabIndex = 19;
+            // 
+            // textBox17
+            // 
+            this.textBox17.Location = new System.Drawing.Point(381, 155);
+            this.textBox17.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox17.Name = "textBox17";
+            this.textBox17.Size = new System.Drawing.Size(205, 42);
+            this.textBox17.TabIndex = 20;
             // 
             // MainForm
             // 
@@ -642,6 +733,8 @@
             this.tabPage2.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
@@ -698,6 +791,14 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button button10;
         private System.Windows.Forms.Button button9;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Button button11;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.TextBox textBox15;
+        private System.Windows.Forms.TextBox textBox16;
+        private System.Windows.Forms.TextBox textBox17;
     }
 }
 

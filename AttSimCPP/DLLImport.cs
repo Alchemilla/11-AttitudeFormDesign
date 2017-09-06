@@ -52,6 +52,13 @@ namespace AttSimCPP
         public static extern void attitudeDetermination(int totalT, int freqQ, int freqG,
     string path, double[] qTrueC, double[] qMeasC, int isBinEKF,
     double[] wTrueC, double[] wMeasC, double[] dqOut, double[] xest_store);
+              
+        /// <summary>
+        /// 导入外部数据进行处理
+        /// </summary>
+        /// <param name="path"></param>
+        [DllImport("AttSimDLL.dll")]
+        public static extern void ExternalData(string path, double[] wBiasA, double sigu, double sigv);
 
         /// <summary>
         /// 姿态仿真和卡尔曼滤波

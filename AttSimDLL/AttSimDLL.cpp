@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "AttSimDLL.h"
 #include "BaseFunc.h"
 #include "SateBase.h"
 #include "DateTime.h"
@@ -21,7 +22,7 @@ string path;
 //作者：GZC
 //日期：2017.06.09
 //////////////////////////////////////////////////////////////////////////
-extern "C" __declspec(dllexport) void   attitudeSimulation2(double dt, double tf, int m, double qInitial[4],
+void  _stdcall attitudeSimulation2(double dt, double tf, int m, double qInitial[4],
 	double sig_ST, double wBiasA[3], double sigu, double sigv, char* path, 
 	double *dqOut, double *biasOut, double *berrOut)
 {
@@ -1760,7 +1761,7 @@ void compareTrueNoise(Quat *qTrue, Quat *qMeas, double *qNoise)
 //作者：GZC
 //日期：2017.07.01
 //////////////////////////////////////////////////////////////////////////
-extern "C" __declspec(dllexport) void simAttitudeDeter(int freqG, int freqQ,int totalT,
+void simAttitudeDeter(int freqG, int freqQ,int totalT,
 	double qInitial[4], double sig_ST, double wBiasA[3],  double sigu, double sigv, int isBinEKF,
 	char* workpath, double *dqOut, double *qNoise, double *biasOut, double *berrOut)
  {
@@ -1809,7 +1810,7 @@ extern "C" __declspec(dllexport) void simAttitudeDeter(int freqG, int freqQ,int 
 //作者：GZC
 //日期：2017.07.09
 //////////////////////////////////////////////////////////////////////////
-extern "C" __declspec(dllexport) void simAttitudeDeter15State(int freqG, int freqQ, int totalT,
+void simAttitudeDeter15State(int freqG, int freqQ, int totalT,
 	double qInitial[4], double sig_ST, double wBiasA[3], double stabW[3], double sigu, double sigv, int isBinEKF,
 	double sArr[9], char* workpath, double *qMeasure, double *dqOut, double *qNoise, double *xest_store)
 {
@@ -1869,7 +1870,7 @@ extern "C" __declspec(dllexport) void simAttitudeDeter15State(int freqG, int fre
 //作者：GZC
 //日期：2017.07.15
 //////////////////////////////////////////////////////////////////////////
-extern "C" __declspec(dllexport) void attitudeSimulation(int freqG, int freqQ, int totalT,
+void attitudeSimulation(int freqG, int freqQ, int totalT,
 	double qInitial[4], double sig_ST, double wBiasA[3], double stabW[3], 
 	double sigu, double sigv, double sArr[9], char* workpath, 
 	double *qTrueC, double *qMeasC, double *wTrueC, double *wMeasC,double *qNoise)
@@ -1918,7 +1919,7 @@ extern "C" __declspec(dllexport) void attitudeSimulation(int freqG, int freqQ, i
 //作者：GZC
 //日期：2017.07.15
 //////////////////////////////////////////////////////////////////////////
-extern "C" __declspec(dllexport) void attitudeDetermination(int totalT, int freqQ,int freqG,
+void attitudeDetermination(int totalT, int freqQ,int freqG,
 	char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store)
 {	
