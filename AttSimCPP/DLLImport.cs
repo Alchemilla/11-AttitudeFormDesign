@@ -52,7 +52,25 @@ namespace AttSimCPP
         public static extern void attitudeDetermination(int totalT, int freqQ, int freqG,
     string path, double[] qTrueC, double[] qMeasC, int isBinEKF,
     double[] wTrueC, double[] wMeasC, double[] dqOut, double[] xest_store);
-              
+        /// <summary>
+        /// 主动推扫姿态确定
+        /// </summary>
+        /// <param name="totalT"></param>
+        /// <param name="freqQ"></param>
+        /// <param name="freqG"></param>
+        /// <param name="path"></param>
+        /// <param name="qTrueC"></param>
+        /// <param name="qMeasC"></param>
+        /// <param name="isBinEKF"></param>
+        /// <param name="wTrueC"></param>
+        /// <param name="wMeasC"></param>
+        /// <param name="dqOut"></param>
+        /// <param name="xest_store"></param>
+        [DllImport("AttSimDLL.dll")]
+        public static extern void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG,
+    string path, double[] qTrueC, double[] qMeasC, int isBinEKF,
+    double[] wTrueC, double[] wMeasC, double[] dqOut, double[] xest_store);
+
         /// <summary>
         /// 导入外部数据进行处理
         /// </summary>

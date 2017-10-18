@@ -13,10 +13,16 @@ ATTSIMDLL void simAttitudeDeter(int freqG, int freqQ, int totalT,
 ATTSIMDLL void simAttitudeDeter15State(int freqG, int freqQ, int totalT,
 	double qInitial[4], double sig_ST, double wBiasA[3], double stabW[3], double sigu, double sigv, int isBinEKF,
 	double sArr[9], char* workpath, double *qMeasure, double *dqOut, double *qNoise, double *xest_store);
+
+//目前在用的仿真函数2017.10.18
 ATTSIMDLL void attitudeSimulation(int freqG, int freqQ, int totalT,
 	double qInitial[4], double sig_ST, double wBiasA[3], double stabW[3],
 	double sigu, double sigv, double sArr[9], char* workpath,
 	double *qTrueC, double *qMeasC, double *wTrueC, double *wMeasC, double *qNoise);
 ATTSIMDLL void attitudeDetermination(int totalT, int freqQ, int freqG,
+	char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
+	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
+//主动推扫姿态确定
+ATTSIMDLL void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG,
 	char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);

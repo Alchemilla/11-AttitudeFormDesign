@@ -385,7 +385,7 @@ namespace AttSimCPP
 
             double[] dqOut = new double[3 * nQuat];
             double[] xest_store = new double[15 * nGyro];
-            DLLImport.attitudeDetermination(tf, freqQ, freqG, path,
+            DLLImport.attitudeDeterActivePushbroom(tf, freqQ, freqG, path,
                 qTrueC, qMeasC, 0, wTrueC, wMeasC, dqOut, xest_store);
             dq = dqOut; qNs = qNoise; xestAll = xest_store; qMeas = qMeasC;
 
@@ -393,7 +393,7 @@ namespace AttSimCPP
             xest_store = new double[15 * nGyro];
             progressBar1.Value = 70;
             ShowInfo("开始双向卡尔曼滤波...");
-            DLLImport.attitudeDetermination(tf, freqQ, freqG, path,
+            DLLImport.attitudeDeterActivePushbroom(tf, freqQ, freqG, path,
                qTrueC, qMeasC, 1, wTrueC, wMeasC, dqOut, xest_store);
             dq2 = dqOut; xestAll2 = xest_store;
             dqOut = null; qNoise = null; xest_store = null;
