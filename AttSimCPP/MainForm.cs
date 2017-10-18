@@ -30,7 +30,7 @@ namespace AttSimCPP
         double[] stabW = new double[3];//姿态稳定度
         string path;
         public double[] qMeas, dq, bias, berr, dq2, bias2, berr2, qNs, xestAll, xestAll2;
-
+        static int nSim = 0;
 
         /// <summary>
         /// 功能：星敏陀螺仿真主程序
@@ -48,6 +48,12 @@ namespace AttSimCPP
                 MessageBox.Show("请设置仿真文件保存路径", "警告", MessageBoxButtons.OK);
                 return;
             }
+            if (nSim==0)
+            {
+                button1.Text = "重新仿真";
+                nSim++;
+            }
+
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 10;
