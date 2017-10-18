@@ -362,7 +362,7 @@ void  _stdcall attitudeSimulation2(double dt, double tf, int m, double qInitial[
 //////////////////////////////////////////////////////////////////////////
 void ExtendedKalmanFilter15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store)
 {
-	double sig = attDat.sig_ST / 3600 * PI / 180;//星敏噪声，角秒转弧度
+	double sig = 0.5 * attDat.sig_ST / 3600 * PI / 180;//星敏噪声，角秒转弧度
 	double w, dt, qw1, qw2, qw3, qw4, qmm1, qmm2, qmm3, qe11, qe22, qe33, qe44;
 	Matrix3d poa, pog, pos, poku, pokl, r, sigu, sigv, wa, sest,  uhat, lhat, wec, diagwe_nos;
 	MatrixXd p(15, 15), qcov(6, 6), qcovd(15,15), xe(1, 3), z(3, 1), h(3, 15), k(15, 3), 
@@ -796,7 +796,7 @@ void EKFForwardAndBackforward(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *
 //////////////////////////////////////////////////////////////////////////
 void EKFForwardAndBackforward15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store)
 {
-	double sig = attDat.sig_ST / 3600 * PI / 180;//星敏噪声，角秒转弧度
+	double sig = 0.5 * attDat.sig_ST / 3600 * PI / 180;//星敏噪声，角秒转弧度
 	double w, dt, qw1, qw2, qw3, qw4, qmm1, qmm2, qmm3, qe11, qe22, qe33, qe44;
 	Matrix3d poa, pog, pos, poku, pokl, r, sigu, sigv, wa, sest, uhat, lhat, wec, diagwe_nos;
 	MatrixXd p(15, 15), qcov(6, 6), qcovd(15, 15), xe(1, 3), z(3, 1), h(3, 15), k(15, 3),
@@ -807,9 +807,12 @@ void EKFForwardAndBackforward15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, d
 	MatrixXd eye15 = MatrixXd::Identity(15, 15);
 	poa << pow((0.1*PI / 180), 2)*eye33;//初始姿态误差协方差0.1°
 	pog << pow((0.2*PI / 180 / 3600), 2)*eye33;//初始陀螺误差协方差0.2°/Hr
-	pos << pow((2000 * 1e-10 / 3), 2)* eye33;//初始尺度因子
-	poku << pow((2000 * 1e-10 / 3), 2) * eye33;//初始上三角安装误差
-	pokl << pow((2000 * 1e-10 / 3), 2) *eye33;//初始下三角安装误差
+	//pos << pow((2000 * 1e-10 / 3), 2)* eye33;//初始尺度因子
+	//poku << pow((2000 * 1e-10 / 3), 2) * eye33;//初始上三角安装误差
+	//pokl << pow((2000 * 1e-10 / 3), 2) *eye33;//初始下三角安装误差
+	pos << zero33;//初始尺度因子
+	poku << zero33;//初始上三角安装误差
+	pokl << zero33;//初始下三角安装误差
 	r << pow(sig, 2)*eye33;//星敏噪声	
 
 						   //预先计算估计四元数的数量
@@ -1515,7 +1518,7 @@ void  simQuatAndGyro(Quat *&qTrue,Quat *&qMeas, Gyro *&wTrue,Gyro *&wMeas)
 //////////////////////////////////////////////////////////////////////////
 void  simQuatAndGyro15State(Quat *&qTrue, Quat *&qMeas, Gyro *&wTrue, Gyro *&wMeas)
 {
-	double sig_tracker = 0.5*attDat.sig_ST / 3600 * PI / 180;
+	double sig_tracker = 0.5*attDat.sig_ST / 3600 * PI / 180;//0.5原因是a（角度）=2q（四元数）
 	double *noise1 = new double[nGyro];
 	double *noise2 = new double[nGyro];
 	double *noise3 = new double[nGyro];
@@ -1877,6 +1880,14 @@ void attitudeSimulation(int freqG, int freqQ, int totalT,
 {
 	attDat.freqG = freqG, attDat.freqQ = freqQ; attDat.totalT = totalT;
 	attDat.sig_ST = sig_ST, attDat.sigu = sigu, attDat.sigv = sigv;
+	//设置随机初始四元数
+	if (qInitial[0]==0.5)//如果用默认参数的，四元数则为随机
+	{
+		double qRand[4];
+		mBase.RandomDistribution(0, 1, 4, 0, qRand);
+		double qAll= sqrt(pow(qRand[0], 2) + pow(qRand[1], 2) + pow(qRand[2], 2) + pow(qRand[3], 2));
+		qInitial[0] = qRand[0] / qAll; qInitial[1] = qRand[1] / qAll; qInitial[2] = qRand[2] / qAll; qInitial[3] = qRand[3] / qAll;
+	} 
 	memcpy(attDat.qInitial, qInitial, sizeof(double) * 4);
 	memcpy(attDat.wBiasA, wBiasA, sizeof(double) * 3);
 	memcpy(attDat.sArr, sArr, sizeof(double) * 9);

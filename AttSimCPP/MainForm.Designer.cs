@@ -74,7 +74,6 @@
             this.textBox12 = new System.Windows.Forms.TextBox();
             this.textBox13 = new System.Windows.Forms.TextBox();
             this.textBox14 = new System.Windows.Forms.TextBox();
-            this.button8 = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.label15 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
@@ -85,6 +84,7 @@
             this.button11 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.button8 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.TabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -167,12 +167,12 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(155, 32);
+            this.button1.Location = new System.Drawing.Point(151, 20);
             this.button1.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(120, 36);
             this.button1.TabIndex = 7;
-            this.button1.Text = "开始仿真";
+            this.button1.Text = "被动推扫仿真";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -234,7 +234,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(15, 32);
+            this.button2.Location = new System.Drawing.Point(15, 20);
             this.button2.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(120, 36);
@@ -513,7 +513,6 @@
             this.tableLayoutPanel1.Controls.Add(this.textBox12, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.textBox13, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.textBox14, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.button8, 2, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(2, 2);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -611,17 +610,6 @@
             this.textBox14.Size = new System.Drawing.Size(71, 25);
             this.textBox14.TabIndex = 13;
             // 
-            // button8
-            // 
-            this.button8.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.button8.Location = new System.Drawing.Point(285, 1);
-            this.button8.Margin = new System.Windows.Forms.Padding(1, 1, 1, 1);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(110, 29);
-            this.button8.TabIndex = 34;
-            this.button8.Text = "开始仿真";
-            this.button8.UseVisualStyleBackColor = true;
-            // 
             // tabPage3
             // 
             this.tabPage3.Controls.Add(this.label15);
@@ -635,7 +623,7 @@
             this.tabPage3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPage3.Size = new System.Drawing.Size(564, 312);
+            this.tabPage3.Size = new System.Drawing.Size(564, 354);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "仿真数据接口";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -699,7 +687,7 @@
             this.button11.Location = new System.Drawing.Point(348, 44);
             this.button11.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.button11.Name = "button11";
-            this.button11.Size = new System.Drawing.Size(108, 42);
+            this.button11.Size = new System.Drawing.Size(124, 42);
             this.button11.TabIndex = 0;
             this.button11.Text = "生成陀螺数据";
             this.button11.UseVisualStyleBackColor = true;
@@ -719,14 +707,27 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.button8);
             this.groupBox3.Controls.Add(this.button2);
             this.groupBox3.Controls.Add(this.button1);
-            this.groupBox3.Location = new System.Drawing.Point(281, 21);
+            this.groupBox3.Location = new System.Drawing.Point(281, 4);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(275, 93);
+            this.groupBox3.Size = new System.Drawing.Size(275, 110);
             this.groupBox3.TabIndex = 32;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "仿真操作";
+            // 
+            // button8
+            // 
+            this.button8.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.button8.Location = new System.Drawing.Point(151, 67);
+            this.button8.Margin = new System.Windows.Forms.Padding(1);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(120, 36);
+            this.button8.TabIndex = 35;
+            this.button8.Text = "主动推扫仿真";
+            this.button8.UseVisualStyleBackColor = true;
+            this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
             // MainForm
             // 
@@ -805,7 +806,6 @@
         private System.Windows.Forms.TextBox textBox12;
         private System.Windows.Forms.TextBox textBox13;
         private System.Windows.Forms.TextBox textBox14;
-        private System.Windows.Forms.Button button8;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button button10;
         private System.Windows.Forms.Button button9;
@@ -818,6 +818,7 @@
         private System.Windows.Forms.TextBox textBox16;
         private System.Windows.Forms.TextBox textBox17;
         private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Button button8;
     }
 }
 
