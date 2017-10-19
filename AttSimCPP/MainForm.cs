@@ -179,6 +179,8 @@ namespace AttSimCPP
             textBox16.ForeColor = Color.Gray;
             textBox17.Text = "10";
             textBox17.ForeColor = Color.Gray;
+            textBox18.Text = "10,10";
+            textBox18.ForeColor = Color.Gray;
             ShowInfo("已加载姿态仿真默认参数!");
             ShowInfo("请设置仿真文件保存目录！!");
         }
@@ -313,7 +315,7 @@ namespace AttSimCPP
             }
             if (nSim2 == 0)
             {
-                button1.Text = "主动重新仿真";
+                button8.Text = "主动重新仿真";
                 nSim2++;
             }
 
@@ -373,6 +375,12 @@ namespace AttSimCPP
             for (int i = 0; i < 9; i++)
                 sArr[i] = double.Parse(strSarr[i]) * 1e-6;
 
+            //主动推扫前后多余时间
+            double[] BeforeAfterT = new double[2];
+            string[] strBAT= textBox18.Text.Split(',');
+            for (int i = 0; i < 2; i++)
+                BeforeAfterT[i] = double.Parse(strBAT[i]);
+
             //注意时间维度
             double[] qTrueC = new double[5 * nQuat]; double[] qMeasC = new double[5 * nQuat];
             double[] wTrueC = new double[4 * nGyro]; double[] wMeasC = new double[4 * nGyro];
@@ -385,7 +393,7 @@ namespace AttSimCPP
 
             double[] dqOut = new double[3 * nQuat];
             double[] xest_store = new double[15 * nGyro];
-            DLLImport.attitudeDeterActivePushbroom(tf, freqQ, freqG, path,
+            DLLImport.attitudeDeterActivePushbroom(tf, freqQ, freqG, BeforeAfterT, path,
                 qTrueC, qMeasC, 0, wTrueC, wMeasC, dqOut, xest_store);
             dq = dqOut; qNs = qNoise; xestAll = xest_store; qMeas = qMeasC;
 
@@ -393,7 +401,7 @@ namespace AttSimCPP
             xest_store = new double[15 * nGyro];
             progressBar1.Value = 70;
             ShowInfo("开始双向卡尔曼滤波...");
-            DLLImport.attitudeDeterActivePushbroom(tf, freqQ, freqG, path,
+            DLLImport.attitudeDeterActivePushbroom(tf, freqQ, freqG, BeforeAfterT, path,
                qTrueC, qMeasC, 1, wTrueC, wMeasC, dqOut, xest_store);
             dq2 = dqOut; xestAll2 = xest_store;
             dqOut = null; qNoise = null; xest_store = null;

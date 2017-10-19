@@ -1979,33 +1979,44 @@ void attitudeDetermination(int totalT, int freqQ,int freqG,
 //////////////////////////////////////////////////////////////////////////
 //功能：主动推扫卡尔曼滤波程序（仅滤波）
 //输入：真实和测量的星敏陀螺数据qTrueC，qMeasC，wTrueC，wMeasC
+//		：BeforeAfterT主动推扫前后可供滤波时间
 //输出：滤波前(qNoise)后(dqOut)真实和测量四元数残差，漂移、尺度、安装等测量值（xest_store）
 //注意：假定陀螺是稳定输出的，仿真将以陀螺的时间作为基准
 //作者：GZC
 //日期：2017.10.18
 //////////////////////////////////////////////////////////////////////////
-void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG,
+void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG, double BeforeAfterT[2],
 	char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store)
 {
 	nQuat = totalT*freqQ;
 	nGyro = totalT*freqG;
-	Quat *qTrue = new Quat[2]; Quat *qMeas = new Quat[2]; 
-	Quat *quatEst = new Quat[nGyro]; Gyro *wTrue = new Gyro[nGyro]; Gyro *wMeas = new Gyro[nGyro];
-	qTrue[0].UT = qTrueC[0];
-	qTrue[0].q1 = qTrueC[1];  qTrue[0].q2 = qTrueC[2];
-	qTrue[0].q3 = qTrueC[3];  qTrue[0].q4 = qTrueC[4];
-	qTrue[1].UT = qTrueC[5 * nQuat-5];
-	qTrue[1].q1 = qTrueC[5 * nQuat - 4];  qTrue[1].q2 = qTrueC[5 * nQuat - 3];
-	qTrue[1].q3 = qTrueC[5 * nQuat - 2];  qTrue[1].q4 = qTrueC[5 * nQuat - 1];
+	Quat *qTrue = new Quat[nQuat]; Quat *quatEst = new Quat[nGyro];
+	Gyro *wTrue = new Gyro[nGyro]; Gyro *wMeas = new Gyro[nGyro];
+	for (int i = 0; i < nQuat; i++)
+	{
+		qTrue[i].UT = qTrueC[5 * i];
+		qTrue[i].q1 = qTrueC[5 * i + 1];  qTrue[i].q2 = qTrueC[5 * i + 2];
+		qTrue[i].q3 = qTrueC[5 * i + 3];  qTrue[i].q4 = qTrueC[5 * i + 4];
+	}
 
-	qMeas[0].UT = qMeasC[0];
-	qMeas[0].q1 = qMeasC[1];  qMeas[0].q2 = qMeasC[2];
-	qMeas[0].q3 = qMeasC[3];  qMeas[0].q4 = qMeasC[4];
-	qMeas[1].UT = qMeasC[5 * nQuat - 5];
-	qMeas[1].q1 = qMeasC[5 * nQuat - 4];  qMeas[1].q2 = qMeasC[5 * nQuat - 3];
-	qMeas[1].q3 = qMeasC[5 * nQuat - 2];  qMeas[1].q4 = qMeasC[5 * nQuat - 1];
-	nQuat = 2;
+	int beforeAct = BeforeAfterT[0] * freqQ;//主动推扫前姿态个数
+	int afterAct = nQuat - BeforeAfterT[1] * freqQ;//主动推扫后姿态位置
+	Quat *qMeas = new Quat[beforeAct + BeforeAfterT[1] * freqQ];
+	for (int i=0;i<beforeAct;i++)
+	{
+		qMeas[i].UT = qMeasC[5 * i];
+		qMeas[i].q1 = qMeasC[5 * i + 1];  qMeas[i].q2 = qMeasC[5 * i + 2];
+		qMeas[i].q3 = qMeasC[5 * i + 3];  qMeas[i].q4 = qMeasC[5 * i + 4];
+	}
+	int j = beforeAct;
+	for (int i = afterAct; i < nQuat; i++,j++)
+	{
+		qMeas[j].UT = qMeasC[5 * i];
+		qMeas[j].q1 = qMeasC[5 * i + 1];  qMeas[j].q2 = qMeasC[5 * i + 2];
+		qMeas[j].q3 = qMeasC[5 * i + 3];  qMeas[j].q4 = qMeasC[5 * i + 4];
+	}
+	nQuat = beforeAct + BeforeAfterT[1] * freqQ;
 
 	for (int i = 0; i < nGyro; i++)
 	{
@@ -2019,10 +2030,12 @@ void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG,
 	{
 	case 0:
 		ExtendedKalmanFilter15State(qMeas, wMeas, quatEst, xest_store);
+		nQuat = totalT*freqQ;
 		compareTrueEKF15State("15StateCompareEKFAndQuat.txt", "15StateXest_store.txt", qTrue, quatEst, dqOut, xest_store);
 		break;
 	case 1:
 		EKFForwardAndBackforward15State(qMeas, wMeas, quatEst, xest_store);
+		nQuat = totalT*freqQ;
 		compareTrueEKF15State("15StateCompareBidEKFAndQuat.txt", "15StateBidXest_store.txt", qTrue, quatEst, dqOut, xest_store);
 		break;
 	default:

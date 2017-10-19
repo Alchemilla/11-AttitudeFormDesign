@@ -24,5 +24,5 @@ ATTSIMDLL void attitudeDetermination(int totalT, int freqQ, int freqG,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
 //主动推扫姿态确定
 ATTSIMDLL void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG,
-	char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
+	double BeforeAfterT[2],	char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);

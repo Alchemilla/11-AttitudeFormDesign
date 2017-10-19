@@ -68,7 +68,7 @@ namespace AttSimCPP
         /// <param name="xest_store"></param>
         [DllImport("AttSimDLL.dll")]
         public static extern void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG,
-    string path, double[] qTrueC, double[] qMeasC, int isBinEKF,
+     double[] BeforeAfterT, string path, double[] qTrueC, double[] qMeasC, int isBinEKF,
     double[] wTrueC, double[] wMeasC, double[] dqOut, double[] xest_store);
 
         /// <summary>
