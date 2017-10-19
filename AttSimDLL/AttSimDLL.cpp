@@ -1544,9 +1544,9 @@ void  simQuatAndGyro15State(Quat *&qTrue, Quat *&qMeas, Gyro *&wTrue, Gyro *&wMe
 	mBase.RandomDistribution(0, sqrt(attDat.sigv*attDat.sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG), nGyro, randcount + 8, wn3);
 	//添加稳定度
 	double *stab1 = new double[nGyro]; double *stab2 = new double[nGyro]; double *stab3 = new double[nGyro];
-	mBase.RandomDistribution(0, attDat.stabW[0] * PI / 180 / 3600 * dtG, nGyro, randcount + 9, stab1);
-	mBase.RandomDistribution(0, attDat.stabW[1] * PI / 180 / 3600 * dtG, nGyro, randcount + 10, stab2);
-	mBase.RandomDistribution(0, attDat.stabW[2] * PI / 180 / 3600 * dtG, nGyro, randcount + 11, stab3);
+	mBase.RandomDistribution(0, attDat.stabW[0] * PI / 180 * dtG, nGyro, randcount + 9, stab1);
+	mBase.RandomDistribution(0, attDat.stabW[1] * PI / 180 * dtG, nGyro, randcount + 10, stab2);
+	mBase.RandomDistribution(0, attDat.stabW[2] * PI / 180 * dtG, nGyro, randcount + 11, stab3);
 	//陀螺尺度因子和安装误差
 	MatrixXd sArr(3, 3),eye33(3,3);
 	sArr << attDat.sArr[0], attDat.sArr[1], attDat.sArr[2],
@@ -1686,6 +1686,10 @@ void compareTrueEKF15State(string pathekf, string pathb, Quat *qTrue, Quat *qEst
 		UT[i] = qTureCopy[i].UT;
 	}
 	mBase.QuatInterpolation(qEst, nGyro, UT, nQuat, qEsti);
+
+	//添加RMS指标
+	double rmsQ1, rmsQ2, rmsQ3;
+	rmsQ1 = rmsQ2 = rmsQ3 = 0;
 	fprintf(fpEKF, "%d\n", nQuat);
 	for (int i = 0; i < nQuat; i++)
 	{
@@ -1701,7 +1705,11 @@ void compareTrueEKF15State(string pathekf, string pathb, Quat *qTrue, Quat *qEst
 		fprintf(fpEKF, "%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n",
 			qTrue[i].UT, qTrue[i].q1, qTrue[i].q2, qTrue[i].q3, qTrue[i].q4,
 			qEsti[i].q1, qEsti[i].q2, qEsti[i].q3, qEsti[i].q4, dq3.q1, dq3.q2, dq3.q3);
+		rmsQ1 += dq3.q1* dq3.q1;		rmsQ2 += dq3.q2* dq3.q2;		rmsQ3 += dq3.q3* dq3.q3;
 	}
+	rmsQ1 = sqrt(rmsQ1 / nQuat); rmsQ2 = sqrt(rmsQ2 / nQuat); rmsQ3 = sqrt(rmsQ3 / nQuat);
+	double rmsAll = sqrt(rmsQ1*rmsQ1 + rmsQ2*rmsQ2 + rmsQ3*rmsQ3);
+	fprintf(fpEKF, "%.9f\t%.9f\t%.9f\t%.9f\n", rmsQ1, rmsQ2, rmsQ3, rmsAll);
 	fclose(fpEKF);
 	delete[] UT, qEsti; UT = NULL; qEsti = NULL;
 
