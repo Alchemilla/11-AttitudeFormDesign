@@ -98,12 +98,12 @@ namespace AttSimCPP
                 wBias[i] = double.Parse(strW[i]);
 
             //漂移噪声
-            sigu = double.Parse(textBox6.Text);
-            sigu = Math.Sqrt(sigu) * 1e-9;
+            sigu = double.Parse(textBox6.Text) * 1e-9;
+            //sigu = Math.Sqrt(sigu) * 1e-9;
 
             //陀螺噪声
-            sigv = double.Parse(textBox7.Text);
-            sigv = Math.Sqrt(sigv) * 1e-6;
+            sigv = double.Parse(textBox7.Text) * 1e-5;
+            //sigv = Math.Sqrt(sigv) * 1e-5;
 
             //陀螺尺度和安装
             string[] strSarr = textBox10.Text.Split(',');
@@ -155,7 +155,7 @@ namespace AttSimCPP
         {
             textBox1.Text = "5,5,5";//稳定度（°/s)
             textBox1.ForeColor = Color.Gray;
-            textBox2.Text = "100";
+            textBox2.Text = "500";
             textBox2.ForeColor = Color.Gray;
             textBox3.Text = "0.5,0.5,0.5,0.5";
             textBox3.ForeColor = Color.Gray;
@@ -187,7 +187,6 @@ namespace AttSimCPP
             else
             {                ShowInfo("已设置仿真文件保存目录：" + path);            }
         }
-
         public void ShowInfo(string Info)
         {
             txtInfo.AppendText(DateTime.Now.ToString("HH:mm:ss  ") + Info + "\r\n");
@@ -337,11 +336,11 @@ namespace AttSimCPP
             //姿态稳定度
             string[] strStab = textBox1.Text.Split(',');
             for (int i = 0; i < 3; i++)
-                stabW[i] = double.Parse(strStab[i]);
-            if (Math.Abs(stabW[0]) > 20 || Math.Abs(stabW[1]) > 20 || Math.Abs(stabW[1]) > 20)
+                stabW[i] = double.Parse(strStab[i]) * 1e-4;
+            if (Math.Abs(stabW[0]) > 0.01 || Math.Abs(stabW[1]) > 0.01 || Math.Abs(stabW[1]) > 0.01)
             {
                 ShowInfo("重新输入姿态稳定度");
-                MessageBox.Show("请将姿态稳定度范围限制在20角秒每秒内", "警告", MessageBoxButtons.OK);
+                MessageBox.Show("请将姿态稳定度范围限制在0.01°/s范围内", "警告", MessageBoxButtons.OK);
                 return;
             }
 
@@ -366,12 +365,12 @@ namespace AttSimCPP
                 wBias[i] = double.Parse(strW[i]);
 
             //漂移噪声
-            sigu = double.Parse(textBox6.Text);
-            sigu = Math.Sqrt(sigu) * 1e-10;
+            sigu = double.Parse(textBox6.Text) * 1e-9;
+            //sigu = Math.Sqrt(sigu) * 1e-10;
 
             //陀螺噪声
-            sigv = double.Parse(textBox7.Text);
-            sigv = Math.Sqrt(sigv) * 1e-7;
+            sigv = double.Parse(textBox7.Text) * 1e-5;
+            //sigv = Math.Sqrt(sigv) * 1e-7;
 
             //陀螺尺度和安装
             string[] strSarr = textBox10.Text.Split(',');

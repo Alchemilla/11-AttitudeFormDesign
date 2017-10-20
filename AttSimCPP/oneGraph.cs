@@ -27,13 +27,13 @@ namespace AttSimCPP
             Series q2 = new Series("q2");
             Series q3 = new Series("q3");
             Series q4 = new Series("q4");
-            q1.ChartType = SeriesChartType.FastLine;
+            q1.ChartType = SeriesChartType.FastPoint;
             q1.Color = System.Drawing.Color.Red;
-            q2.ChartType = SeriesChartType.FastLine;
+            q2.ChartType = SeriesChartType.FastPoint;
             q2.Color = System.Drawing.Color.Blue;
-            q3.ChartType = SeriesChartType.FastLine;
+            q3.ChartType = SeriesChartType.FastPoint;
             q3.Color = System.Drawing.Color.Green;
-            q4.ChartType = SeriesChartType.FastLine;
+            q4.ChartType = SeriesChartType.FastPoint;
             q4.Color = System.Drawing.Color.Black;
 
             for (int i = 0; i < mform.nQuat - 1;)

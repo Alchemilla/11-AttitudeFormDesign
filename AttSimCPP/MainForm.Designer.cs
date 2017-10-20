@@ -64,6 +64,8 @@
             this.button9 = new System.Windows.Forms.Button();
             this.TabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label18 = new System.Windows.Forms.Label();
+            this.textBox18 = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.button8 = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -85,8 +87,6 @@
             this.textBox17 = new System.Windows.Forms.TextBox();
             this.button11 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.textBox18 = new System.Windows.Forms.TextBox();
-            this.label18 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.TabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -146,7 +146,7 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(141, 15);
             this.label5.TabIndex = 4;
-            this.label5.Text = "陀螺噪声(1e-6°)";
+            this.label5.Text = "陀螺噪声(1e-5°)";
             // 
             // label6
             // 
@@ -487,8 +487,26 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(1);
             this.tabPage1.Size = new System.Drawing.Size(589, 389);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "被动推扫模式";
+            this.tabPage1.Text = "仿真处理";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(6, 290);
+            this.label18.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(130, 15);
+            this.label18.TabIndex = 34;
+            this.label18.Text = "推扫前后时间(s)";
+            // 
+            // textBox18
+            // 
+            this.textBox18.Location = new System.Drawing.Point(184, 290);
+            this.textBox18.Margin = new System.Windows.Forms.Padding(1);
+            this.textBox18.Name = "textBox18";
+            this.textBox18.Size = new System.Drawing.Size(104, 25);
+            this.textBox18.TabIndex = 33;
             // 
             // groupBox3
             // 
@@ -521,9 +539,9 @@
             this.tabPage2.Margin = new System.Windows.Forms.Padding(1);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(1);
-            this.tabPage2.Size = new System.Drawing.Size(564, 354);
+            this.tabPage2.Size = new System.Drawing.Size(589, 389);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "主动推扫模式";
+            this.tabPage2.Text = "待开发...";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel1
@@ -652,9 +670,9 @@
             this.tabPage3.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage3.Size = new System.Drawing.Size(564, 354);
+            this.tabPage3.Size = new System.Drawing.Size(589, 389);
             this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "仿真数据接口";
+            this.tabPage3.Text = "真实数据接口";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // label15
@@ -733,24 +751,6 @@
             this.groupBox2.TabIndex = 33;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "程序日志";
-            // 
-            // textBox18
-            // 
-            this.textBox18.Location = new System.Drawing.Point(184, 290);
-            this.textBox18.Margin = new System.Windows.Forms.Padding(1);
-            this.textBox18.Name = "textBox18";
-            this.textBox18.Size = new System.Drawing.Size(104, 25);
-            this.textBox18.TabIndex = 33;
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(6, 290);
-            this.label18.Margin = new System.Windows.Forms.Padding(1, 0, 1, 0);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(130, 15);
-            this.label18.TabIndex = 34;
-            this.label18.Text = "推扫前后时间(s)";
             // 
             // MainForm
             // 
