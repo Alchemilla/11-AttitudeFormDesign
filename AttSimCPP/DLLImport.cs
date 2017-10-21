@@ -29,7 +29,7 @@ namespace AttSimCPP
         /// <param name="wTrue"></param>
         /// <param name="wMeas"></param>
         /// <param name="qNoise"></param>
-        [DllImport("AttSimDLL.dll")]
+        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void attitudeSimulation(int freqG, int freqQ, int totalT,
     double[] qInitial, double sig_ST, double[] wBiasA, double[] stabW,
     double sigu, double sigv, double[] sArr, string path,
@@ -48,7 +48,7 @@ namespace AttSimCPP
         /// <param name="wMeasC"></param>
         /// <param name="dqOut"></param>
         /// <param name="xest_store"></param>
-        [DllImport("AttSimDLL.dll")]
+        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void attitudeDetermination(int totalT, int freqQ, int freqG,
     string path, double[] qTrueC, double[] qMeasC, int isBinEKF,
     double[] wTrueC, double[] wMeasC, double[] dqOut, double[] xest_store);
@@ -66,7 +66,7 @@ namespace AttSimCPP
         /// <param name="wMeasC"></param>
         /// <param name="dqOut"></param>
         /// <param name="xest_store"></param>
-        [DllImport("AttSimDLL.dll")]
+        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG,
      double[] BeforeAfterT, string path, double[] qTrueC, double[] qMeasC, int isBinEKF,
     double[] wTrueC, double[] wMeasC, double[] dqOut, double[] xest_store);
@@ -75,7 +75,7 @@ namespace AttSimCPP
         /// 导入外部数据进行处理
         /// </summary>
         /// <param name="path"></param>
-        [DllImport("AttSimDLL.dll")]
+        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ExternalData(string path, double[] wBiasA, double sigu, double sigv);
 
         /// <summary>
