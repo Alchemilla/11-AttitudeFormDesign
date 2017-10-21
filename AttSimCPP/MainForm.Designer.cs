@@ -511,6 +511,7 @@
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.button8);
+            this.groupBox3.Controls.Add(this.button11);
             this.groupBox3.Controls.Add(this.button2);
             this.groupBox3.Controls.Add(this.button1);
             this.groupBox3.Location = new System.Drawing.Point(310, 11);
@@ -665,7 +666,6 @@
             this.tabPage3.Controls.Add(this.textBox15);
             this.tabPage3.Controls.Add(this.textBox16);
             this.tabPage3.Controls.Add(this.textBox17);
-            this.tabPage3.Controls.Add(this.button11);
             this.tabPage3.Location = new System.Drawing.Point(4, 25);
             this.tabPage3.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage3.Name = "tabPage3";
@@ -731,10 +731,10 @@
             // 
             // button11
             // 
-            this.button11.Location = new System.Drawing.Point(348, 44);
+            this.button11.Location = new System.Drawing.Point(15, 65);
             this.button11.Margin = new System.Windows.Forms.Padding(2);
             this.button11.Name = "button11";
-            this.button11.Size = new System.Drawing.Size(124, 42);
+            this.button11.Size = new System.Drawing.Size(120, 36);
             this.button11.TabIndex = 0;
             this.button11.Text = "生成陀螺数据";
             this.button11.UseVisualStyleBackColor = true;

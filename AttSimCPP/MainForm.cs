@@ -427,18 +427,17 @@ namespace AttSimCPP
         /// </summary>
         private void button11_Click(object sender, EventArgs e)
         {
+
             //陀螺漂移
-            string[] strW = textBox15.Text.Split(',');
+            string[] strW = textBox5.Text.Split(',');
             for (int i = 0; i < 3; i++)
                 wBias[i] = double.Parse(strW[i]);
 
             //漂移噪声
-            sigu = double.Parse(textBox16.Text);
-            sigu = Math.Sqrt(sigu) * 1e-10;
+            sigu = double.Parse(textBox6.Text) * 1e-9;
 
             //陀螺噪声
-            sigv = double.Parse(textBox17.Text);
-            sigv = Math.Sqrt(sigv) * 1e-7;
+            sigv = double.Parse(textBox7.Text) * 1e-5;
 
             DLLImport.ExternalData(path,wBias,sigu,sigv);
         }
