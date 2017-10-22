@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -200,9 +201,9 @@ namespace AttSimCPP
             SetDefaultText();
             //groupBox1.Enabled = false;
             if (path == null)
-            {                button1.Enabled = false; button8.Enabled = false; }
+            {                button1.Enabled = false; button8.Enabled = false; button11.Enabled = false; }
             else
-            {                button1.Enabled = true; button8.Enabled = true; }
+            {                button1.Enabled = true; button8.Enabled = true; button11.Enabled = true; }
             button3.Enabled = false;
             button4.Enabled = false;
             button5.Enabled = false;
@@ -224,6 +225,8 @@ namespace AttSimCPP
                 path = localFilePath.Substring(0, localFilePath.LastIndexOf("\\")); ;
                 ShowInfo("成功设置文件保存路径："+path);
                 button1.Enabled = true;
+                button8.Enabled = true;
+                button11.Enabled = true;
             }            
             else
                 ShowInfo("失败未设置文件保存路径");
@@ -439,6 +442,13 @@ namespace AttSimCPP
             //陀螺噪声
             sigv = double.Parse(textBox7.Text) * 1e-5;
 
+            string sAtt = path + "\\ATT.txt";
+            if (!File.Exists(sAtt))
+            {
+                ShowInfo("没有ATT.txt文件");
+                MessageBox.Show("请设置真实数据路径", "警告", MessageBoxButtons.OK);
+                return;
+            }
             DLLImport.ExternalData(path,wBias,sigu,sigv);
         }
         
