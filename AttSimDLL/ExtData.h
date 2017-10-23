@@ -17,7 +17,7 @@ private:
 	bool ReadZY3AttData();
 	void TransToOmega();
 	string sAtt, sGyroReal, sGyroMeas;
-	vector<Quat>arr_att;
+	vector<Quat>arr_att; vector < Gyro>wMeas;
 	BaseFunc m_base;
 	AttParm m_AttParm;
 };
