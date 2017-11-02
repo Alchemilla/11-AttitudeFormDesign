@@ -1687,31 +1687,66 @@ void compareTrueEKF15State(string pathekf, string pathb, Quat *qTrue, Quat *qEst
 	}
 	mBase.QuatInterpolation(qEst, nGyro, UT, nQuat, qEsti);
 
-	//添加RMS指标
+	////添加RMS指标
+	//double rmsQ1, rmsQ2, rmsQ3;
+	//rmsQ1 = rmsQ2 = rmsQ3 = 0;
+	//fprintf(fpEKF, "%d\n", nQuat);
+	//for (int i = 0; i < nQuat; i++)
+	//{
+	//	Quat dq3;
+	//	qTureCopy[i].q4 = -qTrue[i].q4;
+	//	mBase.quatMult(qTureCopy[i], qEsti[i], dq3);
+	//	dq3.q1 = dq3.q1 * 2 / PI * 180 * 3600;
+	//	dq3.q2 = dq3.q2 * 2 / PI * 180 * 3600;
+	//	dq3.q3 = dq3.q3 * 2 / PI * 180 * 3600;
+	//	dqOut[3 * i] = dq3.q1;
+	//	dqOut[3 * i + 1] = dq3.q2;
+	//	dqOut[3 * i + 2] = dq3.q3;
+	//	fprintf(fpEKF, "%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n",
+	//		qTrue[i].UT, qTrue[i].q1, qTrue[i].q2, qTrue[i].q3, qTrue[i].q4,
+	//		qEsti[i].q1, qEsti[i].q2, qEsti[i].q3, qEsti[i].q4, dq3.q1, dq3.q2, dq3.q3);
+	//	rmsQ1 += dq3.q1* dq3.q1;		rmsQ2 += dq3.q2* dq3.q2;		rmsQ3 += dq3.q3* dq3.q3;
+	//}
+	//rmsQ1 = sqrt(rmsQ1 / nQuat); rmsQ2 = sqrt(rmsQ2 / nQuat); rmsQ3 = sqrt(rmsQ3 / nQuat);
+	//double rmsAll = sqrt(rmsQ1*rmsQ1 + rmsQ2*rmsQ2 + rmsQ3*rmsQ3);
+	//fprintf(fpEKF, "%.9f\t%.9f\t%.9f\t%.9f\n", rmsQ1, rmsQ2, rmsQ3, rmsAll);
+	//fclose(fpEKF);
+	//delete[] UT, qEsti; UT = NULL; qEsti = NULL;
+
+	//添加RMS指标(正确做法,2017.11.02)
 	double rmsQ1, rmsQ2, rmsQ3;
 	rmsQ1 = rmsQ2 = rmsQ3 = 0;
+	double aveQ1, aveQ2, aveQ3;
+	aveQ1 = aveQ2 = aveQ3 = 0;
+	Quat *dq3 = new Quat[nQuat];
 	fprintf(fpEKF, "%d\n", nQuat);
 	for (int i = 0; i < nQuat; i++)
 	{
-		Quat dq3;
 		qTureCopy[i].q4 = -qTrue[i].q4;
-		mBase.quatMult(qTureCopy[i], qEsti[i], dq3);
-		dq3.q1 = dq3.q1 * 2 / PI * 180 * 3600;
-		dq3.q2 = dq3.q2 * 2 / PI * 180 * 3600;
-		dq3.q3 = dq3.q3 * 2 / PI * 180 * 3600;
-		dqOut[3 * i] = dq3.q1;
-		dqOut[3 * i + 1] = dq3.q2;
-		dqOut[3 * i + 2] = dq3.q3;
+		mBase.quatMult(qTureCopy[i], qEsti[i], dq3[i]);
+		dq3[i].q1 = dq3[i].q1 * 2 / PI * 180 * 3600;
+		dq3[i].q2 = dq3[i].q2 * 2 / PI * 180 * 3600;
+		dq3[i].q3 = dq3[i].q3 * 2 / PI * 180 * 3600;
+		dqOut[3 * i] = dq3[i].q1;
+		dqOut[3 * i + 1] = dq3[i].q2;
+		dqOut[3 * i + 2] = dq3[i].q3;
 		fprintf(fpEKF, "%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n",
 			qTrue[i].UT, qTrue[i].q1, qTrue[i].q2, qTrue[i].q3, qTrue[i].q4,
-			qEsti[i].q1, qEsti[i].q2, qEsti[i].q3, qEsti[i].q4, dq3.q1, dq3.q2, dq3.q3);
-		rmsQ1 += dq3.q1* dq3.q1;		rmsQ2 += dq3.q2* dq3.q2;		rmsQ3 += dq3.q3* dq3.q3;
+			qEsti[i].q1, qEsti[i].q2, qEsti[i].q3, qEsti[i].q4, dq3[i].q1, dq3[i].q2, dq3[i].q3);
+		aveQ1 += dq3[i].q1 / nQuat; aveQ2 += dq3[i].q2 / nQuat; aveQ3 += dq3[i].q3 / nQuat;
 	}
-	rmsQ1 = sqrt(rmsQ1 / nQuat); rmsQ2 = sqrt(rmsQ2 / nQuat); rmsQ3 = sqrt(rmsQ3 / nQuat);
+	for (int i=0;i<nQuat;i++)
+	{
+		rmsQ1 += pow(dq3[i].q1 - aveQ1, 2);
+		rmsQ2 += pow(dq3[i].q2 - aveQ2, 2);
+		rmsQ3 += pow(dq3[i].q3 - aveQ3, 2);
+	}
+	rmsQ1 = sqrt(rmsQ1 / (nQuat-1)); rmsQ2 = sqrt(rmsQ2 / (nQuat - 1)); rmsQ3 = sqrt(rmsQ3 / (nQuat - 1));
 	double rmsAll = sqrt(rmsQ1*rmsQ1 + rmsQ2*rmsQ2 + rmsQ3*rmsQ3);
 	fprintf(fpEKF, "%.9f\t%.9f\t%.9f\t%.9f\n", rmsQ1, rmsQ2, rmsQ3, rmsAll);
 	fclose(fpEKF);
 	delete[] UT, qEsti; UT = NULL; qEsti = NULL;
+	delete[] dq3; dq3 = NULL;
 
 	double bias[3],berrOut[3];
 	for (int i = 0; i < nGyro; i++)
