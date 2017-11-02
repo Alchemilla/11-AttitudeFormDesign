@@ -162,14 +162,15 @@ void ExtData::TransToOmega()
 	m_base.RandomDistribution(0, sqrt(m_AttParm.sigv*m_AttParm.sigv *dtG + 1 / 12 * m_AttParm.sigu *m_AttParm.sigu * dtG), nGyro, randcount + 7, wn2);
 	m_base.RandomDistribution(0, sqrt(m_AttParm.sigv*m_AttParm.sigv *dtG + 1 / 12 * m_AttParm.sigu *m_AttParm.sigu * dtG), nGyro, randcount + 8, wn3);
 
-	vector<Gyro>wMeas(arr_gyro);
+	vector<Gyro>wMeasTmp(arr_gyro);
 	for (int i = 0; i < nGyro; i++)
 	{		
-		wMeas[i].UT = arr_gyro[i].UT;
-		wMeas[i].wx = arr_gyro[i].wx + wn1[i] + bias1[i];
-		wMeas[i].wy = arr_gyro[i].wy + wn2[i] + bias2[i];
-		wMeas[i].wz = arr_gyro[i].wz + wn3[i] + bias3[i];
+		wMeasTmp[i].UT = arr_gyro[i].UT;
+		wMeasTmp[i].wx = arr_gyro[i].wx + wn1[i] + bias1[i];
+		wMeasTmp[i].wy = arr_gyro[i].wy + wn2[i] + bias2[i];
+		wMeasTmp[i].wz = arr_gyro[i].wz + wn3[i] + bias3[i];
 	}
+	wMeas = wMeasTmp;
 	fp = fopen(sGyroMeas.c_str(), "w");
 	fprintf(fp, "%d\n", wMeas.size());
 	for (int i = 0; i < wMeas.size(); i++)
