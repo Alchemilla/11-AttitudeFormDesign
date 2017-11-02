@@ -441,9 +441,8 @@ namespace AttSimCPP
 
             //陀螺噪声
             sigv = double.Parse(textBox7.Text) * 1e-5;
-
-            string sAtt = path + "\\ATT.txt";
-            if (!File.Exists(sAtt))
+            
+            if (!File.Exists(path + "\\ATT.txt"))
             {
                 ShowInfo("没有ATT.txt文件");
                 MessageBox.Show("请设置真实数据路径（包含ATT.txt文件）", "警告", MessageBoxButtons.OK);
