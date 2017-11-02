@@ -446,7 +446,7 @@ namespace AttSimCPP
             if (!File.Exists(sAtt))
             {
                 ShowInfo("没有ATT.txt文件");
-                MessageBox.Show("请设置真实数据路径", "警告", MessageBoxButtons.OK);
+                MessageBox.Show("请设置真实数据路径（包含ATT.txt文件）", "警告", MessageBoxButtons.OK);
                 return;
             }
             DLLImport.ExternalData(path,wBias,sigu,sigv);
