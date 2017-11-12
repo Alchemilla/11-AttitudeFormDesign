@@ -1,4 +1,5 @@
 #pragma once
+#include "SateBase.h"
 #ifdef ATTSIMDLL
 #define ATTSIMDLL extern "C" _declspec(dllimport) 
 #else
@@ -26,3 +27,8 @@ ATTSIMDLL void attitudeDetermination(int totalT, int freqQ, int freqG,
 ATTSIMDLL void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG,
 	double BeforeAfterT[2],	char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
+
+//extern int nQuat, nGyro;//全局变量，四元数和陀螺的数量
+void EKFForwardAndBackforward15StateExt(AttParm mAttPa, int nQ, int nG, Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
+void compareTrueEKF15StateExt(string wpath, int nQ, int nG, string pathekf, string pathb, Quat *qTrue, Quat *qEst, double *dqOut, double *xest_store);
+//void ExtendedKalmanFilter15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);

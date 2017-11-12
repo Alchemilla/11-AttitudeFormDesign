@@ -11,7 +11,7 @@ ExtData::~ExtData()
 {
 }
 
-void _stdcall ExternalData(char *workpath, double wBiasA[3], double sigu, double sigv)
+void  ExternalData(char *workpath, double wBiasA[3], double sigu, double sigv)
 {
 	ExtData ZY3;
 	AttParm gyroParm;
@@ -37,6 +37,28 @@ bool ExtData::ReadAttAndTransToOmega(string sworkpath,AttParm gyroParm)
 	sGyroMeas = sworkpath + "\\Gyro_Error.txt";
 	ReadZY3AttData();
 	TransToOmega();
+	int nQuat = arr_att.size();
+	int nGyro = wMeas.size();
+	Quat *qMeas = new Quat[nQuat];
+	Quat *quatEst = new Quat[nQuat];
+	Gyro *wMeasure = new Gyro[nGyro];
+	double *xest_store = new double[15 * nGyro];
+	for (int i=0;i<nQuat;i++)
+	{
+		qMeas[i].UT = arr_att[i].UT;
+		qMeas[i].q1 = arr_att[i].q1; qMeas[i].q2 = arr_att[i].q2;
+		qMeas[i].q3 = arr_att[i].q3; qMeas[i].q4 = arr_att[i].q4;
+	}
+	for (int i = 0; i < nGyro; i++)
+	{
+		wMeasure[i].UT = arr_att[i].UT;
+		wMeasure[i].wx = wMeas[i].wx; wMeasure[i].wy = wMeas[i].wy; wMeasure[i].wz = wMeas[i].wz;
+	}
+	m_AttParm.sig_ST = 8; m_AttParm.sigu = 1e-9; m_AttParm.sigv = 1e-5;
+	EKFForwardAndBackforward15StateExt(m_AttParm, nQuat,nGyro,qMeas, wMeasure, quatEst, xest_store);
+	//Quat *qTrue = new Quat[nQuat];
+	double *dqOut = new double[3 * nQuat];
+	compareTrueEKF15StateExt(sworkpath, nQuat, nGyro, "RealDataKalman.txt", "15StateRealDataXest_store.txt", qMeas, quatEst, dqOut, xest_store);
 	return true;
 }
 

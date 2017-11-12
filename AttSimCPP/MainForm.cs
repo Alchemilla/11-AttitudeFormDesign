@@ -146,7 +146,7 @@ namespace AttSimCPP
             button9.Enabled = true;
             button10.Enabled = true;
         }
-        
+
         /// <summary>
         /// 功能：设置默认参数
         /// 日期：2017.07.15
@@ -166,7 +166,7 @@ namespace AttSimCPP
             textBox5.ForeColor = Color.Gray;
             textBox6.Text = "1";
             textBox6.ForeColor = Color.Gray;
-            textBox7.Text = "1";
+            textBox7.Text = "0.1";
             textBox7.ForeColor = Color.Gray;
             textBox8.Text = "4";
             textBox8.ForeColor = Color.Gray;

@@ -2,6 +2,7 @@
 #include "BaseFunc.h"
 #include "SateBase.h"
 #include "DateTime.h"
+#include "AttSimDLL.h"
 #ifdef ATTSIMDLL
 #define ATTSIMDLL extern "C" _declspec(dllimport) 
 #else
@@ -22,4 +23,4 @@ private:
 	AttParm m_AttParm;
 };
 
-ATTSIMDLL void _stdcall ExternalData(char *workpath, double wBiasA[3], double sigu, double sigv);
+ATTSIMDLL void  ExternalData(char *workpath, double wBiasA[3], double sigu, double sigv);
