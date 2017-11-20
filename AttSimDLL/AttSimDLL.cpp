@@ -2512,3 +2512,46 @@ void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG, double Befor
 	delete[]wMeas; wMeas = NULL;
 	delete[]quatEst; quatEst = NULL;
 }
+
+//////////////////////////////////////////////////////////////////////////
+//功能：姿态仿真程序（仅仿真四元数和陀螺数据）
+//输入：AttParm结构体，包含下列参数
+//			 dt：姿态间隔时长（单位：秒）；		tf：总时长（单位：秒）
+//			 qInitial[4]：初始姿态四元数，最后为标量；		sig_ST：星敏误差（单位：角秒）
+//			 wBiasA[3]：陀螺漂移理论值（单位：°/Hr）；		sigu，sigv：陀螺常值漂移误差，陀螺误差
+//			 sArr[9]：陀螺尺度因子和安装误差，对角线表示尺度因子，上下三角表示上下安装误差
+//输出：真实和测量的星敏结构体Quat陀螺结构体Gyro数据qTrueC，qMeasC，wTrueC，wMeasC
+//注意：假定陀螺是稳定输出的，仿真将以陀螺的时间作为基准
+//作者：GZC
+//日期：2017.11.20
+//////////////////////////////////////////////////////////////////////////
+void attitudeSimulationStruct(AttParm mAtt, char * workpath, 
+	Quat * qTrueC, Quat * qMeasC, Gyro * wTrueC, Gyro * wMeasC, double * qNoise)
+{
+	attDat = mAtt;
+	//设置随机初始四元数
+	if (attDat.qInitial[0] == 0.5)//如果用默认参数的，四元数则为随机
+	{
+		double qRand[4];
+		mBase.RandomDistribution(0, 1, 4, 0, qRand);
+		double qAll = sqrt(pow(qRand[0], 2) + pow(qRand[1], 2) + pow(qRand[2], 2) + pow(qRand[3], 2));
+		attDat.qInitial[0] = qRand[0] / qAll; attDat.qInitial[1] = qRand[1] / qAll; 
+		attDat.qInitial[2] = qRand[2] / qAll; attDat.qInitial[3] = qRand[3] / qAll;
+	}
+
+	nQuat = attDat.freqQ*attDat.totalT;
+	nGyro = attDat.freqG*attDat.totalT;
+	path = workpath;
+	//四元数在Matrix矩阵中顺序为1234, qTrue(0,0)对应1,qTrue(0,3)对应4，为标量
+	Quat *qTrue = new Quat[nQuat]; Quat *qMeas = new Quat[nQuat];
+	Gyro *wTrue = new Gyro[nGyro]; Gyro *wMeas = new Gyro[nGyro];
+	simQuatAndGyro15State(qTrue, qMeas, wTrue, wMeas);
+	compareTrueNoise(qTrue, qMeas, qNoise);
+	qTrueC = qTrue; qMeasC = qMeas;
+	wTrueC = wTrue; wMeasC = wMeas;
+
+	//delete[]qTrue; qTrue = NULL;
+	//delete[]qMeas; qMeas = NULL;
+	//delete[]wTrue; wTrue = NULL;
+	//delete[]wMeas; wMeas = NULL;
+}

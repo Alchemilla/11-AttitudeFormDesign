@@ -10,6 +10,32 @@ namespace AttSimCPP
 {
     class DLLImport
     {
+        [StructLayout(LayoutKind.Sequential)]
+        public struct AttParm
+        {
+            public int freqG, freqQ;//星敏陀螺采样频率
+            public int totalT;//总仿真时长
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+            public double[] stabW;//姿态稳定度
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+            public double[] qInitial;//初始四元数
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+            public double[] wBiasA;//陀螺漂移
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
+            public double[] sArr;//陀螺尺度因子和安装偏差
+            public double sig_ST, sigu, sigv;//星敏陀螺参数        
+        };
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Quat
+        {
+            public double UT, q1, q2, q3, q4;//q4标量
+        }
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Gyro
+        {
+            public double UT, wx, wy, wz;
+        }
+
         /// <summary>
         /// 纯姿态仿真
         /// </summary>
@@ -34,6 +60,9 @@ namespace AttSimCPP
     double[] qInitial, double sig_ST, double[] wBiasA, double[] stabW,
     double sigu, double sigv, double[] sArr, string path,
     double[] qTrueC, double[] qMeasC, double[] wTrueC, double[] wMeasC, double[] qNoise);
+        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void attitudeSimulationStruct(AttParm mAtt, string path,
+   ref Quat[] qTrueC, ref Quat[] qMeasC, ref Gyro[] wTrueC, ref Gyro[] wMeasC, double[] qNoise);
         /// <summary>
         /// 纯姿态确定
         /// </summary>
@@ -77,6 +106,8 @@ namespace AttSimCPP
         /// <param name="path"></param>
         [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ExternalData(string path, double[] wBiasA, double sigu, double sigv);
+
+        //以下函数暂时不用
 
         /// <summary>
         /// 姿态仿真和卡尔曼滤波
