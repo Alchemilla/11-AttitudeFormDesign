@@ -1166,6 +1166,11 @@ void attSim::getAttParam(AttParm mAtt,string workpath)
 	nQuat = mAtt.nQuat, nGyro = mAtt.nGyro;
 	path = workpath;
 }
+void attSim::getQnGnum(int nQ, int nG)
+{
+	nQuat = nQ, nGyro = nG;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //功能：姿态仿真（15状态）
 //输入：卫星姿态参数结构体：attDat

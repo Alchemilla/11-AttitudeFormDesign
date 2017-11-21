@@ -46,6 +46,7 @@ public:
 	attSim();
 	~attSim();
 	void getAttParam(AttParm mAtt,string workpath);
+	void getQnGnum(int nQ, int nG);
 	void simQuatAndGyro15State(Quat *&qTrue, Quat *&qMeas, Gyro *&wTrue, Gyro *&wMeas);
 	void compareTrueNoise(Quat *qTrue, Quat *qMeas, double *qNoise);
 	void compareTrueEKF15State(string pathekf, string pathb, Quat *qTrue, Quat *qEst, double *dqOut, double *xest_store);

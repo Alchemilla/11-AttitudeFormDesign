@@ -575,6 +575,8 @@ namespace AttSimCPP
         /// </summary>
         private void button11_Click(object sender, EventArgs e)
         {
+            //星敏参数
+            mAtt.sig_ST = double.Parse(textBox4.Text);//星敏误差(单位：角秒) 
 
             //陀螺漂移
             string[] strW = textBox5.Text.Split(',');
