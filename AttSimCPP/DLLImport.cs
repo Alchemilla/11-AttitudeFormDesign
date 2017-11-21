@@ -8,34 +8,35 @@ using System.Drawing;
 
 namespace AttSimCPP
 {
-    class DLLImport
+    [StructLayout(LayoutKind.Sequential)]
+    public struct AttParm
     {
-        [StructLayout(LayoutKind.Sequential)]
-        public struct AttParm
-        {
-            public int freqG, freqQ;//星敏陀螺采样频率
-            public int totalT;//总仿真时长
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-            public double[] stabW;//姿态稳定度
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-            public double[] qInitial;//初始四元数
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-            public double[] wBiasA;//陀螺漂移
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
-            public double[] sArr;//陀螺尺度因子和安装偏差
-            public double sig_ST, sigu, sigv;//星敏陀螺参数        
-        };
-        [StructLayout(LayoutKind.Sequential)]
-        public struct Quat
-        {
-            public double UT, q1, q2, q3, q4;//q4标量
-        }
-        [StructLayout(LayoutKind.Sequential)]
-        public struct Gyro
-        {
-            public double UT, wx, wy, wz;
-        }
+        public int freqG, freqQ;//星敏陀螺采样频率
+        public int totalT;//总仿真时长
+        public int nQuat, nGyro;//星敏和陀螺总个数
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public double[] stabW;//姿态稳定度
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public double[] qInitial;//初始四元数
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public double[] wBiasA;//陀螺漂移
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
+        public double[] sArr;//陀螺尺度因子和安装偏差
+        public double sig_ST, sigu, sigv;//星敏陀螺参数        
+    };
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Quat
+    {
+        public double UT, q1, q2, q3, q4;//q4标量
+    }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Gyro
+    {
+        public double UT, wx, wy, wz;
+    }
 
+    public class DLLImport
+    {     
         /// <summary>
         /// 纯姿态仿真
         /// </summary>

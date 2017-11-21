@@ -17,10 +17,10 @@ namespace AttSimCPP
         public MainForm(string[] args)
         {
             InitializeComponent();
-            if (args.Length==2)
-            {                path = args[1];            }
+            if (args.Length == 2)
+            { path = args[1]; }
         }
-        DLLImport.AttParm mAtt;
+        public AttParm mAtt;
         public int nQuat, nGyro;//陀螺和四元数个数
         public int freqG, freqQ;//星敏陀螺采样频率            
         public double dt;
@@ -170,8 +170,8 @@ namespace AttSimCPP
             mAtt.freqQ = Convert.ToInt32(textBox8.Text);//string转数值的第1种转换方式
             mAtt.freqG = Convert.ToInt32(textBox9.Text);
             mAtt.totalT = int.Parse(textBox2.Text);                       //string转数值的第2种转换方式
-            nQuat = mAtt.freqQ * mAtt.totalT;//四元数个数
-            nGyro = mAtt.freqG * mAtt.totalT;//陀螺个数，一般较四元数多
+            mAtt.nQuat = mAtt.freqQ * mAtt.totalT;//四元数个数
+            mAtt.nGyro = mAtt.freqG * mAtt.totalT;//陀螺个数，一般较四元数多
 
             //姿态稳定度
             string[] strStab = textBox1.Text.Split(',');
@@ -221,23 +221,23 @@ namespace AttSimCPP
                 sArr[i] = double.Parse(strSarr[i]) * 1e-6;
             mAtt.sArr = sArr;
 
-            double[] qTrueC = new double[5 * nQuat]; double[] qMeasC = new double[5 * nQuat];
-            double[] wTrueC = new double[4 * nGyro]; double[] wMeasC = new double[4 * nGyro];
-            double[] qNoise = new double[3 * nQuat];
+            double[] qTrueC = new double[5 * mAtt.nQuat]; double[] qMeasC = new double[5 * mAtt.nQuat];
+            double[] wTrueC = new double[4 * mAtt.nGyro]; double[] wMeasC = new double[4 * mAtt.nGyro];
+            double[] qNoise = new double[3 * mAtt.nQuat];
             progressBar1.Value = 20;
             ShowInfo("开始单向卡尔曼滤波...");
             DLLImport.attitudeSimulationStruct(mAtt, path, qTrueC, qMeasC, wTrueC, wMeasC, qNoise);
                     
             progressBar1.Value = 40;
 
-            double[] dqOut = new double[3 * nQuat];
-            double[] xest_store = new double[15 * nGyro];
+            double[] dqOut = new double[3 * mAtt.nQuat];
+            double[] xest_store = new double[15 * mAtt.nGyro];
             DLLImport.attitudeDeterminationStruct(mAtt, path,
                 qTrueC, qMeasC, 0, wTrueC, wMeasC, dqOut, xest_store);
             dq = dqOut; qNs = qNoise; xestAll = xest_store; qMeas = qMeasC;
 
-            dqOut = new double[3 * nQuat];
-            xest_store = new double[15 * nGyro];
+            dqOut = new double[3 * mAtt.nQuat];
+            xest_store = new double[15 * mAtt.nGyro];
             progressBar1.Value = 70;
             ShowInfo("开始双向卡尔曼滤波...");
             DLLImport.attitudeDeterminationStruct(mAtt, path,
@@ -350,7 +350,7 @@ namespace AttSimCPP
         private void button4_Click(object sender, EventArgs e)
         {
             ShowInfo("EKF和双向EKF陀螺漂移变化");
-            attBias simAtt1 = new attBias();//新建子窗体对象
+            attBias simAtt1 = new attBias(mAtt);//新建子窗体对象
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Show();
         }

@@ -13,15 +13,18 @@ namespace AttSimCPP
 {
     public partial class attBias : Form
     {
-        public attBias()
+        AttParm mAtt;
+        public attBias(AttParm mAttparam)
         {
             InitializeComponent();
+            mAtt = mAttparam;
         }
 
-        private void attBias_Load(object sender, EventArgs e)
+        private void attBias_Load(object sender,EventArgs e)
         {
             MainForm mform = (MainForm)this.Owner;         //这样调用父窗体    
 
+            int a = mAtt.freqG;
             chart1.Series.Clear();
             chart2.Series.Clear();
             chart3.Series.Clear();

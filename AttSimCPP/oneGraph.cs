@@ -35,7 +35,7 @@ namespace AttSimCPP
             q3.Color = System.Drawing.Color.Green;
             q4.ChartType = SeriesChartType.FastPoint;
             q4.Color = System.Drawing.Color.Black;
-
+                    
             for (int i = 0; i < mform.nQuat - 1;)
             {
                 q1.Points.AddXY((i / mform.freqQ) + 1, mform.qMeas[5 * i + 1]);
@@ -44,8 +44,7 @@ namespace AttSimCPP
                 q4.Points.AddXY((i / mform.freqQ) + 1, mform.qMeas[5 * i + 4]);
                 i++;
             }
-
-
+                       
             chart1.ChartAreas[0].AxisX.Title = "t/s";
             chart1.ChartAreas[0].AxisX.TitleForeColor = System.Drawing.Color.Crimson;
 

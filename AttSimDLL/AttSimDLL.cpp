@@ -2529,6 +2529,7 @@ void attitudeSimulationStruct(AttParm mAtt, char * workpath,
 	double *qTrueC, double *qMeasC, double *wTrueC, double *wMeasC, double * qNoise)
 {
 	attDat = mAtt;
+	nQuat = attDat.nQuat; nGyro = attDat.nGyro;
 	//设置随机初始四元数
 	if (attDat.qInitial[0] == 0.5)//如果用默认参数的，四元数则为随机
 	{
@@ -2539,15 +2540,13 @@ void attitudeSimulationStruct(AttParm mAtt, char * workpath,
 		attDat.qInitial[2] = qRand[2] / qAll; attDat.qInitial[3] = qRand[3] / qAll;
 	}
 
-	nQuat = attDat.freqQ*attDat.totalT;
-	nGyro = attDat.freqG*attDat.totalT;
 	path = workpath;
 	//四元数在Matrix矩阵中顺序为1234, qTrue(0,0)对应1,qTrue(0,3)对应4，为标量
-	Quat *qTrue = new Quat[nQuat]; Quat *qMeas = new Quat[nQuat];
-	Gyro *wTrue = new Gyro[nGyro]; Gyro *wMeas = new Gyro[nGyro];
+	Quat *qTrue = new Quat[attDat.nQuat]; Quat *qMeas = new Quat[attDat.nQuat];
+	Gyro *wTrue = new Gyro[attDat.nGyro]; Gyro *wMeas = new Gyro[attDat.nGyro];
 	simQuatAndGyro15State(qTrue, qMeas, wTrue, wMeas);
 	compareTrueNoise(qTrue, qMeas, qNoise);
-	for (int i = 0; i < nQuat; i++)
+	for (int i = 0; i < attDat.nQuat; i++)
 	{
 		qTrueC[5 * i] = qTrue[i].UT;
 		qTrueC[5 * i + 1] = qTrue[i].q1; qTrueC[5 * i + 2] = qTrue[i].q2;
@@ -2556,7 +2555,7 @@ void attitudeSimulationStruct(AttParm mAtt, char * workpath,
 		qMeasC[5 * i + 1] = qMeas[i].q1; qMeasC[5 * i + 2] = qMeas[i].q2;
 		qMeasC[5 * i + 3] = qMeas[i].q3; qMeasC[5 * i + 4] = qMeas[i].q4;
 	}
-	for (int i = 0; i < nGyro; i++)
+	for (int i = 0; i < attDat.nGyro; i++)
 	{
 		wTrueC[4 * i] = wTrue[i].UT;
 		wTrueC[4 * i + 1] = wTrue[i].wx; wTrueC[4 * i + 2] = wTrue[i].wy; wTrueC[4 * i + 3] = wTrue[i].wz;
@@ -2582,11 +2581,10 @@ void attitudeDeterminationStruct(AttParm mAtt,
 	char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store)
 {
-	nQuat = mAtt.totalT*mAtt.freqQ;
-	nGyro = mAtt.totalT*mAtt.freqG;
-	Quat *qTrue = new Quat[nQuat]; Quat *qMeas = new Quat[nQuat]; Quat *quatEst = new Quat[nGyro];
-	Gyro *wTrue = new Gyro[nGyro]; Gyro *wMeas = new Gyro[nGyro];
-	for (int i = 0; i < nQuat; i++)
+	nQuat = attDat.nQuat; nGyro = attDat.nGyro;
+	Quat *qTrue = new Quat[mAtt.nQuat]; Quat *qMeas = new Quat[mAtt.nQuat]; Quat *quatEst = new Quat[mAtt.nGyro];
+	Gyro *wTrue = new Gyro[mAtt.nGyro]; Gyro *wMeas = new Gyro[mAtt.nGyro];
+	for (int i = 0; i < mAtt.nQuat; i++)
 	{
 		qTrue[i].UT = qTrueC[5 * i];
 		qTrue[i].q1 = qTrueC[5 * i + 1];  qTrue[i].q2 = qTrueC[5 * i + 2];
@@ -2595,7 +2593,7 @@ void attitudeDeterminationStruct(AttParm mAtt,
 		qMeas[i].q1 = qMeasC[5 * i + 1];  qMeas[i].q2 = qMeasC[5 * i + 2];
 		qMeas[i].q3 = qMeasC[5 * i + 3];  qMeas[i].q4 = qMeasC[5 * i + 4];
 	}
-	for (int i = 0; i < nGyro; i++)
+	for (int i = 0; i < mAtt.nGyro; i++)
 	{
 		wTrue[i].UT = wTrueC[4 * i];
 		wTrue[i].wx = wTrueC[4 * i + 1];  wTrue[i].wy = wTrueC[4 * i + 2];  wTrue[i].wz = wTrueC[4 * i + 3];

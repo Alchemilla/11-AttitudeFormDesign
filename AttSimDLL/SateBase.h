@@ -11,6 +11,7 @@ struct AttParm
 {
 	int freqG, freqQ;//星敏陀螺采样频率
 	int totalT;//总仿真时长
+	int nQuat, nGyro;//星敏和陀螺数据个数
 	double stabW[3];//姿态稳定度
 	double qInitial[4], wBiasA[3];//初始四元数，陀螺漂移
 	double sArr[9];//陀螺尺度因子和安装偏差
@@ -19,9 +20,9 @@ struct AttParm
 	// 重载操作符=
 	AttParm& operator=(const AttParm &s)
 	{
-		this->freqG = s.freqG;
-		this->freqQ = s.freqQ;
+		this->freqG = s.freqG;		this->freqQ = s.freqQ;
 		this->totalT = s.totalT;
+		this->nQuat = s.nQuat; this->nGyro = s.nGyro;
 		memcpy(this->stabW, s.stabW, sizeof(double) * 3);
 		memcpy(this->qInitial, s.qInitial, sizeof(double) * 4);
 		memcpy(this->wBiasA, s.wBiasA, sizeof(double) * 3);
