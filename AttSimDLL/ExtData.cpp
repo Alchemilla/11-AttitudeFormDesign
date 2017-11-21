@@ -67,11 +67,13 @@ bool ExtData::ReadAttAndTransToOmega(string sworkpath,AttParm gyroParm)
 		wMeasure[i].UT = arr_att[i].UT;
 		wMeasure[i].wx = wMeas[i].wx; wMeasure[i].wy = wMeas[i].wy; wMeasure[i].wz = wMeas[i].wz;
 	}
-	m_AttParm.sig_ST = 8; m_AttParm.sigu = 1e-9; m_AttParm.sigv = 1e-5;
-	EKFForwardAndBackforward15StateExt(m_AttParm, nQuat,nGyro,qMeas, wMeasure, quatEst, xest_store);
+	attSim	ZY3;
+	ZY3.getAttParam(m_AttParm, sworkpath);
+	//m_AttParm.sig_ST = 8; m_AttParm.sigu = 1e-9; m_AttParm.sigv = 1e-5;
+	ZY3.EKFForwardAndBackforward15StateExt(qMeas, wMeasure, quatEst, xest_store);
 	//Quat *qTrue = new Quat[nQuat];
 	double *dqOut = new double[3 * nQuat];
-	compareTrueEKF15StateExt(sworkpath, nQuat, nGyro, "RealDataKalman.txt", "15StateRealDataXest_store.txt", qMeas, quatEst, dqOut, xest_store);
+	ZY3.compareTrueEKF15StateExt("RealDataKalman.txt", "15StateRealDataXest_store.txt", qMeas, quatEst, dqOut, xest_store);
 	return true;
 }
 
