@@ -62,7 +62,7 @@ namespace AttSimCPP
     double[] qTrueC, double[] qMeasC, double[] wTrueC, double[] wMeasC, double[] qNoise);
         [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void attitudeSimulationStruct(AttParm mAtt, string path,
-   ref Quat[] qTrueC, ref Quat[] qMeasC, ref Gyro[] wTrueC, ref Gyro[] wMeasC, double[] qNoise);
+    double[] qTrueC, double[] qMeasC, double[] wTrueC, double[] wMeasC, double[] qNoise);
         /// <summary>
         /// 纯姿态确定
         /// </summary>
@@ -79,6 +79,10 @@ namespace AttSimCPP
         /// <param name="xest_store"></param>
         [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void attitudeDetermination(int totalT, int freqQ, int freqG,
+    string path, double[] qTrueC, double[] qMeasC, int isBinEKF,
+    double[] wTrueC, double[] wMeasC, double[] dqOut, double[] xest_store);
+        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void attitudeDeterminationStruct(AttParm mAtt,
     string path, double[] qTrueC, double[] qMeasC, int isBinEKF,
     double[] wTrueC, double[] wMeasC, double[] dqOut, double[] xest_store);
         /// <summary>

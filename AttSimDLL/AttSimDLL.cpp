@@ -2526,7 +2526,7 @@ void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG, double Befor
 //日期：2017.11.20
 //////////////////////////////////////////////////////////////////////////
 void attitudeSimulationStruct(AttParm mAtt, char * workpath, 
-	Quat * qTrueC, Quat * qMeasC, Gyro * wTrueC, Gyro * wMeasC, double * qNoise)
+	double *qTrueC, double *qMeasC, double *wTrueC, double *wMeasC, double * qNoise)
 {
 	attDat = mAtt;
 	//设置随机初始四元数
@@ -2547,11 +2547,79 @@ void attitudeSimulationStruct(AttParm mAtt, char * workpath,
 	Gyro *wTrue = new Gyro[nGyro]; Gyro *wMeas = new Gyro[nGyro];
 	simQuatAndGyro15State(qTrue, qMeas, wTrue, wMeas);
 	compareTrueNoise(qTrue, qMeas, qNoise);
-	qTrueC = qTrue; qMeasC = qMeas;
-	wTrueC = wTrue; wMeasC = wMeas;
+	for (int i = 0; i < nQuat; i++)
+	{
+		qTrueC[5 * i] = qTrue[i].UT;
+		qTrueC[5 * i + 1] = qTrue[i].q1; qTrueC[5 * i + 2] = qTrue[i].q2;
+		qTrueC[5 * i + 3] = qTrue[i].q3; qTrueC[5 * i + 4] = qTrue[i].q4;
+		qMeasC[5 * i] = qMeas[i].UT;
+		qMeasC[5 * i + 1] = qMeas[i].q1; qMeasC[5 * i + 2] = qMeas[i].q2;
+		qMeasC[5 * i + 3] = qMeas[i].q3; qMeasC[5 * i + 4] = qMeas[i].q4;
+	}
+	for (int i = 0; i < nGyro; i++)
+	{
+		wTrueC[4 * i] = wTrue[i].UT;
+		wTrueC[4 * i + 1] = wTrue[i].wx; wTrueC[4 * i + 2] = wTrue[i].wy; wTrueC[4 * i + 3] = wTrue[i].wz;
+		wMeasC[4 * i] = wMeas[i].UT;
+		wMeasC[4 * i + 1] = wMeas[i].wx; wMeasC[4 * i + 2] = wMeas[i].wy; wMeasC[4 * i + 3] = wMeas[i].wz;
+	}
 
-	//delete[]qTrue; qTrue = NULL;
-	//delete[]qMeas; qMeas = NULL;
-	//delete[]wTrue; wTrue = NULL;
-	//delete[]wMeas; wMeas = NULL;
+	delete[]qTrue; qTrue = NULL;
+	delete[]qMeas; qMeas = NULL;
+	delete[]wTrue; wTrue = NULL;
+	delete[]wMeas; wMeas = NULL;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//功能：卡尔曼滤波程序（仅滤波）
+//输入：真实和测量的星敏陀螺数据qTrueC，qMeasC，wTrueC，wMeasC
+//输出：滤波前(qNoise)后(dqOut)真实和测量四元数残差，漂移、尺度、安装等测量值（xest_store）
+//注意：假定陀螺是稳定输出的，仿真将以陀螺的时间作为基准
+//作者：GZC
+//日期：2017.11.21
+//////////////////////////////////////////////////////////////////////////
+void attitudeDeterminationStruct(AttParm mAtt,
+	char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
+	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store)
+{
+	nQuat = mAtt.totalT*mAtt.freqQ;
+	nGyro = mAtt.totalT*mAtt.freqG;
+	Quat *qTrue = new Quat[nQuat]; Quat *qMeas = new Quat[nQuat]; Quat *quatEst = new Quat[nGyro];
+	Gyro *wTrue = new Gyro[nGyro]; Gyro *wMeas = new Gyro[nGyro];
+	for (int i = 0; i < nQuat; i++)
+	{
+		qTrue[i].UT = qTrueC[5 * i];
+		qTrue[i].q1 = qTrueC[5 * i + 1];  qTrue[i].q2 = qTrueC[5 * i + 2];
+		qTrue[i].q3 = qTrueC[5 * i + 3];  qTrue[i].q4 = qTrueC[5 * i + 4];
+		qMeas[i].UT = qMeasC[5 * i];
+		qMeas[i].q1 = qMeasC[5 * i + 1];  qMeas[i].q2 = qMeasC[5 * i + 2];
+		qMeas[i].q3 = qMeasC[5 * i + 3];  qMeas[i].q4 = qMeasC[5 * i + 4];
+	}
+	for (int i = 0; i < nGyro; i++)
+	{
+		wTrue[i].UT = wTrueC[4 * i];
+		wTrue[i].wx = wTrueC[4 * i + 1];  wTrue[i].wy = wTrueC[4 * i + 2];  wTrue[i].wz = wTrueC[4 * i + 3];
+		wMeas[i].UT = wMeasC[4 * i];
+		wMeas[i].wx = wMeasC[4 * i + 1];  wMeas[i].wy = wMeasC[4 * i + 2];  wMeas[i].wz = wMeasC[4 * i + 3];
+	}
+
+	switch (isBinEKF)
+	{
+	case 0:
+		ExtendedKalmanFilter15State(qMeas, wMeas, quatEst, xest_store);
+		compareTrueEKF15State("15StateCompareEKFAndQuat.txt", "15StateXest_store.txt", qTrue, quatEst, dqOut, xest_store);
+		break;
+	case 1:
+		EKFForwardAndBackforward15State(qMeas, wMeas, quatEst, xest_store);
+		compareTrueEKF15State("15StateCompareBidEKFAndQuat.txt", "15StateBidXest_store.txt", qTrue, quatEst, dqOut, xest_store);
+		break;
+	default:
+		break;
+	}
+
+	delete[]qTrue; qTrue = NULL;
+	delete[]qMeas; qMeas = NULL;
+	delete[]wTrue; wTrue = NULL;
+	delete[]wMeas; wMeas = NULL;
+	delete[]quatEst; quatEst = NULL;
 }

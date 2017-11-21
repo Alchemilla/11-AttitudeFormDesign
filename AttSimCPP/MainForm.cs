@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -19,7 +20,7 @@ namespace AttSimCPP
             if (args.Length==2)
             {                path = args[1];            }
         }
-      
+        DLLImport.AttParm mAtt;
         public int nQuat, nGyro;//陀螺和四元数个数
         public int freqG, freqQ;//星敏陀螺采样频率            
         public double dt;
@@ -164,9 +165,7 @@ namespace AttSimCPP
             progressBar1.Maximum = 100;
             progressBar1.Value = 10;
             ShowInfo("根据不同频率星敏陀螺测量数据仿真");
-
-            DLLImport.AttParm mAtt;
-
+            
             //获取星敏陀螺频率和总时长
             mAtt.freqQ = Convert.ToInt32(textBox8.Text);//string转数值的第1种转换方式
             mAtt.freqG = Convert.ToInt32(textBox9.Text);
@@ -222,31 +221,29 @@ namespace AttSimCPP
                 sArr[i] = double.Parse(strSarr[i]) * 1e-6;
             mAtt.sArr = sArr;
 
-            DLLImport.Quat[] qTrueC= new DLLImport.Quat[nQuat];
-            DLLImport.Quat[] qMeasC = new DLLImport.Quat[nQuat];
-            DLLImport.Gyro[] wTrueC = new DLLImport.Gyro[nGyro];
-            DLLImport.Gyro[] wMeasC = new DLLImport.Gyro[nGyro];
+            double[] qTrueC = new double[5 * nQuat]; double[] qMeasC = new double[5 * nQuat];
+            double[] wTrueC = new double[4 * nGyro]; double[] wMeasC = new double[4 * nGyro];
             double[] qNoise = new double[3 * nQuat];
             progressBar1.Value = 20;
             ShowInfo("开始单向卡尔曼滤波...");
-            DLLImport.attitudeSimulationStruct(mAtt, path, ref qTrueC, ref qMeasC, ref wTrueC, ref wMeasC, qNoise);
+            DLLImport.attitudeSimulationStruct(mAtt, path, qTrueC, qMeasC, wTrueC, wMeasC, qNoise);
                     
             progressBar1.Value = 40;
 
-            //double[] dqOut = new double[3 * nQuat];
-            //double[] xest_store = new double[15 * nGyro];
-            //DLLImport.attitudeDetermination(tf, freqQ, freqG, path,
-            //    qTrueC, qMeasC, 0, wTrueC, wMeasC, dqOut, xest_store);
-            //dq = dqOut; qNs = qNoise; xestAll = xest_store; qMeas = qMeasC;
+            double[] dqOut = new double[3 * nQuat];
+            double[] xest_store = new double[15 * nGyro];
+            DLLImport.attitudeDeterminationStruct(mAtt, path,
+                qTrueC, qMeasC, 0, wTrueC, wMeasC, dqOut, xest_store);
+            dq = dqOut; qNs = qNoise; xestAll = xest_store; qMeas = qMeasC;
 
-            //dqOut = new double[3 * nQuat];
-            //xest_store = new double[15 * nGyro];
-            //progressBar1.Value = 70;
-            //ShowInfo("开始双向卡尔曼滤波...");
-            //DLLImport.attitudeDetermination(tf, freqQ, freqG, path,
-            //   qTrueC, qMeasC, 1, wTrueC, wMeasC, dqOut, xest_store);
-            //dq2 = dqOut; xestAll2 = xest_store;
-            //dqOut = null; qNoise = null; xest_store = null;
+            dqOut = new double[3 * nQuat];
+            xest_store = new double[15 * nGyro];
+            progressBar1.Value = 70;
+            ShowInfo("开始双向卡尔曼滤波...");
+            DLLImport.attitudeDeterminationStruct(mAtt, path,
+               qTrueC, qMeasC, 1, wTrueC, wMeasC, dqOut, xest_store);
+            dq2 = dqOut; xestAll2 = xest_store;
+            dqOut = null; qNoise = null; xest_store = null;
 
             progressBar1.Value = 100;
             ShowInfo("仿真完成！");
