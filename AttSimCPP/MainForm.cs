@@ -21,21 +21,21 @@ namespace AttSimCPP
             { path = args[1]; }
         }
         public AttParm mAtt;
-        public int nQuat, nGyro;//陀螺和四元数个数
-        public int freqG, freqQ;//星敏陀螺采样频率            
-        public double dt;
-        public int tf, m;
-        double sig_ST, sigu, sigv;
-        double[] qInitial = new double[4];
-        double[] wBias = new double[3];
-        double[] sArr = new double[9];//陀螺安装和尺度误差
-        double[] stabW = new double[3];//姿态稳定度
+        //public int nQuat, nGyro;//陀螺和四元数个数
+        //public int freqG, freqQ;//星敏陀螺采样频率            
+        //public double dt;
+        //public int tf, m;
+        //double sig_ST, sigu, sigv;
+        //double[] qInitial = new double[4];
+        //double[] wBias = new double[3];
+        //double[] sArr = new double[9];//陀螺安装和尺度误差
+        //double[] stabW = new double[3];//姿态稳定度
         string path;
         public double[] qMeas, dq, bias, berr, dq2, bias2, berr2, qNs, xestAll, xestAll2;
         static int nSim1 = 0, nSim2 = 0;
 
         /// <summary>
-        /// 功能：星敏陀螺仿真主程序
+        /// 功能：星敏陀螺仿真和姿态确定主程序
         /// 说明：点击该按钮，根据时间间隔和总时长仿真
         /// 作者：GZC
         /// 时间：2017.07.15
@@ -175,6 +175,7 @@ namespace AttSimCPP
 
             //姿态稳定度
             string[] strStab = textBox1.Text.Split(',');
+            double[] stabW = new double[3];
             for (int i = 0; i < 3; i++)
                 stabW[i] = double.Parse(strStab[i]) * 1e-4;
             mAtt.stabW = stabW;
@@ -187,6 +188,7 @@ namespace AttSimCPP
 
             //得到初始四元数
             string[] strQ = textBox3.Text.Split(',');
+            double[] qInitial = new double[4];
             for (int i = 0; i < 4; i++)
                 qInitial[i] = double.Parse(strQ[i]);
             mAtt.qInitial = qInitial;
@@ -203,6 +205,7 @@ namespace AttSimCPP
 
             //陀螺漂移
             string[] strW = textBox5.Text.Split(',');
+            double[] wBias = new double[3];
             for (int i = 0; i < 3; i++)
                 wBias[i] = double.Parse(strW[i]);
             mAtt.wBiasA = wBias;
@@ -217,6 +220,7 @@ namespace AttSimCPP
 
             //陀螺尺度和安装
             string[] strSarr = textBox10.Text.Split(',');
+            double[] sArr = new double[9];
             for (int i = 0; i < 9; i++)
                 sArr[i] = double.Parse(strSarr[i]) * 1e-6;
             mAtt.sArr = sArr;
@@ -296,12 +300,18 @@ namespace AttSimCPP
             else
             {                ShowInfo("已设置仿真文件保存目录：" + path);            }
         }
+        /// <summary>
+        /// 功能：记录日志
+        /// </summary>
         public void ShowInfo(string Info)
         {
             txtInfo.AppendText(DateTime.Now.ToString("HH:mm:ss  ") + Info + "\r\n");
             txtInfo.SelectionStart = txtInfo.Text.Length; //设定光标位置
             txtInfo.ScrollToCaret(); //滚动到光标处
         }
+        /// <summary>
+        /// 功能：加载主界面
+        /// </summary>
         private void MainForm_Load(object sender, EventArgs e)
         {
             ShowInfo("欢迎来到姿态确定仿真程序！");
@@ -322,7 +332,9 @@ namespace AttSimCPP
             radioButton1.Enabled = false;
             radioButton2.Enabled = false;
         }
-
+        /// <summary>
+        /// 功能：设置保存目录
+        /// </summary>
         private void button2_Click(object sender, EventArgs e)
         {
             ShowInfo("设置输出文件保存目录");
@@ -338,15 +350,21 @@ namespace AttSimCPP
             }            
             else
                 ShowInfo("失败未设置文件保存路径");
-        }    
+        }
+        /// <summary>
+        /// 功能：两种滤波结果对比
+        /// </summary>
         private void button3_Click(object sender, EventArgs e)
         {
             ShowInfo("比较EKF滤波，双向EKF滤波，星敏测量和真实四元数残差");
-            attTure simAtt1 = new attTure();//新建子窗体对象
+            attTure simAtt1 = new attTure(mAtt);//新建子窗体对象
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Text = "残差对比";
             simAtt1.Show();
         }
+        /// <summary>
+        /// 功能：显示陀螺漂移
+        /// </summary>
         private void button4_Click(object sender, EventArgs e)
         {
             ShowInfo("EKF和双向EKF陀螺漂移变化");
@@ -354,10 +372,13 @@ namespace AttSimCPP
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Show();
         }
+        /// <summary>
+        /// 功能：双向EKF滤波残差
+        /// </summary>
         private void button5_Click(object sender, EventArgs e)
         {
             ShowInfo("比较双向EKF滤波，和真实四元数残差");
-            attTure simAtt1 = new attTure();//新建子窗体对象
+            attTure simAtt1 = new attTure(mAtt);//新建子窗体对象
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Text = "双向滤波残差";
             simAtt1.Show();
@@ -368,35 +389,46 @@ namespace AttSimCPP
         private void button6_Click(object sender, EventArgs e)
         {
             ShowInfo("显示测量四元数");
-            oneGraph simAtt1 = new oneGraph();//新建子窗体对象
+            oneGraph simAtt1 = new oneGraph(mAtt);//新建子窗体对象
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Show();
         }
+        /// <summary>
+        /// 功能：EKF滤波残差
+        /// </summary>
         private void button7_Click(object sender, EventArgs e)
         {
             ShowInfo("比较EKF滤波，和真实四元数残差");
-            attTure simAtt1 = new attTure();//新建子窗体对象
+            attTure simAtt1 = new attTure(mAtt);//新建子窗体对象
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Text = "EKF滤波残差";
             simAtt1.Show();
         }
+        /// <summary>
+        /// 功能：EKF结果和星敏噪声
+        /// </summary>
         private void button9_Click(object sender, EventArgs e)
         {
             ShowInfo("比较EKF滤波，星敏测量和真实四元数残差");
-            attTure simAtt1 = new attTure();//新建子窗体对象
+            attTure simAtt1 = new attTure(mAtt);//新建子窗体对象
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Text = "EKF星敏噪声";
             simAtt1.Show();
         }
+        /// <summary>
+        /// 功能：双向EKF结果和星敏噪声
+        /// </summary>
         private void button10_Click(object sender, EventArgs e)
         {
             ShowInfo("比较双向EKF滤波，星敏测量和真实四元数残差");
-            attTure simAtt1 = new attTure();//新建子窗体对象
+            attTure simAtt1 = new attTure(mAtt);//新建子窗体对象
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Text = "双向星敏噪声";
             simAtt1.Show();
         }
-        //考虑陀螺安装和尺度
+        /// <summary>
+        /// 功能：考虑陀螺安装和尺度
+        /// </summary>
         private void radioButton2_CheckedChanged(object sender, EventArgs e)
         {
             textBox10.Enabled = true;
@@ -404,15 +436,16 @@ namespace AttSimCPP
             textBox10.ForeColor = Color.Gray;
             button1.Enabled = true;
         }
-        //不考虑陀螺安装和尺度
+        /// <summary>
+        /// 功能：不考虑陀螺安装和尺度
+        /// </summary>
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
             textBox10.Clear();
             textBox10.Text = "0,0,0,0,0,0,0,0,0";
             textBox10.Enabled = false;
             button1.Enabled = true;
-        }
-        
+        }        
         /// <summary>
         /// 功能：主动推扫模式仿真
         /// 日期：2017.10.18
@@ -438,16 +471,18 @@ namespace AttSimCPP
             ShowInfo("根据不同频率星敏陀螺测量数据仿真");
 
             //获取星敏陀螺频率和总时长
-            tf = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
-            freqQ = Convert.ToInt32(textBox8.Text);
-            freqG = Convert.ToInt32(textBox9.Text);//string转数值的第1种转换方式
-            nQuat = freqQ * tf;//四元数个数
-            nGyro = freqG * tf;//陀螺个数，一般较四元数多
+            mAtt.totalT = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
+            mAtt.freqQ = Convert.ToInt32(textBox8.Text);
+            mAtt.freqG = Convert.ToInt32(textBox9.Text);//string转数值的第1种转换方式
+            mAtt.nQuat = mAtt.freqQ * mAtt.totalT;//四元数个数
+            mAtt.nGyro = mAtt.freqG * mAtt.totalT;//陀螺个数，一般较四元数多
 
             //姿态稳定度
             string[] strStab = textBox1.Text.Split(',');
+            double[] stabW = new double[3];
             for (int i = 0; i < 3; i++)
                 stabW[i] = double.Parse(strStab[i]) * 1e-4;
+            mAtt.stabW = stabW;
             if (Math.Abs(stabW[0]) > 0.01 || Math.Abs(stabW[1]) > 0.01 || Math.Abs(stabW[1]) > 0.01)
             {
                 ShowInfo("重新输入姿态稳定度");
@@ -457,8 +492,10 @@ namespace AttSimCPP
 
             //得到初始四元数
             string[] strQ = textBox3.Text.Split(',');
+            double[] qInitial = new double[4];
             for (int i = 0; i < 4; i++)
                 qInitial[i] = double.Parse(strQ[i]);
+            mAtt.qInitial = qInitial;
             double qSquare = Math.Sqrt(Math.Pow(qInitial[0], 2) + Math.Pow(qInitial[1], 2) + Math.Pow(qInitial[2], 2) + Math.Pow(qInitial[3], 2));
             if (qInitial[0] > 1 || qInitial[1] > 1 || qInitial[2] > 1 || qInitial[3] > 1 || qSquare > 1.01 || qSquare < 0.99)
             {
@@ -468,26 +505,29 @@ namespace AttSimCPP
             }
 
             //星敏参数
-            sig_ST = double.Parse(textBox4.Text);//星敏误差(单位：角秒) 
+            mAtt.sig_ST = double.Parse(textBox4.Text);//星敏误差(单位：角秒) 
 
             //陀螺漂移
             string[] strW = textBox5.Text.Split(',');
+            double[] wBias = new double[3];
             for (int i = 0; i < 3; i++)
                 wBias[i] = double.Parse(strW[i]);
+            mAtt.wBiasA = wBias;
 
             //漂移噪声
-            sigu = double.Parse(textBox6.Text) * 1e-9;
+            mAtt.sigu = double.Parse(textBox6.Text) * 1e-9;
             //sigu = Math.Sqrt(sigu) * 1e-10;
 
             //陀螺噪声
-            sigv = double.Parse(textBox7.Text) * 1e-5;
+            mAtt.sigv = double.Parse(textBox7.Text) * 1e-5;
             //sigv = Math.Sqrt(sigv) * 1e-7;
 
             //陀螺尺度和安装
             string[] strSarr = textBox10.Text.Split(',');
+            double[] sArr = new double[9];
             for (int i = 0; i < 9; i++)
                 sArr[i] = double.Parse(strSarr[i]) * 1e-6;
-
+            mAtt.sArr = sArr;
             //主动推扫前后多余时间
             double[] BeforeAfterT = new double[2];
             string[] strBAT= textBox18.Text.Split(',');
@@ -495,26 +535,25 @@ namespace AttSimCPP
                 BeforeAfterT[i] = double.Parse(strBAT[i]);
 
             //注意时间维度
-            double[] qTrueC = new double[5 * nQuat]; double[] qMeasC = new double[5 * nQuat];
-            double[] wTrueC = new double[4 * nGyro]; double[] wMeasC = new double[4 * nGyro];
-            double[] qNoise = new double[3 * nQuat];
+            double[] qTrueC = new double[5 * mAtt.nQuat]; double[] qMeasC = new double[5 * mAtt.nQuat];
+            double[] wTrueC = new double[4 * mAtt.nGyro]; double[] wMeasC = new double[4 * mAtt.nGyro];
+            double[] qNoise = new double[3 * mAtt.nQuat];
             progressBar1.Value = 20;
             ShowInfo("开始单向卡尔曼滤波...");
-            DLLImport.attitudeSimulation(freqG, freqQ, tf, qInitial, sig_ST, wBias, stabW, sigu, sigv, sArr,
-                path, qTrueC, qMeasC, wTrueC, wMeasC, qNoise);
+            DLLImport.attitudeSimulationStruct(mAtt, path, qTrueC, qMeasC, wTrueC, wMeasC, qNoise);
             progressBar1.Value = 40;
 
-            double[] dqOut = new double[3 * nQuat];
-            double[] xest_store = new double[15 * nGyro];
-            DLLImport.attitudeDeterActivePushbroom(tf, freqQ, freqG, BeforeAfterT, path,
+            double[] dqOut = new double[3 * mAtt.nQuat];
+            double[] xest_store = new double[15 * mAtt.nGyro];
+            DLLImport.attitudeDeterActivePushbroomStruct(mAtt, BeforeAfterT, path,
                 qTrueC, qMeasC, 0, wTrueC, wMeasC, dqOut, xest_store);
             dq = dqOut; qNs = qNoise; xestAll = xest_store; qMeas = qMeasC;
 
-            dqOut = new double[3 * nQuat];
-            xest_store = new double[15 * nGyro];
+            dqOut = new double[3 * mAtt.nQuat];
+            xest_store = new double[15 * mAtt.nGyro];
             progressBar1.Value = 70;
             ShowInfo("开始双向卡尔曼滤波...");
-            DLLImport.attitudeDeterActivePushbroom(tf, freqQ, freqG, BeforeAfterT, path,
+            DLLImport.attitudeDeterActivePushbroomStruct(mAtt, BeforeAfterT, path,
                qTrueC, qMeasC, 1, wTrueC, wMeasC, dqOut, xest_store);
             dq2 = dqOut; xestAll2 = xest_store;
             dqOut = null; qNoise = null; xest_store = null;
@@ -528,9 +567,7 @@ namespace AttSimCPP
             button7.Enabled = true;
             button9.Enabled = true;
             button10.Enabled = true;
-        }
-
-
+        }        
         /// <summary>
         /// 功能：将外部程序仿真的姿态转换为陀螺角速度
         /// 日期：2017.09.06
@@ -541,14 +578,16 @@ namespace AttSimCPP
 
             //陀螺漂移
             string[] strW = textBox5.Text.Split(',');
+            double[] wBias = new double[3]; 
             for (int i = 0; i < 3; i++)
                 wBias[i] = double.Parse(strW[i]);
+            mAtt.wBiasA = wBias;
 
             //漂移噪声
-            sigu = double.Parse(textBox6.Text) * 1e-9;
+            mAtt.sigu = double.Parse(textBox6.Text) * 1e-9;
 
             //陀螺噪声
-            sigv = double.Parse(textBox7.Text) * 1e-5;
+            mAtt.sigv = double.Parse(textBox7.Text) * 1e-5;
             
             if (!File.Exists(path + "\\ATT.txt"))
             {
@@ -556,7 +595,7 @@ namespace AttSimCPP
                 MessageBox.Show("请设置真实数据路径（包含ATT.txt文件）", "警告", MessageBoxButtons.OK);
                 return;
             }
-            DLLImport.ExternalData(path,wBias,sigu,sigv);
+            DLLImport.ExternalDataStruct(path,mAtt);
         }
         
     }

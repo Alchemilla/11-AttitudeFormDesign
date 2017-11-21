@@ -24,3 +24,4 @@ private:
 };
 
 ATTSIMDLL void  ExternalData(char *workpath, double wBiasA[3], double sigu, double sigv);
+ATTSIMDLL void  ExternalDataStruct(char *workpath, AttParm mAtt);

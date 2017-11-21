@@ -23,8 +23,7 @@ namespace AttSimCPP
         private void attBias_Load(object sender,EventArgs e)
         {
             MainForm mform = (MainForm)this.Owner;         //这样调用父窗体    
-
-            int a = mAtt.freqG;
+            
             chart1.Series.Clear();
             chart2.Series.Clear();
             chart3.Series.Clear();
@@ -52,15 +51,15 @@ namespace AttSimCPP
             bias3b.ChartType = SeriesChartType.FastLine;
             bias3b.Color = System.Drawing.Color.Blue;
             bias3b.BorderWidth = 3;
-
-            for (int i = 0; i < mform.nGyro - 1; i++)
+            
+            for (int i = 0; i < mAtt.nGyro - 1; i++)
             {
-                bias1a.Points.AddXY(i/mform.freqG+1, mform.xestAll[15 * i + 3] / Math.PI * 180 * 3600 * mform.freqG);
-                bias2a.Points.AddXY(i/mform.freqG+1, mform.xestAll[15 * i + 4] / Math.PI * 180 * 3600 * mform.freqG);
-                bias3a.Points.AddXY(i/mform.freqG+1, mform.xestAll[15 * i + 5] / Math.PI * 180 * 3600 * mform.freqG);
-                bias1b.Points.AddXY(i/mform.freqG+1, mform.xestAll2[15 * i + 3] / Math.PI * 180 * 3600 * mform.freqG);
-                bias2b.Points.AddXY(i/mform.freqG+1, mform.xestAll2[15 * i + 4] / Math.PI * 180 * 3600 * mform.freqG);
-                bias3b.Points.AddXY(i/mform.freqG+1, mform.xestAll2[15 * i + 5] / Math.PI * 180 * 3600 * mform.freqG);
+                bias1a.Points.AddXY(i/mAtt.freqG+1, mform.xestAll[15 * i + 3] / Math.PI * 180 * 3600 * mAtt.freqG);
+                bias2a.Points.AddXY(i/mAtt.freqG+1, mform.xestAll[15 * i + 4] / Math.PI * 180 * 3600 * mAtt.freqG);
+                bias3a.Points.AddXY(i/mAtt.freqG+1, mform.xestAll[15 * i + 5] / Math.PI * 180 * 3600 * mAtt.freqG);
+                bias1b.Points.AddXY(i/mAtt.freqG+1, mform.xestAll2[15 * i + 3] / Math.PI * 180 * 3600 * mAtt.freqG);
+                bias2b.Points.AddXY(i/mAtt.freqG+1, mform.xestAll2[15 * i + 4] / Math.PI * 180 * 3600 * mAtt.freqG);
+                bias3b.Points.AddXY(i/mAtt.freqG+1, mform.xestAll2[15 * i + 5] / Math.PI * 180 * 3600 * mAtt.freqG);
             }
 
 

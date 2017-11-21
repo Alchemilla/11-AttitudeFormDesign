@@ -13,9 +13,11 @@ namespace AttSimCPP
 {
     public partial class oneGraph : Form
     {
-        public oneGraph()
+        AttParm mAtt;
+        public oneGraph(AttParm mAttParm)
         {
             InitializeComponent();
+            mAtt = mAttParm;
         }
 
         private void oneGraph_Load(object sender, EventArgs e)
@@ -36,12 +38,12 @@ namespace AttSimCPP
             q4.ChartType = SeriesChartType.FastPoint;
             q4.Color = System.Drawing.Color.Black;
                     
-            for (int i = 0; i < mform.nQuat - 1;)
+            for (int i = 0; i < mAtt.nQuat - 1;)
             {
-                q1.Points.AddXY((i / mform.freqQ) + 1, mform.qMeas[5 * i + 1]);
-                q2.Points.AddXY((i / mform.freqQ) + 1, mform.qMeas[5 * i + 2]);
-                q3.Points.AddXY((i / mform.freqQ) + 1, mform.qMeas[5 * i + 3]);
-                q4.Points.AddXY((i / mform.freqQ) + 1, mform.qMeas[5 * i + 4]);
+                q1.Points.AddXY((i / mAtt.freqQ) + 1, mform.qMeas[5 * i + 1]);
+                q2.Points.AddXY((i / mAtt.freqQ) + 1, mform.qMeas[5 * i + 2]);
+                q3.Points.AddXY((i / mAtt.freqQ) + 1, mform.qMeas[5 * i + 3]);
+                q4.Points.AddXY((i / mAtt.freqQ) + 1, mform.qMeas[5 * i + 4]);
                 i++;
             }
                        

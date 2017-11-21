@@ -33,6 +33,9 @@ ATTSIMDLL void attitudeSimulationStruct(AttParm mAtt, char* workpath,
 ATTSIMDLL void attitudeDeterminationStruct(AttParm mAtt,
 	char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
+ATTSIMDLL void attitudeDeterActivePushbroomStruct(AttParm mAtt,
+	double BeforeAfterT[2], char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
+	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
 
 //extern int nQuat, nGyro;//全局变量，四元数和陀螺的数量
 void EKFForwardAndBackforward15StateExt(AttParm mAttPa, int nQ, int nG, Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);

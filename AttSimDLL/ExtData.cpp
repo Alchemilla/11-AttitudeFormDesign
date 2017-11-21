@@ -11,6 +11,14 @@ ExtData::~ExtData()
 {
 }
 
+//////////////////////////////////////////////////////////////////////////
+//功能：读取外部数据并进行处理
+//输入：
+//输出：
+//注意：NULL
+//作者：GZC
+//日期：2017.11.21
+//////////////////////////////////////////////////////////////////////////
 void  ExternalData(char *workpath, double wBiasA[3], double sigu, double sigv)
 {
 	ExtData ZY3;
@@ -19,6 +27,11 @@ void  ExternalData(char *workpath, double wBiasA[3], double sigu, double sigv)
 	gyroParm.sigu = sigu;
 	gyroParm.sigv = sigv;
 	ZY3.ReadAttAndTransToOmega(workpath, gyroParm);
+}
+void  ExternalDataStruct(char *workpath, AttParm mAtt)
+{
+	ExtData ZY3;
+	ZY3.ReadAttAndTransToOmega(workpath, mAtt);
 }
 
 //////////////////////////////////////////////////////////////////////////

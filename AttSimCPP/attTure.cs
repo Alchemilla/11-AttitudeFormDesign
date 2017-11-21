@@ -13,9 +13,11 @@ namespace AttSimCPP
 {
     public partial class attTure : Form
     {
-        public attTure()
+        AttParm mAtt;
+        public attTure(AttParm mAttParm)
         {
             InitializeComponent();
+            mAtt = mAttParm;
         }
 
         private void attTure_Load(object sender, EventArgs e)
@@ -41,11 +43,11 @@ namespace AttSimCPP
                 Yawa.BorderWidth = 2;
 
                 //单向卡尔曼滤波残差
-                for (int i = 0; i < mform.nQuat;)
+                for (int i = 0; i < mAtt.nQuat;)
                 {
-                    Rolla.Points.AddXY(i/mform.freqQ+1, mform.dq[3 * i]);
-                    Pitcha.Points.AddXY(i/mform.freqQ+1, mform.dq[3 * i + 1]);
-                    Yawa.Points.AddXY(i/mform.freqQ+1, mform.dq[3 * i + 2]);
+                    Rolla.Points.AddXY(i/mAtt.freqQ+1, mform.dq[3 * i]);
+                    Pitcha.Points.AddXY(i/mAtt.freqQ+1, mform.dq[3 * i + 1]);
+                    Yawa.Points.AddXY(i/mAtt.freqQ+1, mform.dq[3 * i + 2]);
                     i++;
                 }
             
@@ -88,11 +90,11 @@ namespace AttSimCPP
                 Yawb.BorderWidth = 2;
                             
                 //双向卡尔曼滤波残差
-                for (int i = 0; i < mform.nQuat;)
+                for (int i = 0; i < mAtt.nQuat;)
                 {
-                    Rollb.Points.AddXY(i/mform.freqQ+1, mform.dq2[3 * i]);
-                    Pitchb.Points.AddXY(i/mform.freqQ+1, mform.dq2[3 * i + 1]);
-                    Yawb.Points.AddXY(i/mform.freqQ+1, mform.dq2[3 * i + 2]);
+                    Rollb.Points.AddXY(i/mAtt.freqQ+1, mform.dq2[3 * i]);
+                    Pitchb.Points.AddXY(i/mAtt.freqQ+1, mform.dq2[3 * i + 1]);
+                    Yawb.Points.AddXY(i/mAtt.freqQ+1, mform.dq2[3 * i + 2]);
                     i++;
                 }
 
@@ -147,19 +149,19 @@ namespace AttSimCPP
                 Yawa.BorderWidth = 2;
 
                 //单向卡尔曼滤波残差
-                for (int i = 0; i < mform.nQuat;)
+                for (int i = 0; i < mAtt.nQuat;)
                 {
-                    Rolla.Points.AddXY(i / mform.freqQ + 1, mform.dq[3 * i]);
-                    Pitcha.Points.AddXY(i / mform.freqQ + 1, mform.dq[3 * i + 1]);
-                    Yawa.Points.AddXY(i / mform.freqQ + 1, mform.dq[3 * i + 2]);
+                    Rolla.Points.AddXY(i / mAtt.freqQ + 1, mform.dq[3 * i]);
+                    Pitcha.Points.AddXY(i / mAtt.freqQ + 1, mform.dq[3 * i + 1]);
+                    Yawa.Points.AddXY(i / mAtt.freqQ + 1, mform.dq[3 * i + 2]);
                     i++;
                 }
                 //测量噪声
-                for (int i = 0; i < mform.nQuat;)
+                for (int i = 0; i < mAtt.nQuat;)
                 {
-                    noise1.Points.AddXY(i / mform.freqQ + 1, mform.qNs[3 * i]);
-                    noise2.Points.AddXY(i / mform.freqQ + 1, mform.qNs[3 * i + 1]);
-                    noise3.Points.AddXY(i / mform.freqQ + 1, mform.qNs[3 * i + 2]);
+                    noise1.Points.AddXY(i / mAtt.freqQ + 1, mform.qNs[3 * i]);
+                    noise2.Points.AddXY(i / mAtt.freqQ + 1, mform.qNs[3 * i + 1]);
+                    noise3.Points.AddXY(i / mAtt.freqQ + 1, mform.qNs[3 * i + 2]);
                     i++;
                 }
                 chart1.ChartAreas[0].AxisX.Title = "Roll(t/s)";
@@ -216,19 +218,19 @@ namespace AttSimCPP
                 Yawb.BorderWidth = 2;
 
                 //双向卡尔曼滤波残差
-                for (int i = 0; i < mform.nQuat;)
+                for (int i = 0; i < mAtt.nQuat;)
                 {
-                    Rollb.Points.AddXY(i / mform.freqQ + 1, mform.dq2[3 * i]);
-                    Pitchb.Points.AddXY(i / mform.freqQ + 1, mform.dq2[3 * i + 1]);
-                    Yawb.Points.AddXY(i / mform.freqQ + 1, mform.dq2[3 * i + 2]);
+                    Rollb.Points.AddXY(i / mAtt.freqQ + 1, mform.dq2[3 * i]);
+                    Pitchb.Points.AddXY(i / mAtt.freqQ + 1, mform.dq2[3 * i + 1]);
+                    Yawb.Points.AddXY(i / mAtt.freqQ + 1, mform.dq2[3 * i + 2]);
                     i++;
                 }
                 //测量噪声
-                for (int i = 0; i < mform.nQuat;)
+                for (int i = 0; i < mAtt.nQuat;)
                 {
-                    noise1.Points.AddXY(i / mform.freqQ + 1, mform.qNs[3 * i]);
-                    noise2.Points.AddXY(i / mform.freqQ + 1, mform.qNs[3 * i + 1]);
-                    noise3.Points.AddXY(i / mform.freqQ + 1, mform.qNs[3 * i + 2]);
+                    noise1.Points.AddXY(i / mAtt.freqQ + 1, mform.qNs[3 * i]);
+                    noise2.Points.AddXY(i / mAtt.freqQ + 1, mform.qNs[3 * i + 1]);
+                    noise3.Points.AddXY(i / mAtt.freqQ + 1, mform.qNs[3 * i + 2]);
                     i++;
                 }
                 chart1.ChartAreas[0].AxisX.Title = "Roll(t/s)";
@@ -286,19 +288,19 @@ namespace AttSimCPP
                 Yawb.BorderWidth = 2;
 
                 //单向卡尔曼滤波残差
-                for (int i = 0; i < mform.nQuat;)
+                for (int i = 0; i < mAtt.nQuat;)
                 {
-                    Rolla.Points.AddXY(i/mform.freqQ+1, mform.dq[3 * i]);
-                    Pitcha.Points.AddXY(i/mform.freqQ+1, mform.dq[3 * i + 1]);
-                    Yawa.Points.AddXY(i/mform.freqQ+1, mform.dq[3 * i + 2]);
+                    Rolla.Points.AddXY(i/mAtt.freqQ+1, mform.dq[3 * i]);
+                    Pitcha.Points.AddXY(i/mAtt.freqQ+1, mform.dq[3 * i + 1]);
+                    Yawa.Points.AddXY(i/mAtt.freqQ+1, mform.dq[3 * i + 2]);
                     i++;
                 }
                 //双向卡尔曼滤波残差
-                for (int i = 0; i < mform.nQuat;)
+                for (int i = 0; i < mAtt.nQuat;)
                 {
-                    Rollb.Points.AddXY(i/mform.freqQ+1, mform.dq2[3 * i]);
-                    Pitchb.Points.AddXY(i/mform.freqQ+1, mform.dq2[3 * i + 1]);
-                    Yawb.Points.AddXY(i/mform.freqQ+1, mform.dq2[3 * i + 2]);
+                    Rollb.Points.AddXY(i/mAtt.freqQ+1, mform.dq2[3 * i]);
+                    Pitchb.Points.AddXY(i/mAtt.freqQ+1, mform.dq2[3 * i + 1]);
+                    Yawb.Points.AddXY(i/mAtt.freqQ+1, mform.dq2[3 * i + 2]);
                     i++;
                 }
               

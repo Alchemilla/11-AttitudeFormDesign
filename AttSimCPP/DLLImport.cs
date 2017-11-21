@@ -104,6 +104,10 @@ namespace AttSimCPP
         public static extern void attitudeDeterActivePushbroom(int totalT, int freqQ, int freqG,
      double[] BeforeAfterT, string path, double[] qTrueC, double[] qMeasC, int isBinEKF,
     double[] wTrueC, double[] wMeasC, double[] dqOut, double[] xest_store);
+        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void attitudeDeterActivePushbroomStruct(AttParm mAtt,
+     double[] BeforeAfterT, string path, double[] qTrueC, double[] qMeasC, int isBinEKF,
+    double[] wTrueC, double[] wMeasC, double[] dqOut, double[] xest_store);
 
         /// <summary>
         /// 导入外部数据进行处理
@@ -111,9 +115,10 @@ namespace AttSimCPP
         /// <param name="path"></param>
         [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ExternalData(string path, double[] wBiasA, double sigu, double sigv);
+        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ExternalDataStruct(string path, AttParm mAtt);
 
         //以下函数暂时不用
-
         /// <summary>
         /// 姿态仿真和卡尔曼滤波
         /// </summary>
