@@ -53,9 +53,6 @@ public:
 	void ExtendedKalmanFilter15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
 	void EKFForwardAndBackforward15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
 
-	void EKFForwardAndBackforward15StateExt(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
-	void compareTrueEKF15StateExt(string pathekf, string pathb, Quat *qTrue, Quat *qEst, double *dqOut, double *xest_store);
-
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量
 	AttParm attDat;
