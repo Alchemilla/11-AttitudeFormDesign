@@ -114,9 +114,7 @@ namespace AttSimCPP
         /// </summary>
         /// <param name="path"></param>
         [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void ExternalData(string path, double[] wBiasA, double sigu, double sigv);
-        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void ExternalDataStruct(string path, AttParm mAtt);
+        public static extern void ExternalData(string path, AttParm mAtt);
 
         //以下函数暂时不用
         /// <summary>

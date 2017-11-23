@@ -597,7 +597,7 @@ namespace AttSimCPP
                 MessageBox.Show("请设置真实数据路径（包含ATT.txt文件）", "警告", MessageBoxButtons.OK);
                 return;
             }
-            DLLImport.ExternalDataStruct(path,mAtt);
+            DLLImport.ExternalData(path,mAtt);
         }
         
     }
