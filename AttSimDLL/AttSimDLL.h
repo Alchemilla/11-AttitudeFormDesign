@@ -52,7 +52,10 @@ public:
 	void compareTrueEKF15State(string pathekf, string pathb, Quat *qTrue, Quat *qEst, double *dqOut, double *xest_store);
 	void ExtendedKalmanFilter15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
 	void EKFForwardAndBackforward15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
-
+	void EKF6StateForStarOpticAxis(attGFDM attMeas);
+	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
+	void simAttparam(Quat *qTrue, attGFDM attMeas);
+	void preAttparam(attGFDM attMeas,Quat q0, vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas);
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量
 	AttParm attDat;

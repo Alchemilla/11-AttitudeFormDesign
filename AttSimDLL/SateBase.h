@@ -6,6 +6,7 @@
 #include <iostream>
 using namespace Eigen;
 using namespace std;
+typedef Matrix<double, Dynamic, Dynamic, RowMajor>rMatrixXd;
 
 struct AttParm
 {
@@ -58,5 +59,18 @@ struct Quat
 		this->q1 = q.q1; this->q2 = q.q2; this->q3 = q.q3; this->q4 = q.q4;
 		return *this;
 	}
+};
+
+//星点控制点转换为 惯性矢量和本体矢量
+struct BmImStar
+{
+	double UT;
+	double Im[3], Bm[3];
+};
+
+struct attGFDM
+{
+	vector<Quat> qA, qB, qC;//三颗星敏
+	vector<Gyro> gy1,gy2,gy3;//两组三浮陀螺，一组光纤陀螺
 };
 #endif
