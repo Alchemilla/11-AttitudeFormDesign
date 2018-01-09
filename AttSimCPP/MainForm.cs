@@ -362,6 +362,7 @@ namespace AttSimCPP
             simAtt1.Text = "残差对比";
             simAtt1.Show();
         }
+
         /// <summary>
         /// 功能：显示陀螺漂移
         /// </summary>
@@ -372,6 +373,8 @@ namespace AttSimCPP
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Show();
         }
+
+
         /// <summary>
         /// 功能：双向EKF滤波残差
         /// </summary>
@@ -599,6 +602,56 @@ namespace AttSimCPP
             }
             DLLImport.ExternalData(path,mAtt);
         }
-        
+
+        /// <summary>
+        /// 真实数据路径
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button12_Click(object sender, EventArgs e)
+        {
+            ShowInfo("选择姿轨行时文件路径");
+            OpenFileDialog openDlg = new OpenFileDialog();
+            if (openDlg.ShowDialog() == DialogResult.OK)
+            {
+                string localFilePath = openDlg.FileName.ToString(); //获得文件路径 
+                path = localFilePath.Substring(0, localFilePath.LastIndexOf("\\")); ;
+                ShowInfo("成功找到路径：" + path);
+            }
+            else
+                ShowInfo("失败：未设置路径");
+        }
+        /// <summary>
+        /// 真实数据开始仿真
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button13_Click(object sender, EventArgs e)
+        {
+            //星敏参数
+            mAtt.sig_ST = double.Parse(textBox4.Text);//星敏误差(单位：角秒) 
+
+            //陀螺漂移
+            string[] strW = textBox5.Text.Split(',');
+            double[] wBias = new double[3];
+            for (int i = 0; i < 3; i++)
+                wBias[i] = double.Parse(strW[i]);
+            mAtt.wBiasA = wBias;
+
+            //漂移噪声
+            mAtt.sigu = double.Parse(textBox6.Text) * 1e-9;
+
+            //陀螺噪声
+            mAtt.sigv = double.Parse(textBox7.Text) * 1e-5;
+
+            if (!File.Exists(path + "\\ManeuverData_All.txt"))
+            {
+                ShowInfo("没有ManeuverData_All.txt文件");
+                MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
+                return;
+            }
+            DLLImport.attitudeSimAndDeter(path,mAtt);
+        }
+
     }
 }

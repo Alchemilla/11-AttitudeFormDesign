@@ -2136,20 +2136,18 @@ void attSim::readAttparam(string pushbroomDat)
 				&eulerTmp.W[2], &eulerTmp.vW[0], &eulerTmp.vW[1], &eulerTmp.vW[2],tmp);
 		euler.push_back(eulerTmp);
 	}
-
 	//读取轨道数据
 	string datPos = pushbroomDat + "\\GuiDao.txt";
 	FILE *fp2 = fopen(datPos.c_str(), "r");
 	if (!fp2) { printf("文件不存在！\n"); exit(0); }
-	for (int a = 0; a < 6; a++)
-		fscanf(fp2, "%[^\n]\n", tmp);
-	while (!feof(fp2))
+	fscanf(fp2, "%[^\n]\n%[^\n]\n%[^\n]\n%[^\n]\n%[^\n]\n%[^\n]\n", tmp);
+
+	while (!feof(fp1))
 	{
-		fscanf(fp2, "%*lf\t%*lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf%[^\n]\n", &eulerTmp.UT, &eulerTmp.W[0], &eulerTmp.W[1],
+		fscanf(fp1, "%*lf\t%*lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf%[^\n]\n", &eulerTmp.UT, &eulerTmp.W[0], &eulerTmp.W[1],
 			&eulerTmp.W[2], &eulerTmp.vW[0], &eulerTmp.vW[1], &eulerTmp.vW[2], tmp);
 		euler.push_back(eulerTmp);
 	}
-
 	//转换为四元数
 }
 

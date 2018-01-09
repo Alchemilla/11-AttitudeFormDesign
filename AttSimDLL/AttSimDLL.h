@@ -39,6 +39,8 @@ ATTSIMDLL void attitudeDeterminationStruct(AttParm mAtt,
 ATTSIMDLL void attitudeDeterActivePushbroomStruct(AttParm mAtt,
 	double BeforeAfterT[2], char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
+//读取外部数据（包括主动推扫）然后仿真姿态
+ATTSIMDLL void attitudeSimAndDeter(char * workpath, AttParm mAtt);
 
 class attSim
 {
@@ -52,9 +54,11 @@ public:
 	void compareTrueEKF15State(string pathekf, string pathb, Quat *qTrue, Quat *qEst, double *dqOut, double *xest_store);
 	void ExtendedKalmanFilter15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
 	void EKFForwardAndBackforward15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
+	//以下为主动推扫相关函数
 	void EKF6StateForStarOpticAxis(attGFDM attMeas);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
 	void simAttparam(Quat *qTrue, attGFDM attMeas);
+	void readAttparam(string pushbroomDat);
 	void preAttparam(attGFDM attMeas,Quat &q0, vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas);
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量

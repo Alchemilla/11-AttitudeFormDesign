@@ -68,9 +68,16 @@ struct BmImStar
 	double Im[3], Bm[3];
 };
 
+//高分多模星敏陀螺参数
 struct attGFDM
 {
 	vector<Quat> qA, qB, qC;//三颗星敏
 	vector<Gyro> gy1,gy2,gy3;//两组三浮陀螺，一组光纤陀螺
+};
+//高分多模姿态欧拉角参数
+struct eulerGFDM
+{
+	double UT;
+	double W[3], vW[3];
 };
 #endif
