@@ -1151,6 +1151,33 @@ attSim::~attSim()
 {
 }
 
+double attSim::starAali[]=//Crb
+{
+	cos(108.72 / 180 * PI),cos(22.5 / 180 * PI),cos(77.97 / 180 * PI),
+	cos(57 / 180 * PI),cos(90 / 180 * PI),cos(33 / 180 * PI),
+	cos(39.2103 / 180 * PI),cos(67.5 / 180 * PI),cos(120.211 / 180 * PI)
+};
+double attSim::starBali[] =//Crb
+{
+	cos(54.8062 / 180 * PI),cos(89.4236 / 180 * PI),cos(144.8 / 180 * PI),
+	cos(108.364 / 180 * PI),cos(156.91 / 180 * PI),cos(103.505 / 180 * PI),
+	cos(138.941 / 180 * PI),cos(66.9184 / 180 * PI),cos(121.803 / 180 * PI)
+};
+double attSim::starCali[] =//Crb
+{
+	cos(122 / 180 * PI),cos(90 / 180 * PI),cos(148 / 180 * PI),
+	cos(67.7656 / 180 * PI),cos(26.5 / 180 * PI),cos(103.677 / 180 * PI),
+	cos(40.6285 / 180 * PI),cos(116.5 / 180 * PI),cos(118.31 / 180 * PI)
+};
+double attSim::G11[] = { -cos(35.2644 / 180 * PI)*cos(40 / 180 * PI), cos(35.2644 / 180 * PI)*cos(50 / 180 * PI) ,cos(54.7356 / 180 * PI)};
+double attSim::G12[] = { -cos(35.2644 / 180 * PI)*cos(80 / 180 * PI), -cos(35.2644 / 180 * PI)*cos(10 / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G13[] = { cos(35.2644 / 180 * PI)*cos(20 / 180 * PI), cos(35.2644 / 180 * PI)*cos(70 / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G21[] = { cos(35.2644 / 180 * PI)*cos(60 / 180 * PI), cos(35.2644 / 180 * PI)*cos(30 / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G22[] = { -cos(35.2644 / 180 * PI),0 ,cos(54.7356 / 180 * PI) };
+double attSim::G23[] = { cos(35.2644 / 180 * PI)*cos(60 / 180 * PI), -cos(35.2644 / 180 * PI)*cos(30 / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G31[] = { -cos(35.2644 / 180 * PI)*cos(20 / 180 * PI), cos(35.2644 / 180 * PI)*cos(70 / 180 * PI) ,-cos(54.7356 / 180 * PI) };
+double attSim::G32[] = { cos(35.2644 / 180 * PI)*cos(40 / 180 * PI), cos(35.2644 / 180 * PI)*cos(50 / 180 * PI) ,-cos(54.7356 / 180 * PI) };
+double attSim::G33[] = { cos(35.2644 / 180 * PI)*cos(80 / 180 * PI), -cos(35.2644 / 180 * PI)*cos(10 / 180 * PI) ,-cos(54.7356 / 180 * PI) };
 BaseFunc mBase;
 //////////////////////////////////////////////////////////////////////////
 //功能：获取姿态仿真参数
@@ -1898,6 +1925,7 @@ void attSim::EKFForwardAndBackforward15State(Quat *qMeas, Gyro *wMeas, Quat *&qu
 void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 {
 	vector<vector<BmImStar>>BmIm; vector<Gyro>wMeas; Quat q0;
+	//根据姿态数据得到初始四元数、光轴矢量、陀螺测量值；
 	preAttparam(attMeas, q0, BmIm, wMeas);
 	//删掉四元数之前的陀螺数据
 	int ii = 0;
@@ -2084,15 +2112,15 @@ void attSim::simAttparam(Quat *qTrue, attGFDM attMeas)
 
 }
 
-//////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 //功能：
 //输入：
 //输出：
 //注意：
 //作者：GZC
-//日期：2018.01.08
+//日期：2018.01.09
 //////////////////////////////////////////////////////////////////////////
-void attSim::preAttparam(attGFDM attMeas, Quat q0, vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas)
+void attSim::preAttparam(attGFDM attMeas, Quat &q0, vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas)
 {
 
 }

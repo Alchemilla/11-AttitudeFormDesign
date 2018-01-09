@@ -55,9 +55,11 @@ public:
 	void EKF6StateForStarOpticAxis(attGFDM attMeas);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
 	void simAttparam(Quat *qTrue, attGFDM attMeas);
-	void preAttparam(attGFDM attMeas,Quat q0, vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas);
+	void preAttparam(attGFDM attMeas,Quat &q0, vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas);
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量
 	AttParm attDat;
 	string path;
+	static double starAali[9], starBali[9], starCali[9];//星敏安装
+	static double G11[3], G12[3], G13[3], G21[3], G22[3], G23[3], G31[3], G32[3], G33[3];//陀螺安装
 };
