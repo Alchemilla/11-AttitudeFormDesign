@@ -80,4 +80,19 @@ struct eulerGFDM
 	double UT;
 	double W[3], vW[3];
 };
+//轨道离散点信息
+struct orbGFDM
+{
+	double X[6];					// 直角坐标：坐标X,Y,Z,Vx,Vy,Vz
+	double UT;						// 时间系统：累计秒
+	int year, month, day, hour, minute; // 时间系统：历书时
+	double second;                  // 时间系统：历书时
+									// 重载构造函数
+	orbGFDM()
+	{
+		memset(X, 0, sizeof(double) * 6);
+		UT = second = 0.0;
+		year = month = day = hour = minute = 0;
+	}
+};
 #endif

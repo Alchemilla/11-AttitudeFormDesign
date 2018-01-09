@@ -471,6 +471,57 @@ void BaseFunc::QuatInterpolation(Quat *Att, int AttNum, double *UT, int interNum
 //	}
 //}
 
+void BaseFunc::LagrangianInterpolationVector(vector<orbGFDM> Eph, double UT, orbGFDM * m_point, byte order)
+{
+	long EphNum = Eph.size();
+	orbGFDM *pEph = new orbGFDM[EphNum];
+	for (int a=0;a<EphNum;a++)
+	{
+		pEph[a] = Eph[a];
+	}
+	LagrangianInterpolation(pEph, EphNum, UT, m_point, order);
+	delete []pEph; pEph = NULL;
+}
+
+void BaseFunc::LagrangianInterpolation(orbGFDM *Eph, long EphNum, double UT, orbGFDM *m_point, byte order)
+{
+	memset(m_point, 0, sizeof(orbGFDM));
+	m_point->UT = UT;
+	// 搜索内插用的起始和结束点(对分查找)
+	double up = 1, down = 1;
+	long posstart, posend, pos;
+	posstart = 0, posend = EphNum - 1, pos = 0;
+	while (posstart < posend)
+	{
+		pos = (posstart + posend) / 2;
+		if (pos == posstart) break;	// 记得加上这句判断,否则会陷入死循环
+		if ((Eph[pos].UT <= UT) && (UT < Eph[pos + 1].UT))
+			break;
+		if (Eph[pos].UT <= UT)
+			posstart = pos;
+		else
+			posend = pos;
+	}
+	if (pos - order / 2 < 0)			posstart = 0;
+	else						posstart = pos - order / 2;
+	if (pos + order / 2 >= EphNum - 1)	posend = EphNum - 1;
+	else						posend = pos + order / 2;
+	int i, j;
+	// 开始进行内插
+	for (j = posstart; j <= posend; j++)
+	{
+		up = 1, down = 1;
+		for (i = posstart; i <= posend; i++)
+			if (i != j) { up *= (UT - Eph[i].UT);	down *= (Eph[j].UT - Eph[i].UT); }
+		m_point->X[0] += Eph[j].X[0]*up / down;
+		m_point->X[1] += Eph[j].X[1] *up / down;
+		m_point->X[2] += Eph[j].X[2] *up / down;
+		m_point->X[3] += Eph[j].X[3] *up / down;
+		m_point->X[4] += Eph[j].X[4] *up / down;
+		m_point->X[5] += Eph[j].X[5] *up / down;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 //功能：产生一个符合正态分布的随机数
 //输入：mean:均值，sigma:方差
@@ -588,3 +639,254 @@ double BaseFunc::AverageRand(int min, int max, int num, double * randnum)
 	return 0.0;
 }
 
+////////////////////////////////////////////////////////
+// 旋转矩阵与欧拉角的相互变换
+////////////////////////////////////////////////////////
+//////////////////////////////////////
+// 功能：从旋转矩阵获得欧拉角
+// 输入:
+//		double *R：		旋转矩阵3*3，行优先	
+//		int ratateOrder:欧拉角转序
+// 输出：
+//		double &eulor1:	欧拉角1
+//		double &eulor2:	欧拉角2
+//		double &eulor3:	欧拉角3
+// 返回值：
+//		void
+///////////////////////////////////////
+void BaseFunc::Matrix2Eulor(double *R, int rotateOrder, double &eulor1, double &eulor2, double &eulor3)
+{
+	switch (rotateOrder)
+	{
+		// 第一类:第一次和第三次转动是绕同类坐标轴进行的,第二次转动是绕另两轴中的一类进行的
+	case 121:  // 1
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		eulor2 = acos(R[0]);					double temp = sin(eulor2);
+		eulor1 = atan2(R[1] * temp, -R[2] * temp);	eulor3 = atan2(R[3] * temp, R[6] * temp);	break;
+	}
+	case 131:	// 2
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		eulor2 = acos(R[0]);					double temp = sin(eulor2);
+		eulor1 = atan2(R[2] * temp, R[1] * temp);	eulor3 = atan2(R[6] * temp, -R[3] * temp);	break;
+	}
+	case 212:	// 3
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		eulor2 = acos(R[4]);					double temp = sin(eulor2);
+		eulor1 = atan2(R[3] * temp, R[5] * temp);	eulor3 = atan2(R[1] * temp, -R[7] * temp);	break;
+	}
+	case 232:	// 4
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		eulor2 = acos(R[4]);					double temp = sin(eulor2);
+		eulor1 = atan2(R[5] * temp, -R[3] * temp);	eulor3 = atan2(R[7] * temp, R[1] * temp);	break;
+	}
+	case 313:	// 5
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		eulor2 = acos(R[8]);					double temp = sin(eulor2);
+		eulor1 = atan2(R[6] * temp, -R[7] * temp);	eulor3 = atan2(R[2] * temp, R[5] * temp);	break;
+	}
+	case 323:	// 6
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		eulor2 = acos(R[8]);					double temp = sin(eulor2);
+		eulor1 = atan2(R[7] * temp, R[6] * temp);	eulor3 = atan2(R[5] * temp, -R[2] * temp);	break;
+	}
+	// 第二类:每次转动是绕不同类别的坐标轴进行的
+	case 123:	// 7
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		eulor2 = asin(R[6]);					double temp = cos(eulor2);
+		eulor1 = atan2(-R[7] * temp, R[8] * temp);	eulor3 = atan2(-R[3] * temp, R[0] * temp);	break;
+	}
+	case 132:	// 8
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		eulor2 = asin(-R[3]);					double temp = cos(eulor2);
+		eulor1 = atan2(R[5] * temp, R[4] * temp);	eulor3 = atan2(R[6] * temp, R[0] * temp);	break;
+	}
+	case 213:	// 9
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		eulor2 = asin(-R[7]);					double temp = cos(eulor2);
+		eulor1 = atan2(R[6] * temp, R[8] * temp);	eulor3 = atan2(R[1] * temp, R[4] * temp);	break;
+	}
+	case 231:	// 10
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		eulor2 = asin(R[1]);					double temp = cos(eulor2);
+		eulor1 = atan2(-R[2] * temp, R[0] * temp);	eulor3 = atan2(-R[7] * temp, R[4] * temp);	break;
+	}
+	case 312:	// 11
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		eulor2 = asin(R[5]);					double temp = cos(eulor2);
+		eulor1 = atan2(-R[3] * temp, R[4] * temp);	eulor3 = atan2(-R[2] * temp, R[8] * temp);	break;
+	}
+	case 321:	// 12
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		eulor2 = asin(-R[2]);					double temp = cos(eulor2);
+		eulor1 = atan2(R[1] * temp, R[0] * temp);	eulor3 = atan2(R[5] * temp, R[8] * temp);	break;
+	}
+	}
+}
+
+
+//////////////////////////////////////
+// 功能：从欧拉角获得旋转矩阵
+// 输入:
+//		double &eulor1:	欧拉角1
+//		double &eulor2:	欧拉角2
+//		double &eulor3:	欧拉角3
+// 输出：
+//		double *R：		旋转矩阵3*3，行优先	
+//		int ratateOrder:欧拉角转序	
+// 返回值：
+//		void
+///////////////////////////////////////
+void BaseFunc::Eulor2Matrix(double eulor1, double eulor2, double eulor3, int rotateOrder, double *R)
+{
+	double R1[9], R2[9], R3[9], Rtemp[9];
+	switch (rotateOrder)
+	{
+		// 第一类:第一次和第三次转动是绕同类坐标轴进行的,第二次转动是绕另两轴中的一类进行的
+	case 121:	// 1
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		RotationX(eulor1, R1);	RotationY(eulor2, R2);	RotationX(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	case 131:	// 2
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		RotationX(eulor1, R1);	RotationZ(eulor2, R2);	RotationX(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	case 212:	// 3
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		RotationY(eulor1, R1);	RotationX(eulor2, R2);	RotationY(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	case 232:	// 4
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		RotationY(eulor1, R1);	RotationZ(eulor2, R2);	RotationY(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	case 313:	// 5
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		RotationZ(eulor1, R1);	RotationX(eulor2, R2);	RotationZ(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	case 323:	// 6
+	{	// eulor1值域-pi到pi，eulor2值域0到pi，eulor3值域-pi到pi
+		RotationZ(eulor1, R1);	RotationY(eulor2, R2);	RotationZ(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	// 第二类:每次转动是绕不同类别的坐标轴进行的
+	case 123:	// 7
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		RotationX(eulor1, R1);	RotationY(eulor2, R2);	RotationZ(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	case 132:	// 8
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		RotationX(eulor1, R1);	RotationZ(eulor2, R2);	RotationY(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	case 213:	// 9
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		RotationY(eulor1, R1);	RotationX(eulor2, R2);	RotationZ(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	case 231:	// 10
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		RotationY(eulor1, R1);	RotationZ(eulor2, R2);	RotationX(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	case 312:	// 11
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		RotationZ(eulor1, R1);	RotationX(eulor2, R2);	RotationY(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	case 321:	// 12
+	{	// eulor1值域-pi到pi，eulor2值域-pi/2到pi/2，eulor3值域-pi到pi
+		RotationZ(eulor1, R1);	RotationY(eulor2, R2);	RotationX(eulor3, R3);
+		Multi(R2, R1, Rtemp, 3, 3, 3);	Multi(R3, Rtemp, R, 3, 3, 3);	break;
+	}
+	default:
+	{
+		printf("Eulor2Matrix Error!\n");	break;	// 没有此种转序存在!
+	}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// 绕轴的旋转
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////
+// 功能：绕X轴转角angle的旋转矩阵
+// [ 1          0         0     ]
+// [ 0    cos(angle)  sin(angle)]
+// [ 0   -sin(angle)  cos(angle)]
+// 输入:
+//		double angle:	转过的角(弧度)
+// 输出：
+//		double *R：		旋转矩阵3*3，行优先	
+// 返回值：
+//		void
+//////////////////////////////////////
+void BaseFunc::RotationX(double angle, double *R)
+{
+	memset(R, 0, sizeof(double) * 9);
+	R[0] = 1.0;
+	R[8] = R[4] = cos(angle);
+	R[5] = sin(angle);
+	R[7] = -R[5];
+}
+
+
+//////////////////////////////////////
+// 功能：绕Y轴转角angle的旋转矩阵
+// [cos(angle)  0    -sin(angle)]
+// [     0      1         0     ]
+// [sin(angle)  0     cos(angle)]
+// 输入:
+//		double angle:	转过的角(弧度)
+// 输出：
+//		double *R：		旋转矩阵3*3，行优先	
+// 返回值：
+//		void
+//////////////////////////////////////
+void BaseFunc::RotationY(double angle, double *R)
+{
+	memset(R, 0, sizeof(double) * 9);
+	R[8] = R[0] = cos(angle);
+	R[4] = 1.0;
+	R[2] = -sin(angle);
+	R[6] = -R[2];
+}
+
+
+//////////////////////////////////////
+// 功能：绕Z轴转角angle的旋转矩阵
+// [ cos(angle)  sin(angle)  0]
+// [-sin(angle)  cos(angle)  0]
+// [     0            0      1]
+// 输入:
+//		double angle:	转过的角(弧度)
+// 输出：
+//		double *R：		旋转矩阵3*3，行优先	
+// 返回值：
+//		void
+//////////////////////////////////////
+void BaseFunc::RotationZ(double angle, double *R)
+{
+	memset(R, 0, sizeof(double) * 9);
+	R[4] = R[0] = cos(angle);
+	R[8] = 1.0;
+	R[1] = sin(angle);
+	R[3] = -R[1];
+}
+
+void BaseFunc::rot(double phi, double omg, double kap, double * R)
+{
+	memset(R, 0, 9 * sizeof(double));
+	double RX[9], RY[9], RZ[9], Tmp[9];
+	RotationX(-omg, RX);
+	RotationY(-phi, RY);
+	RotationZ(-kap, RZ);
+
+	Multi(RY, RX, Tmp, 3, 3, 3);
+	Multi(Tmp, RZ, R, 3, 3, 3);
+
+}

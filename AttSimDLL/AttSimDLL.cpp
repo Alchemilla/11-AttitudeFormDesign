@@ -2141,16 +2141,41 @@ void attSim::readAttparam(string pushbroomDat)
 	string datPos = pushbroomDat + "\\GuiDao.txt";
 	FILE *fp2 = fopen(datPos.c_str(), "r");
 	if (!fp2) { printf("文件不存在！\n"); exit(0); }
-	for (int a = 0; a < 6; a++)
+	for (int a = 0; a < 4; a++)
 		fscanf(fp2, "%[^\n]\n", tmp);
+	orbGFDM orbTmp;
+	vector<orbGFDM>orbJ2000;	
 	while (!feof(fp2))
 	{
-		fscanf(fp2, "%*lf\t%*lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf%[^\n]\n", &eulerTmp.UT, &eulerTmp.W[0], &eulerTmp.W[1],
-			&eulerTmp.W[2], &eulerTmp.vW[0], &eulerTmp.vW[1], &eulerTmp.vW[2], tmp);
-		euler.push_back(eulerTmp);
+		fscanf(fp2, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf%[^\n]\n", &orbTmp.UT,&orbTmp.X[0], &orbTmp.X[1], 
+			&orbTmp.X[2], &orbTmp.X[3], &orbTmp.X[4], &orbTmp.X[5], tmp);
+		orbJ2000.push_back(orbTmp);
 	}
 
-	//转换为四元数
+	//根据J2000轨道构建 J2000到轨道转换矩阵，然后根据轨道到本体的欧拉角，得到J2000到本体的旋转矩阵
+	vector<Quat>mQ; Quat mQtmp;
+	for (int a=0;a<euler.size();a++)
+	{
+		mBase.LagrangianInterpolationVector(orbJ2000, euler[a].UT, &orbTmp,9);
+		double X[3], Y[3], Z[3],rJ20002Orbit[9], rOrbit2Body[9], rJ20002Body[9];
+		X[0] = orbTmp.X[3];    X[1] = orbTmp.X[4];   X[2] = orbTmp.X[5];
+		Z[0] = -orbTmp.X[0];    Z[1] = -orbTmp.X[1];   Z[2] = -orbTmp.X[2];
+		mBase.crossmultnorm(Z, X, Y);
+		mBase.crossmultnorm(Y, Z, X);
+		// 归一化
+		mBase.NormVector(X, 3);
+		mBase.NormVector(Y, 3);
+		mBase.NormVector(Z, 3);
+		// 构建旋转矩阵
+		rJ20002Orbit[0] = X[0];     rJ20002Orbit[1] = X[1];     rJ20002Orbit[2] = X[2];
+		rJ20002Orbit[3] = Y[0];     rJ20002Orbit[4] = Y[1];     rJ20002Orbit[5] = Y[2];
+		rJ20002Orbit[6] = Z[0];     rJ20002Orbit[7] = Z[1];     rJ20002Orbit[8] = Z[2];
+		mBase.Eulor2Matrix(euler[a].W[0], euler[a].W[0], euler[a].W[0], 213, rOrbit2Body);
+		mBase.Multi(rOrbit2Body, rJ20002Orbit, rJ20002Body, 3, 3, 3);
+		mBase.matrix2quat(rJ20002Body, mQtmp.q1, mQtmp.q2, mQtmp.q3, mQtmp.q4);
+		mQ.push_back(mQtmp);
+	}
+	
 }
 
 /////////////////////////////////////////////////////////////////////////

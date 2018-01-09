@@ -47,9 +47,34 @@ public:
 	//四元数内插，四元数顺序为0123，其中0为标量
 	void QuatInterpolation(Quat *Att, int AttNum, double *UTC, int interNum, Quat *&m_att);
 	//void QuatInter(vector<Quat>Att, double *UTC, int interNum, Quat *&m_att);
+	//轨道内插
+	void LagrangianInterpolationVector(vector<orbGFDM>Eph,  double UT, orbGFDM *m_point, byte order);
+	void LagrangianInterpolation(orbGFDM *Eph, long EphNum, double UT, orbGFDM *m_point, byte order);
 	//产生随机数(分别产生一个随机数，一组随机数)
 	double GaussRand(double mean, double sigma, int &phase);
 	double RandomDistribution(double mean, double sigma, int n, long randCount, double *a);
 	double AverageRand(int min, int max, int num, double *randnum);
+
+public:
+	//////////////////////////////////////////////////////////////////////////
+	// 旋转矩阵与欧拉角的相互变换
+	//////////////////////////////////////////////////////////////////////////
+	// 从旋转矩阵获得欧拉角
+	void Matrix2Eulor(double *R, int rotateOrder, double &eulor1, double &eulor2, double &eulor3);
+	// 从欧拉角获得旋转矩阵
+	void Eulor2Matrix(double eulor1, double eulor2, double eulor3, int rotateOrder, double *R);
+
+public:
+	//////////////////////////////////////////////////////////////////////////
+	// 绕轴的旋转
+	//////////////////////////////////////////////////////////////////////////
+	// 绕X轴转角angle的旋转矩阵
+	void RotationX(double angle, double *R);
+	// 绕Y轴转角angle的旋转矩阵
+	void RotationY(double angle, double *R);
+	// 绕Z轴转角angle的旋转矩阵
+	void RotationZ(double angle, double *R);
+	//旋转
+	void rot(double phi, double omg, double kap, double *R);
 };
 
