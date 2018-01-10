@@ -62,8 +62,10 @@ public:
 	void preAttparam(attGFDM attMeas,Quat &q0, vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas);
 	void predictQuat(Gyro wMeas, Quat &Qk, double dt);
 	void calcuOmega(Quat qL, Quat qR, Gyro &wTrue);
+	//转换数据
+	void transCrj2StarGyro(isStarGyro starGyro, vector<Quat>qTrueInter1,vector<Gyro>wTrue,attGFDM &attMeas);
 	//各种输出函数
-	void outputTrueQuatGyro(attGFDM attMeas);
+	void outputTrueQuatGyro(attGFDM attMeas, string out1, string out2);
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量
 	AttParm attDat;
