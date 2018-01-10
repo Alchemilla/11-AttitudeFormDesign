@@ -38,13 +38,7 @@ namespace AttSimCPP
     public struct isStarGyro
     {
         public bool isA, isB, isC;
-        public bool isG11, isG12, isG13;
-        public bool isG21, isG22, isG23;
-        public bool isG31, isG32, isG33;
-        //isStarGyro()
-        //{
-        //    isA = isB = isC = isG11 = isG12 = isG13 = isG21 = isG22 = isG23 = isG31 = isG32 = isG33 = false;
-        //}
+        public bool isG11, isG12, isG13, isG21, isG22, isG23, isG31, isG32, isG33;
     };
     public class DLLImport
     {     

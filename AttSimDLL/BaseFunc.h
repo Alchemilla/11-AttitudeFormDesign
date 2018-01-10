@@ -46,6 +46,7 @@ public:
 	void matrix2quat(double *R, double &q1, double &q2, double &q3, double &q4);
 	//四元数内插，四元数顺序为0123，其中0为标量
 	void QuatInterpolation(Quat *Att, int AttNum, double *UTC, int interNum, Quat *&m_att);
+	void QuatInterpolationVector(vector<Quat>Att, vector<double>UT, vector<Quat>&AttInter);
 	//void QuatInter(vector<Quat>Att, double *UTC, int interNum, Quat *&m_att);
 	//轨道内插
 	void LagrangianInterpolationVector(vector<orbGFDM>Eph,  double UT, orbGFDM *m_point, byte order);

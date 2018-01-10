@@ -413,63 +413,22 @@ void BaseFunc::QuatInterpolation(Quat *Att, int AttNum, double *UT, int interNum
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//功能：四元数内插
-//输入：Att：原始四元数；UTC：内插时间点；interNum：时间个数
-//输出：m_att：内插后四元数
-//注意：四元数时间范围要大于陀螺时间UTC范围
-//作者：GZC
-//日期：2017.03.23
-//////////////////////////////////////////////////////////////////////////
-//void BaseFunc::QuatInter(vector<Quat>Att, double *UTC, int interNum, Quat *&m_att)
-//{
-//	int AttNum = Att.size();
-//	if (AttNum<2) { printf("QuatInterpolation Error：AttNum is less than 2, can't interpolation!\n");	return; }
-//	// 寻找临近的两个点(对分查找)
-//	Quat attleft, attright, att;
-//	long posstart, posend, pos;
-//	for (int i = 0; i<interNum; i++)
-//	{
-//		posstart = 0, posend = AttNum - 1, pos = 0;
-//		while (posstart<posend)
-//		{
-//			pos = (posstart + posend) / 2;
-//			if (pos == posstart) break;	// 记得加上这句判断,否则会陷入死循环
-//			if ((Att[pos].UTC <= UTC[i]) && (Att[pos + 1].UTC>UTC[i]))
-//				break;
-//			if (Att[pos].UTC <= UTC[i])
-//				posstart = pos;
-//			else
-//				posend = pos;
-//		}
-//		if (pos < 0)	pos = 0;
-//		if (pos >= AttNum - 1)		pos = AttNum - 2;
-//		attleft = Att[pos];		attright = Att[pos + 1];
-//
-//		// 进行内插
-//		double sp, sq;
-//		double t = (UTC[i] - attleft.UTC) / (attright.UTC - attleft.UTC);
-//		double cosa = attleft.q4*attright.q4 + attleft.Q1*attright.Q1 + attleft.Q2*attright.Q2 + attleft.Q3*attright.Q3;
-//		// 这个错误需要注意了,防止邻近两个值互为反号的情况,需要确保length>0
-//		if (cosa<0)
-//		{
-//			cosa = -cosa;
-//			attright.q4 = -attright.q4;	attright.Q1 = -attright.Q1;	attright.Q2 = -attright.Q2;	attright.Q3 = -attright.Q3;
-//		}
-//		if (cosa>0.9999f)
-//		{
-//			sp = 1.0 - t;	sq = t;
-//		}
-//		else
-//		{
-//			double sina = sqrt(1.0 - pow(cosa, 2));	double a = atan2(sina, cosa);	double invSina = 1.0 / sina;
-//			sp = sin((1.0 - t)*a)*invSina;			sq = sin(t*a)*invSina;
-//		}
-//		m_att[i].q4 = sp*attleft.q4 + sq*attright.q4;	m_att[i].Q1 = sp*attleft.Q1 + sq*attright.Q1;
-//		m_att[i].Q2 = sp*attleft.Q2 + sq*attright.Q2;	m_att[i].Q3 = sp*attleft.Q3 + sq*attright.Q3;
-//		m_att[i].UTC = UTC[i];
-//	}
-//}
+void BaseFunc::QuatInterpolationVector(vector<Quat>Att, vector<double>UT, vector<Quat>&AttInter)
+{
+	int AttNum = Att.size();
+	Quat *Att1 = new Quat[AttNum];
+	for (int a=0;a<AttNum;a++)
+	{		Att1[a] = Att[a];	}
+	int interNum = UT.size();
+	double *UT1 = new double[interNum];
+	for (int a=0;a<interNum;a++)
+	{		UT1[a] = UT[a];	}
+	Quat *m_att = new Quat[interNum];
+	QuatInterpolation(Att1, AttNum, UT1, interNum, m_att);
+	for (int a = 0; a < interNum; a++)
+	{		AttInter.push_back(m_att[a]);	}
+}
+
 
 void BaseFunc::LagrangianInterpolationVector(vector<orbGFDM> Eph, double UT, orbGFDM * m_point, byte order)
 {

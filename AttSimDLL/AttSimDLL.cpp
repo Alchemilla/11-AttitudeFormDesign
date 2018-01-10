@@ -1151,10 +1151,10 @@ attSim::~attSim()
 {
 }
 
-double attSim::starAali[]=//Crb
+double attSim::starAali[] =//Crb
 {
 	cos(108.72 / 180 * PI),cos(22.5 / 180 * PI),cos(77.97 / 180 * PI),
-	cos(57 / 180 * PI),cos(90 / 180 * PI),cos(33 / 180 * PI),
+	cos(57. / 180 * PI),cos(90. / 180 * PI),cos(33. / 180 * PI),
 	cos(39.2103 / 180 * PI),cos(67.5 / 180 * PI),cos(120.211 / 180 * PI)
 };
 double attSim::starBali[] =//Crb
@@ -1165,19 +1165,19 @@ double attSim::starBali[] =//Crb
 };
 double attSim::starCali[] =//Crb
 {
-	cos(122 / 180 * PI),cos(90 / 180 * PI),cos(148 / 180 * PI),
+	cos(122. / 180 * PI),cos(90. / 180 * PI),cos(148. / 180 * PI),
 	cos(67.7656 / 180 * PI),cos(26.5 / 180 * PI),cos(103.677 / 180 * PI),
 	cos(40.6285 / 180 * PI),cos(116.5 / 180 * PI),cos(118.31 / 180 * PI)
 };
-double attSim::G11[] = { -cos(35.2644 / 180 * PI)*cos(40 / 180 * PI), cos(35.2644 / 180 * PI)*cos(50 / 180 * PI) ,cos(54.7356 / 180 * PI)};
-double attSim::G12[] = { -cos(35.2644 / 180 * PI)*cos(80 / 180 * PI), -cos(35.2644 / 180 * PI)*cos(10 / 180 * PI) ,cos(54.7356 / 180 * PI) };
-double attSim::G13[] = { cos(35.2644 / 180 * PI)*cos(20 / 180 * PI), cos(35.2644 / 180 * PI)*cos(70 / 180 * PI) ,cos(54.7356 / 180 * PI) };
-double attSim::G21[] = { cos(35.2644 / 180 * PI)*cos(60 / 180 * PI), cos(35.2644 / 180 * PI)*cos(30 / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G11[] = { -cos(35.2644 / 180 * PI)*cos(40. / 180 * PI), cos(35.2644 / 180 * PI)*cos(50. / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G12[] = { -cos(35.2644 / 180 * PI)*cos(80. / 180 * PI), -cos(35.2644 / 180 * PI)*cos(10. / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G13[] = { cos(35.2644 / 180 * PI)*cos(20. / 180 * PI), cos(35.2644 / 180 * PI)*cos(70. / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G21[] = { cos(35.2644 / 180 * PI)*cos(60. / 180 * PI), cos(35.2644 / 180 * PI)*cos(30. / 180 * PI) ,cos(54.7356 / 180 * PI) };
 double attSim::G22[] = { -cos(35.2644 / 180 * PI),0 ,cos(54.7356 / 180 * PI) };
-double attSim::G23[] = { cos(35.2644 / 180 * PI)*cos(60 / 180 * PI), -cos(35.2644 / 180 * PI)*cos(30 / 180 * PI) ,cos(54.7356 / 180 * PI) };
-double attSim::G31[] = { -cos(35.2644 / 180 * PI)*cos(20 / 180 * PI), cos(35.2644 / 180 * PI)*cos(70 / 180 * PI) ,-cos(54.7356 / 180 * PI) };
-double attSim::G32[] = { cos(35.2644 / 180 * PI)*cos(40 / 180 * PI), cos(35.2644 / 180 * PI)*cos(50 / 180 * PI) ,-cos(54.7356 / 180 * PI) };
-double attSim::G33[] = { cos(35.2644 / 180 * PI)*cos(80 / 180 * PI), -cos(35.2644 / 180 * PI)*cos(10 / 180 * PI) ,-cos(54.7356 / 180 * PI) };
+double attSim::G23[] = { cos(35.2644 / 180 * PI)*cos(60. / 180 * PI), -cos(35.2644 / 180 * PI)*cos(30. / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G31[] = { -cos(35.2644 / 180 * PI)*cos(20. / 180 * PI), cos(35.2644 / 180 * PI)*cos(70. / 180 * PI) ,-cos(54.7356 / 180 * PI) };
+double attSim::G32[] = { cos(35.2644 / 180 * PI)*cos(40. / 180 * PI), cos(35.2644 / 180 * PI)*cos(50. / 180 * PI) ,-cos(54.7356 / 180 * PI) };
+double attSim::G33[] = { cos(35.2644 / 180 * PI)*cos(80. / 180 * PI), -cos(35.2644 / 180 * PI)*cos(10. / 180 * PI) ,-cos(54.7356 / 180 * PI) };
 BaseFunc mBase;
 //////////////////////////////////////////////////////////////////////////
 //功能：获取姿态仿真参数
@@ -1187,7 +1187,7 @@ BaseFunc mBase;
 //作者：GZC
 //日期：2017.11.21
 //////////////////////////////////////////////////////////////////////////
-void attSim::getAttParam(AttParm mAtt,string workpath)
+void attSim::getAttParam(AttParm mAtt, string workpath)
 {
 	attDat = mAtt;
 	nQuat = mAtt.nQuat, nGyro = mAtt.nGyro;
@@ -1934,11 +1934,11 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 		ii++;
 	}
 	wMeas.erase(wMeas.begin(), wMeas.begin() + ii);
-	
+
 	double sig = 0.5 * attDat.sig_ST / 3600 * PI / 180;//星敏噪声，角秒转弧度
 	double w, dt, qw1, qw2, qw3, qw4, qmm1, qmm2, qmm3, qe11, qe22, qe33, qe44;
 	Matrix3d zero33, eye33, poa, pog, r, sigu33, sigv33, wa;
-	MatrixXd p(6, 6), Q(6, 6), eye66(6, 6), xe(1, 3),  tempqe(4, 1), om(4, 4),
+	MatrixXd p(6, 6), Q(6, 6), eye66(6, 6), xe(1, 3), tempqe(4, 1), om(4, 4),
 		fmat(6, 6), gmat(6, 6), phi(6, 6), gamma(6, 6);
 	eye33 << 1, 0, 0, 0, 1, 0, 0, 0, 1;
 	zero33 << MatrixXd::Zero(3, 3);
@@ -2084,7 +2084,7 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 //作者：GZC
 //日期：2018.01.08
 //////////////////////////////////////////////////////////////////////////
-void attSim::Measurement(vector<BmImStar> BmIm, double *Att,MatrixXd &mH, MatrixXd &mDetZ)
+void attSim::Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ)
 {
 	int num = BmIm.size();
 	MatrixXd pbe(3, num);
@@ -2102,56 +2102,195 @@ void attSim::Measurement(vector<BmImStar> BmIm, double *Att,MatrixXd &mH, Matrix
 }
 
 //////////////////////////////////////////////////////////////////////////
-//功能：已知真实四元数和角速度，根据参数仿真测量值
-//输入：真实四元数和角速度，姿态误差参数，星敏陀螺标识
+//功能：已知真实四元数Cbj，根据参数仿真测量值
+//输入：真实四元数：qTrue，姿态误差参数：sensorParam，星敏陀螺标识：starGyro
 //输出：指定星敏陀螺的测量输出值
 //注意：只仿真需要的测量值
 //作者：GZC
 //日期：2018.01.10
 //////////////////////////////////////////////////////////////////////////
-void attSim::simAttparam(vector<Quat>qTrue, AttParm sensorParam, isStarGyro starGyro, attGFDM attMeas)
+void attSim::simAttparam(vector<Quat>qTrue, isStarGyro starGyro, attGFDM attMeas)
 {
+	//首先仿真真实星敏和陀螺数据
+	attDat.nQuat = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*attDat.freqQ;
+	attDat.nGyro = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*attDat.freqG;
+	vector<double> utc1(attDat.nQuat); vector<Quat>qTrueInter1, qTrueInter2;
+	vector<double> utc2(attDat.nGyro + 1); vector<Gyro> wTrue(attDat.nGyro);
+	for (int a = 0; a < attDat.nQuat; a++)//仿真nQuat个星敏真实数据
+	{
+		utc1[a] = qTrue[0].UT + 1. / attDat.freqQ*a;
+	}
+	mBase.QuatInterpolationVector(qTrue, utc1, qTrueInter1);//内插得到真实四元数
+	for (int a = 0; a < attDat.nGyro + 1; a++)//仿真nGyro个陀螺真实数据
+	{
+		utc2[a] = qTrue[0].UT + 1. / attDat.freqG*a;
+	}
+	mBase.QuatInterpolationVector(qTrue, utc2, qTrueInter2);//内插得到真实四元数
+	for (int a = 0; a < attDat.nGyro; a++)
+	{
+		calcuOmega(qTrueInter2[a], qTrueInter2[a + 1], wTrue[a]);
+	}
+
+	//根据安装，得到真实的三星敏和3陀螺测量数据
+	double Cbj[9], Crj[9]; Quat qCrj; 
+	double XYZ[3],omega; Gyro gyTmp;
+	for (int a = 0; a < qTrueInter1.size(); a++)
+	{
+		if (starGyro.isA == true)
+		{
+			mBase.quat2matrix(qTrueInter1[a].q1, qTrueInter1[a].q2, qTrueInter1[a].q3, qTrueInter1[a].q4, Cbj);
+			mBase.Multi(starAali, Cbj, Crj, 3, 3, 3);
+			mBase.matrix2quat(Crj, qCrj.q1, qCrj.q2, qCrj.q3, qCrj.q4);
+			qCrj.UT = qTrueInter1[a].UT;
+			attMeas.qA.push_back(qCrj);
+		}
+		else
+		{
+			qCrj.q1 = qCrj.q2 = qCrj.q3 = qCrj.q4 = 0;
+			qCrj.UT = qTrueInter1[a].UT;
+			attMeas.qA.push_back(qCrj);
+		}
+		if (starGyro.isB == true)
+		{
+			mBase.quat2matrix(qTrueInter1[a].q1, qTrueInter1[a].q2, qTrueInter1[a].q3, qTrueInter1[a].q4, Cbj);
+			mBase.Multi(starBali, Cbj, Crj, 3, 3, 3);
+			mBase.matrix2quat(Crj, qCrj.q1, qCrj.q2, qCrj.q3, qCrj.q4);
+			qCrj.UT = qTrueInter1[a].UT;
+			attMeas.qB.push_back(qCrj);
+		}
+		else
+		{
+			qCrj.q1 = qCrj.q2 = qCrj.q3 = qCrj.q4 = 0;
+			qCrj.UT = qTrueInter1[a].UT;
+			attMeas.qB.push_back(qCrj);
+		}
+		if (starGyro.isC == true)
+		{
+			mBase.quat2matrix(qTrueInter1[a].q1, qTrueInter1[a].q2, qTrueInter1[a].q3, qTrueInter1[a].q4, Cbj);
+			mBase.Multi(starCali, Cbj, Crj, 3, 3, 3);
+			mBase.matrix2quat(Crj, qCrj.q1, qCrj.q2, qCrj.q3, qCrj.q4);
+			qCrj.UT = qTrueInter1[a].UT;
+			attMeas.qC.push_back(qCrj);
+		}
+		else
+		{
+			qCrj.q1 = qCrj.q2 = qCrj.q3 = qCrj.q4 = 0;
+			qCrj.UT = qTrueInter1[a].UT;
+			attMeas.qC.push_back(qCrj);
+		}
+	}
+	for (int a = 0; a < wTrue.size(); a++)
+	{
+		attMeas.UT.push_back(wTrue[a].UT);
+		if (starGyro.isG11 == true)
+		{
+			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+			mBase.Multi(G11, XYZ, &omega, 1, 3, 1); attMeas.gy11.push_back(omega);
+		}
+		else
+			attMeas.gy11.push_back(0);
+		if (starGyro.isG12 == true)
+		{
+			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+			mBase.Multi(G12, XYZ, &omega, 1, 3, 1); attMeas.gy12.push_back(omega);
+		}
+		else
+			attMeas.gy12.push_back(0);
+		if (starGyro.isG13 == true)
+		{
+			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+			mBase.Multi(G13, XYZ, &omega, 1, 3, 1); attMeas.gy13.push_back(omega);
+		}
+		else
+			attMeas.gy13.push_back(0);
+
+		if (starGyro.isG21 == true)
+		{
+			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+			mBase.Multi(G21, XYZ, &omega, 1, 3, 1); attMeas.gy21.push_back(omega);
+		}
+		else
+			attMeas.gy21.push_back(0);
+		if (starGyro.isG22 == true)
+		{
+			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+			mBase.Multi(G22, XYZ, &omega, 1, 3, 1); attMeas.gy22.push_back(omega);
+		}
+		else
+			attMeas.gy22.push_back(0);
+		if (starGyro.isG23 == true)
+		{
+			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+			mBase.Multi(G23, XYZ, &omega, 1, 3, 1); attMeas.gy23.push_back(omega);
+		}
+		else
+			attMeas.gy23.push_back(0);
+
+		if (starGyro.isG31 == true)
+		{
+			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+			mBase.Multi(G31, XYZ, &omega, 1, 3, 1); attMeas.gy31.push_back(omega);
+		}
+		else
+			attMeas.gy31.push_back(0);
+		if (starGyro.isG32 == true)
+		{
+			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+			mBase.Multi(G32, XYZ, &omega, 1, 3, 1); attMeas.gy32.push_back(omega);
+		}
+		else
+			attMeas.gy32.push_back(0);
+		if (starGyro.isG33 == true)
+		{
+			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+			mBase.Multi(G33, XYZ, &omega, 1, 3, 1); attMeas.gy33.push_back(omega);
+		}
+		else
+			attMeas.gy33.push_back(0);		
+	}
+	outputTrueQuatGyro(attMeas);//输出真实星敏四元数和陀螺角速度
+
 	double sig_tracker = 0.5*attDat.sig_ST / 3600 * PI / 180;//0.5原因是a（角度）=2q（四元数）
-	double *noise1 = new double[sensorParam.nGyro];
-	double *noise2 = new double[sensorParam.nGyro];
-	double *noise3 = new double[sensorParam.nGyro];
+	double *noise1 = new double[attDat.nGyro];
+	double *noise2 = new double[attDat.nGyro];
+	double *noise3 = new double[attDat.nGyro];
 	//根据程序启动时间得到一个随机数，作为种子放入星敏和陀螺的随机模型中
 	int randcount;
 	double randtmp[1];
 	mBase.RandomDistribution(0, 30000, 1, 0, randtmp);
 	randcount = (int)randtmp[0];
 	//设置星敏噪声
-	mBase.RandomDistribution(0, sig_tracker, sensorParam.nGyro, randcount + 0, noise1);
-	mBase.RandomDistribution(0, sig_tracker, sensorParam.nGyro, randcount + 1, noise2);
-	mBase.RandomDistribution(0, sig_tracker, sensorParam.nGyro, randcount + 2, noise3);
+	mBase.RandomDistribution(0, sig_tracker, attDat.nGyro, randcount + 0, noise1);
+	mBase.RandomDistribution(0, sig_tracker, attDat.nGyro, randcount + 1, noise2);
+	mBase.RandomDistribution(0, sig_tracker, attDat.nGyro, randcount + 2, noise3);
 	//设置常值漂移和随机漂移噪声
 	double dtG = 1. / attDat.freqG, dtQ = 1. / attDat.freqQ;
 	double wbias1 = attDat.wBiasA[0]; double wbias2 = attDat.wBiasA[1]; double wbias3 = attDat.wBiasA[2];
-	double *bias1 = new double[sensorParam.nGyro]; double *bias2 = new double[sensorParam.nGyro]; double *bias3 = new double[sensorParam.nGyro];
-	double *wn1 = new double[sensorParam.nGyro]; double *wn2 = new double[sensorParam.nGyro]; double *wn3 = new double[sensorParam.nGyro];
-	mBase.RandomDistribution(wbias1*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), sensorParam.nGyro, randcount + 3, bias1);//注意是*dt，matlab中是/dt
-	mBase.RandomDistribution(wbias2*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), sensorParam.nGyro, randcount + 4, bias2);
-	mBase.RandomDistribution(wbias3*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), sensorParam.nGyro, randcount + 5, bias3);
-	mBase.RandomDistribution(0, sqrt(attDat.sigv*attDat.sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG), sensorParam.nGyro, randcount + 6, wn1);
-	mBase.RandomDistribution(0, sqrt(attDat.sigv*attDat.sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG), sensorParam.nGyro, randcount + 7, wn2);
-	mBase.RandomDistribution(0, sqrt(attDat.sigv*attDat.sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG), sensorParam.nGyro, randcount + 8, wn3);
+	double *bias1 = new double[attDat.nGyro]; double *bias2 = new double[attDat.nGyro]; double *bias3 = new double[attDat.nGyro];
+	double *wn1 = new double[attDat.nGyro]; double *wn2 = new double[attDat.nGyro]; double *wn3 = new double[attDat.nGyro];
+	mBase.RandomDistribution(wbias1*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), attDat.nGyro, randcount + 3, bias1);//注意是*dt，matlab中是/dt
+	mBase.RandomDistribution(wbias2*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), attDat.nGyro, randcount + 4, bias2);
+	mBase.RandomDistribution(wbias3*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), attDat.nGyro, randcount + 5, bias3);
+	mBase.RandomDistribution(0, sqrt(attDat.sigv*attDat.sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG), attDat.nGyro, randcount + 6, wn1);
+	mBase.RandomDistribution(0, sqrt(attDat.sigv*attDat.sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG), attDat.nGyro, randcount + 7, wn2);
+	mBase.RandomDistribution(0, sqrt(attDat.sigv*attDat.sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG), attDat.nGyro, randcount + 8, wn3);
 	//添加稳定度
-	double *stab1 = new double[sensorParam.nGyro]; double *stab2 = new double[sensorParam.nGyro]; double *stab3 = new double[sensorParam.nGyro];
-	mBase.RandomDistribution(0, attDat.stabW[0] * PI / 180 * dtG, sensorParam.nGyro, randcount + 9, stab1);
-	mBase.RandomDistribution(0, attDat.stabW[1] * PI / 180 * dtG, sensorParam.nGyro, randcount + 10, stab2);
-	mBase.RandomDistribution(0, attDat.stabW[2] * PI / 180 * dtG, sensorParam.nGyro, randcount + 11, stab3);
+	double *stab1 = new double[attDat.nGyro]; double *stab2 = new double[attDat.nGyro]; double *stab3 = new double[attDat.nGyro];
+	mBase.RandomDistribution(0, attDat.stabW[0] * PI / 180 * dtG, attDat.nGyro, randcount + 9, stab1);
+	mBase.RandomDistribution(0, attDat.stabW[1] * PI / 180 * dtG, attDat.nGyro, randcount + 10, stab2);
+	mBase.RandomDistribution(0, attDat.stabW[2] * PI / 180 * dtG, attDat.nGyro, randcount + 11, stab3);
 	//陀螺尺度因子和安装误差
 	MatrixXd sArr(3, 3), eye33(3, 3);
 	sArr << attDat.sArr[0], attDat.sArr[1], attDat.sArr[2],
 		attDat.sArr[3], attDat.sArr[4], attDat.sArr[5],
 		attDat.sArr[6], attDat.sArr[7], attDat.sArr[8];
 	eye33 << MatrixXd::Identity(3, 3);
-	Quat *qTrueOri = new Quat[sensorParam.nGyro];//这个是跟陀螺一致频率的真实四元数
+	Quat *qTrueOri = new Quat[attDat.nGyro];//这个是跟陀螺一致频率的真实四元数
 	qTrueOri[0].UT = 0;
 	qTrueOri[0].q1 = attDat.qInitial[0]; qTrueOri[0].q2 = attDat.qInitial[1];
 	qTrueOri[0].q3 = attDat.qInitial[2]; qTrueOri[0].q4 = attDat.qInitial[3];
 
-	//for (int i = 0; i < sensorParam.nGyro; i++)
+	//for (int i = 0; i < attDat.nGyro; i++)
 	//{
 	//	wTrue[i].UT = i*dtG;
 	//	wTrue[i].wx = 0.1*PI / 180 * sin(-0.0026 * dtG*i) + stab1[i];//增加了姿态稳定度
@@ -2164,7 +2303,7 @@ void attSim::simAttparam(vector<Quat>qTrue, AttParm sensorParam, isStarGyro star
 	//	wMeas[i].wx = wScaleAli(0) + wn1[i] + bias1[i];
 	//	wMeas[i].wy = wScaleAli(1) + wn2[i] + bias2[i];
 	//	wMeas[i].wz = wScaleAli(2) + wn3[i] + bias3[i];
-	//	if (i == sensorParam.nGyro - 1) { break; }
+	//	if (i == attDat.nGyro - 1) { break; }
 	//	double ww = sqrt(pow(wTrue[i].wx, 2) + pow(wTrue[i].wy, 2) + pow(wTrue[i].wz, 2));
 	//	double co = cos(0.5*ww*dtG);
 	//	double si = sin(0.5*ww*dtG);
@@ -2185,7 +2324,7 @@ void attSim::simAttparam(vector<Quat>qTrue, AttParm sensorParam, isStarGyro star
 	//{
 	//	utc[i] = i*dtQ;
 	//}
-	//mBase.QuatInterpolation(qTrueOri, sensorParam.nGyro, utc, nQuat, qTrue);//内插得到真实四元数
+	//mBase.QuatInterpolation(qTrueOri, attDat.nGyro, utc, nQuat, qTrue);//内插得到真实四元数
 	//for (int i = 0; i < nQuat; i++)
 	//{
 	//	Quat q2;
@@ -2210,7 +2349,7 @@ void attSim::simAttparam(vector<Quat>qTrue, AttParm sensorParam, isStarGyro star
 //作者：GZC
 //日期：2018.01.09
 //////////////////////////////////////////////////////////////////////////
-bool attSim::readAttparam(string pushbroomDat,vector<Quat>qTrue)
+bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 {
 	//读取姿态数据
 	string datAtt = pushbroomDat + "\\ManeuverData_All.txt";
@@ -2218,13 +2357,14 @@ bool attSim::readAttparam(string pushbroomDat,vector<Quat>qTrue)
 	if (!fp1) { printf("文件不存在！\n"); return false; }
 	char tmp[512];
 	fscanf(fp1, "%[^\n]\n", tmp);
+	fscanf(fp1, "%[^\n]\n", tmp);//第一个姿态数据不要
 	Gyro eulerTmp; vector<Gyro>euler;
 	while (!feof(fp1))
 	{
 		fscanf(fp1, "%*lf\t%*lf\t%lf\t%lf\t%lf\t%lf\t%[^\n]\n", &eulerTmp.UT,
 			&eulerTmp.wx, &eulerTmp.wy, &eulerTmp.wz, tmp);
 		eulerTmp.wx /= 180 * PI, eulerTmp.wy /= 180 * PI, eulerTmp.wz /= 180 * PI;
-		euler.push_back(eulerTmp); 
+		euler.push_back(eulerTmp);
 	}
 
 	//读取轨道数据
@@ -2306,7 +2446,7 @@ void attSim::predictQuat(Gyro wMeas, Quat &Qk, double dt)
 	om[4] = -qw3, om[5] = qw4, om[6] = qw1, om[7] = qw2;
 	om[8] = qw2, om[9] = -qw1, om[10] = qw4, om[11] = qw3;
 	om[12] = -qw1, om[13] = -qw2, om[14] = -qw3, om[15] = qw4;
-	double Qk1[4],Qk2[4];
+	double Qk1[4], Qk2[4];
 	Qk1[0] = Qk.q1, Qk1[1] = Qk.q2, Qk1[2] = Qk.q3, Qk1[3] = Qk.q4;
 	mBase.Multi(om, Qk1, Qk2, 4, 4, 1);
 	Qk.q1 = Qk2[0], Qk.q2 = Qk2[1], Qk.q3 = Qk2[2], Qk.q4 = Qk2[3];
@@ -2319,19 +2459,41 @@ void attSim::predictQuat(Gyro wMeas, Quat &Qk, double dt)
 //作者：GZC
 //日期：2018.01.10
 //////////////////////////////////////////////////////////////////////////
-void attSim::calcuOmega(Quat *qTrue,Gyro wTrue)
+void attSim::calcuOmega(Quat qL, Quat qR, Gyro &wTrue)
 {
-	double rL[9], rR[9], Res[9],dt;
-	mBase.quat2matrix(qTrue[0].q1, qTrue[0].q2, qTrue[0].q3, -qTrue[0].q4, rL);
-	mBase.quat2matrix(qTrue[1].q1, qTrue[1].q2, qTrue[1].q3, qTrue[1].q4, rR);
+	double rL[9], rR[9], Res[9], dt;
+	mBase.quat2matrix(qL.q1, qL.q2, qL.q3, -qL.q4, rL);
+	mBase.quat2matrix(qR.q1, qR.q2, qR.q3, qR.q4, rR);
 	mBase.Multi(rR, rL, Res, 3, 3, 3);
-	dt = qTrue[1].UT - qTrue[0].UT;
-	wTrue.UT = qTrue[1].UT;
+	dt = qR.UT - qL.UT;
+	wTrue.UT = qR.UT;
 	wTrue.wx = (Res[5] - Res[7]) / 2 / dt;
 	wTrue.wy = (Res[6] - Res[2]) / 2 / dt;
 	wTrue.wz = (Res[1] - Res[3]) / 2 / dt;
 }
 
+void attSim::outputTrueQuatGyro(attGFDM attMeas)
+{
+	//输出真实q值和角速度值
+	string quatPath = path + "\\ATT.txt"; string gyroPath = path + "\\Gyro.txt";
+	FILE *fp1 = fopen(quatPath.c_str(), "w");
+	fprintf(fp1, "%d\n", attMeas.qA.size());
+	for (int a = 0; a < attMeas.qA.size(); a++)
+	{
+		fprintf(fp1, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n", attMeas.qA[a].UT,
+			attMeas.qA[a].q1, attMeas.qA[a].q2, attMeas.qA[a].q3, attMeas.qA[a].q4, attMeas.qB[a].q1, attMeas.qB[a].q2,
+			attMeas.qB[a].q3, attMeas.qB[a].q4, attMeas.qC[a].q1, attMeas.qC[a].q2, attMeas.qC[a].q3, attMeas.qC[a].q4);
+	}
+	FILE *fp2 = fopen(gyroPath.c_str(), "w");
+	fprintf(fp2, "%d\n", attMeas.gy11.size());
+	for (int a = 0; a < attMeas.gy11.size(); a++)
+	{
+		fprintf(fp2, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n", attMeas.UT[a], attMeas.gy11[a],
+			attMeas.gy12[a], attMeas.gy13[a], attMeas.gy21[a], attMeas.gy22[a], attMeas.gy23[a], attMeas.gy31[a],
+			attMeas.gy32[a], attMeas.gy33[a]);
+	}
+	fclose(fp1), fclose(fp2);
+}
 /////////////////////////////////////////////////////////////////////////
 //功能：姿态仿真与确定（外部接口）
 //输入：工作路径：workpath，传感器指标：mAtt，星敏陀螺参与指示：starGyro
@@ -2342,13 +2504,15 @@ void attSim::calcuOmega(Quat *qTrue,Gyro wTrue)
 //////////////////////////////////////////////////////////////////////////
 void attitudeSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro)
 {
-	attSim GFDM; attGFDM measGFDM;
+	attSim GFDM; 
+	GFDM.getAttParam(mAtt, workpath);
+	attGFDM measGFDM;
 	vector<Quat>qTure; vector<Gyro>wTrue;
 	vector<Quat>qMeas; vector<Gyro>wMeas;
 	//根据欧拉角计算四元数
-	GFDM.readAttparam(workpath,qTure);
+	GFDM.readAttparam(workpath, qTure);
 	//仿真带误差四元数
-	GFDM.simAttparam(qTure, mAtt, starGyro, measGFDM);
+	GFDM.simAttparam(qTure, starGyro, measGFDM);
 	//卡尔曼滤波处理
 
 }
@@ -2365,11 +2529,11 @@ void attitudeSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro)
 //作者：GZC
 //日期：2017.11.20
 //////////////////////////////////////////////////////////////////////////
-void attitudeSimulationStruct(AttParm mAtt, char * workpath, 
+void attitudeSimulationStruct(AttParm mAtt, char * workpath,
 	double *qTrueC, double *qMeasC, double *wTrueC, double *wMeasC, double * qNoise)
-{	
+{
 	attSim ZY3;
-	ZY3.getAttParam(mAtt,workpath);
+	ZY3.getAttParam(mAtt, workpath);
 	int nQuat = mAtt.nQuat; int nGyro = mAtt.nGyro;
 	//设置随机初始四元数
 	if (mAtt.qInitial[0] == 0.5)//如果用默认参数的，四元数则为随机

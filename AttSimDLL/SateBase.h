@@ -72,7 +72,7 @@ struct BmImStar
 struct attGFDM
 {
 	vector<Quat> qA, qB, qC;//三颗星敏
-	vector<Gyro> gy1,gy2,gy3;//两组三浮陀螺，一组光纤陀螺
+	vector<double>UT, gy11, gy12, gy13, gy21, gy22, gy23, gy31, gy32, gy33;//两组三浮陀螺，一组光纤陀螺
 };
 
 //轨道离散点信息
@@ -93,13 +93,11 @@ struct orbGFDM
 //星敏陀螺选择状态
 struct isStarGyro
 {
-	bool isA, isB, isC;
-	bool isG11, isG12, isG13;
-	bool isG21, isG22, isG23;
-	bool isG31, isG32, isG33;
-	isStarGyro()
-	{
-		isA = isB = isC = isG11 = isG12 = isG13 = isG21 = isG22 = isG23 = isG31 = isG32 = isG33 = false;
-	}
+	BOOL isA, isB, isC;
+	BOOL isG11, isG12, isG13, isG21, isG22, isG23, isG31, isG32, isG33;
+	//isStarGyro()
+	//{
+	//	isA = isB = isC = isG11 = isG12 = isG13 = isG21 = isG22 = isG23 = isG31 = isG32 = isG33 = false;
+	//}
 };
 #endif

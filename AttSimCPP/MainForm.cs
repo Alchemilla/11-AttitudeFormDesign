@@ -646,11 +646,11 @@ namespace AttSimCPP
             if (checkBox12.Checked)  { starGyro.isG33 = true; } else starGyro.isG33 = false;
 
             //获取星敏陀螺频率和总时长
-            mAtt.totalT = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
+            //mAtt.totalT = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
             mAtt.freqQ = Convert.ToInt32(textBox8.Text);
             mAtt.freqG = Convert.ToInt32(textBox9.Text);//string转数值的第1种转换方式
-            mAtt.nQuat = mAtt.freqQ * mAtt.totalT;//四元数个数
-            mAtt.nGyro = mAtt.freqG * mAtt.totalT;//陀螺个数，一般较四元数多
+            //mAtt.nQuat = mAtt.freqQ * mAtt.totalT;//四元数个数
+            //mAtt.nGyro = mAtt.freqG * mAtt.totalT;//陀螺个数，一般较四元数多
             //星敏参数
             mAtt.sig_ST = double.Parse(textBox4.Text);//星敏误差(单位：角秒) 
             //陀螺漂移
