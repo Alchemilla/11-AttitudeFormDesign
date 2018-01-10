@@ -21,6 +21,7 @@ namespace AttSimCPP
             { path = args[1]; }
         }
         public AttParm mAtt;
+        public isStarGyro starGyro;
         //public int nQuat, nGyro;//陀螺和四元数个数
         //public int freqG, freqQ;//星敏陀螺采样频率            
         //public double dt;
@@ -386,6 +387,7 @@ namespace AttSimCPP
             simAtt1.Text = "双向滤波残差";
             simAtt1.Show();
         }
+
         /// <summary>
         /// 功能：显示四元数
         /// </summary>
@@ -628,6 +630,22 @@ namespace AttSimCPP
         /// <param name="e"></param>
         private void button13_Click(object sender, EventArgs e)
         {
+            //首先判断选中了哪些星敏和陀螺
+            starGyro.isA = starGyro.isB = starGyro.isC = starGyro.isG11 = starGyro.isG12 = starGyro.isG13 = starGyro.isG21 =
+                 starGyro.isG22 = starGyro.isG23 = starGyro.isG31 = starGyro.isG32 = starGyro.isG33 = false;
+            if (checkBox1.Checked) starGyro.isA = true;
+            if (checkBox2.Checked) starGyro.isB = true;
+            if (checkBox3.Checked) starGyro.isC = true;
+            if (checkBox4.Checked) starGyro.isG11= true;
+            if (checkBox4.Checked) starGyro.isG12 = true;
+            if (checkBox4.Checked) starGyro.isG13 = true;
+            if (checkBox4.Checked) starGyro.isG21 = true;
+            if (checkBox4.Checked) starGyro.isG22 = true;
+            if (checkBox4.Checked) starGyro.isG23 = true;
+            if (checkBox4.Checked) starGyro.isG31 = true;
+            if (checkBox4.Checked) starGyro.isG32 = true;
+            if (checkBox4.Checked) starGyro.isG33 = true;
+
             //星敏参数
             mAtt.sig_ST = double.Parse(textBox4.Text);//星敏误差(单位：角秒) 
 

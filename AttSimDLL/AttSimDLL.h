@@ -57,8 +57,8 @@ public:
 	//以下为主动推扫相关函数
 	void EKF6StateForStarOpticAxis(attGFDM attMeas);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
-	void simAttparam(Quat *qTrue, attGFDM attMeas);
-	void readAttparam(string pushbroomDat);
+	void simAttparam(Quat *&qTrue, Quat *&qMeas, Gyro *&wTrue, Gyro *&wMeas, attGFDM attMeas);
+	bool readAttparam(string pushbroomDat, vector<Quat>qTrue, vector<Gyro>wTrue);
 	void preAttparam(attGFDM attMeas,Quat &q0, vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas);
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量

@@ -95,4 +95,16 @@ struct orbGFDM
 		year = month = day = hour = minute = 0;
 	}
 };
+//ÐÇÃôÍÓÂÝÑ¡Ôñ×´Ì¬
+struct isStarGyro
+{
+	bool isA, isB, isC;
+	bool isG11, isG12, isG13;
+	bool isG21, isG22, isG23;
+	bool isG31, isG32, isG33;
+	isStarGyro()
+	{
+		isA = isB = isC = isG11 = isG12 = isG13 = isG21 = isG22 = isG23 = isG31 = isG32 = isG33 = false;
+	}
+};
 #endif
