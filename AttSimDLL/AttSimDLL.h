@@ -40,7 +40,7 @@ ATTSIMDLL void attitudeDeterActivePushbroomStruct(AttParm mAtt,
 	double BeforeAfterT[2], char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
 //读取外部数据（包括主动推扫）然后仿真姿态
-ATTSIMDLL void attitudeSimAndDeter(char * workpath, AttParm mAtt);
+ATTSIMDLL void attitudeSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro);
 
 class attSim
 {
@@ -57,9 +57,11 @@ public:
 	//以下为主动推扫相关函数
 	void EKF6StateForStarOpticAxis(attGFDM attMeas);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
-	void simAttparam(Quat *&qTrue, Quat *&qMeas, Gyro *&wTrue, Gyro *&wMeas, attGFDM attMeas);
-	bool readAttparam(string pushbroomDat, vector<Quat>qTrue, vector<Gyro>wTrue);
+	void simAttparam(vector<Quat>qTrue,  AttParm mAtt, isStarGyro starGyro, attGFDM attMeas);
+	bool readAttparam(string pushbroomDat, vector<Quat>qTrue);
 	void preAttparam(attGFDM attMeas,Quat &q0, vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas);
+	void predictQuat(Gyro wMeas, Quat &Qk, double dt);
+	void calcuOmega(Quat *qTrue, Gyro wTrue);
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量
 	AttParm attDat;

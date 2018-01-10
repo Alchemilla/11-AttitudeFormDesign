@@ -132,7 +132,7 @@ namespace AttSimCPP
         /// <param name="path"></param>
         /// <param name="mAtt"></param>
         [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void attitudeSimAndDeter(string path, AttParm mAtt);
+        public static extern void attitudeSimAndDeter(string path, AttParm mAtt,isStarGyro starGyro);
 
 
         //以下函数暂时不用

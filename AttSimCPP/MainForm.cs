@@ -300,6 +300,19 @@ namespace AttSimCPP
             {                ShowInfo("请设置仿真文件保存目录！!");            }
             else
             {                ShowInfo("已设置仿真文件保存目录：" + path);            }
+            if (path == null)
+            { button1.Enabled = false; button8.Enabled = false; button11.Enabled = false; }
+            else
+            { button1.Enabled = true; button8.Enabled = true; button11.Enabled = true; }
+            button3.Enabled = false;
+            button4.Enabled = false;
+            button5.Enabled = false;
+            button6.Enabled = false;
+            button7.Enabled = false;
+            button9.Enabled = false;
+            button10.Enabled = false;
+            radioButton1.Enabled = false;
+            radioButton2.Enabled = false;
         }
         /// <summary>
         /// 功能：记录日志
@@ -316,22 +329,8 @@ namespace AttSimCPP
         private void MainForm_Load(object sender, EventArgs e)
         {
             ShowInfo("欢迎来到姿态确定仿真程序！");
-            //为TextBox设置默认值和默认值的前景色（字体颜色）
             SetDefaultText();
-            //groupBox1.Enabled = false;
-            if (path == null)
-            {                button1.Enabled = false; button8.Enabled = false; button11.Enabled = false; }
-            else
-            {                button1.Enabled = true; button8.Enabled = true; button11.Enabled = true; }
-            button3.Enabled = false;
-            button4.Enabled = false;
-            button5.Enabled = false;
-            button6.Enabled = false;
-            button7.Enabled = false;
-            button9.Enabled = false;
-            button10.Enabled = false;
-            radioButton1.Enabled = false;
-            radioButton2.Enabled = false;
+            SetTabPage3Default();
         }
         /// <summary>
         /// 功能：设置保存目录
@@ -363,7 +362,6 @@ namespace AttSimCPP
             simAtt1.Text = "残差对比";
             simAtt1.Show();
         }
-
         /// <summary>
         /// 功能：显示陀螺漂移
         /// </summary>
@@ -374,9 +372,7 @@ namespace AttSimCPP
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Show();
         }
-
-
-        /// <summary>
+                /// <summary>
         /// 功能：双向EKF滤波残差
         /// </summary>
         private void button5_Click(object sender, EventArgs e)
@@ -387,7 +383,6 @@ namespace AttSimCPP
             simAtt1.Text = "双向滤波残差";
             simAtt1.Show();
         }
-
         /// <summary>
         /// 功能：显示四元数
         /// </summary>
@@ -605,6 +600,12 @@ namespace AttSimCPP
             DLLImport.ExternalData(path,mAtt);
         }
 
+
+        private void SetTabPage3Default()
+        {
+            checkBox1.Checked = checkBox2.Checked = checkBox4.Checked = 
+                checkBox5.Checked = checkBox6.Checked = true;
+        }
         /// <summary>
         /// 真实数据路径
         /// </summary>
@@ -630,35 +631,36 @@ namespace AttSimCPP
         /// <param name="e"></param>
         private void button13_Click(object sender, EventArgs e)
         {
-            //首先判断选中了哪些星敏和陀螺
-            starGyro.isA = starGyro.isB = starGyro.isC = starGyro.isG11 = starGyro.isG12 = starGyro.isG13 = starGyro.isG21 =
-                 starGyro.isG22 = starGyro.isG23 = starGyro.isG31 = starGyro.isG32 = starGyro.isG33 = false;
-            if (checkBox1.Checked) starGyro.isA = true;
-            if (checkBox2.Checked) starGyro.isB = true;
-            if (checkBox3.Checked) starGyro.isC = true;
-            if (checkBox4.Checked) starGyro.isG11= true;
-            if (checkBox4.Checked) starGyro.isG12 = true;
-            if (checkBox4.Checked) starGyro.isG13 = true;
-            if (checkBox4.Checked) starGyro.isG21 = true;
-            if (checkBox4.Checked) starGyro.isG22 = true;
-            if (checkBox4.Checked) starGyro.isG23 = true;
-            if (checkBox4.Checked) starGyro.isG31 = true;
-            if (checkBox4.Checked) starGyro.isG32 = true;
-            if (checkBox4.Checked) starGyro.isG33 = true;
+            //首先判断选中了哪些星敏和陀螺           
+            if (checkBox1.Checked) { starGyro.isA = true; } else starGyro.isA = false;
+            if (checkBox2.Checked)  { starGyro.isB = true; } else starGyro.isB = false;
+            if (checkBox3.Checked)  { starGyro.isC = true; } else starGyro.isC = false;
+            if (checkBox4.Checked)  { starGyro.isG11= true; } else starGyro.isG11 = false;
+            if (checkBox5.Checked)  { starGyro.isG12 = true; } else starGyro.isG12 = false;
+            if (checkBox6.Checked)  { starGyro.isG13 = true; } else starGyro.isG13 = false;
+            if (checkBox7.Checked)  { starGyro.isG21 = true; } else starGyro.isG21 = false;
+            if (checkBox8.Checked)  { starGyro.isG22 = true; } else starGyro.isG22 = false;
+            if (checkBox9.Checked)  { starGyro.isG23 = true; } else starGyro.isG23 = false;
+            if (checkBox10.Checked) { starGyro.isG31 = true; } else starGyro.isG31 = false;
+            if (checkBox11.Checked)  { starGyro.isG32 = true; } else starGyro.isG32 = false;
+            if (checkBox12.Checked)  { starGyro.isG33 = true; } else starGyro.isG33 = false;
 
+            //获取星敏陀螺频率和总时长
+            mAtt.totalT = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
+            mAtt.freqQ = Convert.ToInt32(textBox8.Text);
+            mAtt.freqG = Convert.ToInt32(textBox9.Text);//string转数值的第1种转换方式
+            mAtt.nQuat = mAtt.freqQ * mAtt.totalT;//四元数个数
+            mAtt.nGyro = mAtt.freqG * mAtt.totalT;//陀螺个数，一般较四元数多
             //星敏参数
             mAtt.sig_ST = double.Parse(textBox4.Text);//星敏误差(单位：角秒) 
-
             //陀螺漂移
             string[] strW = textBox5.Text.Split(',');
             double[] wBias = new double[3];
             for (int i = 0; i < 3; i++)
                 wBias[i] = double.Parse(strW[i]);
             mAtt.wBiasA = wBias;
-
             //漂移噪声
             mAtt.sigu = double.Parse(textBox6.Text) * 1e-9;
-
             //陀螺噪声
             mAtt.sigv = double.Parse(textBox7.Text) * 1e-5;
 
@@ -668,7 +670,7 @@ namespace AttSimCPP
                 MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
                 return;
             }
-            DLLImport.attitudeSimAndDeter(path,mAtt);
+            DLLImport.attitudeSimAndDeter(path,mAtt, starGyro);
         }
 
     }
