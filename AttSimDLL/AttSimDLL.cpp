@@ -2232,7 +2232,7 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 //日期：2018.01.11
 //////////////////////////////////////////////////////////////////////////
 void attSim::preAttparam(attGFDM attMeas, Quat &q0, 
-	vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas)
+	vector<vector<BmImStar>>&BmIm, vector<Gyro>&wMeas)
 {
 	double Cbj[9], Crj[9], Cbr[9],Bm[3],Im[3]; Quat qCbj;
 	double optical[3] = { 0,0,1 };
@@ -2245,11 +2245,17 @@ void attSim::preAttparam(attGFDM attMeas, Quat &q0,
 			mBase.quat2matrix(attMeas.qA[a].q1, attMeas.qA[a].q2, attMeas.qA[a].q3, attMeas.qA[a].q4, Crj);
 			memcpy(Cbr, starAali, sizeof(double) * 9);//Crb
 			mBase.invers_matrix(Cbr, 3);//Cbr
+			if (a==0)
+			{
+				mBase.Multi(Cbr, Crj, Cbj, 3, 3, 3);
+				mBase.matrix2quat(Cbj, q0.q1, q0.q2, q0.q3, q0.q4);
+			}
 			mBase.invers_matrix(Crj, 3);//Cjr
 			mBase.Multi(Cbr, optical, Bm, 3, 3, 1);
 			mBase.Multi(Crj, optical, Im, 3, 3, 1);
 			memcpy(BmImTmp2.Bm, Bm, sizeof(double) * 3);
 			memcpy(BmImTmp2.Im, Im, sizeof(double) * 3);
+			BmImTmp2.UT = attMeas.qA[a].UT;
 			BmImTmp.push_back(BmImTmp2);
 		}
 
@@ -2258,11 +2264,17 @@ void attSim::preAttparam(attGFDM attMeas, Quat &q0,
 			mBase.quat2matrix(attMeas.qB[a].q1, attMeas.qB[a].q2, attMeas.qB[a].q3, attMeas.qB[a].q4, Crj);
 			memcpy(Cbr, starBali, sizeof(double) * 9);//Crb
 			mBase.invers_matrix(Cbr, 3);//Cbr
+			if (a == 0)
+			{
+				mBase.Multi(Cbr, Crj, Cbj, 3, 3, 3);
+				mBase.matrix2quat(Cbj, q0.q1, q0.q2, q0.q3, q0.q4);
+			}
 			mBase.invers_matrix(Crj, 3);//Cjr
 			mBase.Multi(Cbr, optical, Bm, 3, 3, 1);
 			mBase.Multi(Crj, optical, Im, 3, 3, 1);
 			memcpy(BmImTmp2.Bm, Bm, sizeof(double) * 3);
 			memcpy(BmImTmp2.Im, Im, sizeof(double) * 3);
+			BmImTmp2.UT = attMeas.qB[a].UT;
 			BmImTmp.push_back(BmImTmp2);
 		}
 
@@ -2271,14 +2283,59 @@ void attSim::preAttparam(attGFDM attMeas, Quat &q0,
 			mBase.quat2matrix(attMeas.qC[a].q1, attMeas.qC[a].q2, attMeas.qC[a].q3, attMeas.qC[a].q4, Crj);
 			memcpy(Cbr, starCali, sizeof(double) * 9);//Crb
 			mBase.invers_matrix(Cbr, 3);//Cbr
+			if (a == 0)
+			{
+				mBase.Multi(Cbr, Crj, Cbj, 3, 3, 3);
+				mBase.matrix2quat(Cbj, q0.q1, q0.q2, q0.q3, q0.q4);
+			}
 			mBase.invers_matrix(Crj, 3);//Cjr
 			mBase.Multi(Cbr, optical, Bm, 3, 3, 1);
 			mBase.Multi(Crj, optical, Im, 3, 3, 1);
 			memcpy(BmImTmp2.Bm, Bm, sizeof(double) * 3);
 			memcpy(BmImTmp2.Im, Im, sizeof(double) * 3);
+			BmImTmp2.UT = attMeas.qC[a].UT;
 			BmImTmp.push_back(BmImTmp2);
 		}
+		BmIm.push_back(BmImTmp);
 	}
+
+	int num = 0;
+	if (starGyro.isG11 == true) num++;
+	if (starGyro.isG12 == true) num++;
+	if (starGyro.isG13 == true) num++;
+	if (starGyro.isG21 == true) num++;
+	if (starGyro.isG22 == true) num++;
+	if (starGyro.isG23 == true) num++;
+	if (starGyro.isG31 == true) num++;
+	if (starGyro.isG32 == true) num++;
+	if (starGyro.isG33 == true) num++;
+	double *A = new double[num * 3];
+	double *AT = new double[3 * num];
+	double *L = new double[num];
+	double ATA[9], ATL[3],LS[3];
+	
+	for (int a=0;a<attMeas.gy11.size();a++)
+	{
+		num = 0;
+		if (starGyro.isG11 == true) { A[num] = G11[0], A[num + 1] = G11[1], A[num + 2] = G11[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
+		if (starGyro.isG12 == true) { A[num] = G12[0], A[num + 1] = G12[1], A[num + 2] = G12[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
+		if (starGyro.isG13 == true) { A[num] = G13[0], A[num + 1] = G13[1], A[num + 2] = G13[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
+		if (starGyro.isG21 == true) { A[num] = G21[0], A[num + 1] = G21[1], A[num + 2] = G21[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
+		if (starGyro.isG22 == true) { A[num] = G22[0], A[num + 1] = G22[1], A[num + 2] = G22[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
+		if (starGyro.isG23 == true) { A[num] = G23[0], A[num + 1] = G23[1], A[num + 2] = G23[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
+		if (starGyro.isG31 == true) { A[num] = G31[0], A[num + 1] = G31[1], A[num + 2] = G31[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
+		if (starGyro.isG32 == true) { A[num] = G32[0], A[num + 1] = G32[1], A[num + 2] = G32[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
+		if (starGyro.isG33 == true) { A[num] = G33[0], A[num + 1] = G33[1], A[num + 2] = G33[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
+		mBase.Transpose(A, AT, num/3,3);
+		mBase.Multi(AT, A, ATA, 3, num/3, 3);
+		mBase.invers_matrix(ATA, 3);
+		mBase.Multi(AT, L, ATL, 3, num / 3, 1);
+		mBase.Multi(ATA, ATL, LS, 3, 3, 1);
+		Gyro wTmp;
+		wTmp.UT = attMeas.UT[a]; wTmp.wx = LS[0], wTmp.wy = LS[1], wTmp.wz = LS[2];
+		wMeas.push_back(wTmp);
+	}
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2673,7 +2730,7 @@ void attitudeSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro)
 	//仿真带误差四元数
 	GFDM.simAttparam(qTure,measGFDM);
 	//卡尔曼滤波处理
-
+	GFDM.EKF6StateForStarOpticAxis(measGFDM);
 }
 
 //////////////////////////////////////////////////////////////////////////
