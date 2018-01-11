@@ -287,12 +287,6 @@ namespace AttSimCPP
             textBox9.ForeColor = Color.Gray;
             textBox10.Text = "0,0,0,0,0,0,0,0,0";
             textBox10.Enabled = false;
-            textBox15.Text = "0.5,0.1,-0.1";
-            textBox15.ForeColor = Color.Gray;
-            textBox16.Text = "10";
-            textBox16.ForeColor = Color.Gray;
-            textBox17.Text = "10";
-            textBox17.ForeColor = Color.Gray;
             textBox18.Text = "10,10";
             textBox18.ForeColor = Color.Gray;
             ShowInfo("已加载姿态仿真默认参数!");
@@ -393,6 +387,7 @@ namespace AttSimCPP
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Show();
         }
+
         /// <summary>
         /// 功能：EKF滤波残差
         /// </summary>
@@ -605,7 +600,13 @@ namespace AttSimCPP
         {
             checkBox1.Checked = checkBox2.Checked = checkBox4.Checked = 
                 checkBox5.Checked = checkBox6.Checked = true;
-        }
+            textBox15.Text = "4";//星敏测量频率
+            textBox17.Text = "8";//陀螺测量频率
+            textBox16.Text = "1";//星敏噪声
+            textBox19.Text = "0.006";//陀螺噪声
+            textBox20.Text = "3";//常值漂移
+            textBox21.Text = "0.0005";//随机游走
+          }
         /// <summary>
         /// 真实数据路径
         /// </summary>
@@ -647,22 +648,19 @@ namespace AttSimCPP
 
             //获取星敏陀螺频率和总时长
             //mAtt.totalT = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
-            mAtt.freqQ = Convert.ToInt32(textBox8.Text);
-            mAtt.freqG = Convert.ToInt32(textBox9.Text);//string转数值的第1种转换方式
-            //mAtt.nQuat = mAtt.freqQ * mAtt.totalT;//四元数个数
-            //mAtt.nGyro = mAtt.freqG * mAtt.totalT;//陀螺个数，一般较四元数多
+            mAtt.freqQ = Convert.ToInt32(textBox15.Text);
+            mAtt.freqG = Convert.ToInt32(textBox17.Text);//string转数值的第1种转换方式
             //星敏参数
-            mAtt.sig_ST = double.Parse(textBox4.Text);//星敏误差(单位：角秒) 
+            mAtt.sig_ST = double.Parse(textBox16.Text);//星敏误差(单位：角秒) 
+            //陀螺噪声
+            mAtt.sigv = double.Parse(textBox19.Text) * 1e-4;
             //陀螺漂移
-            string[] strW = textBox5.Text.Split(',');
             double[] wBias = new double[3];
             for (int i = 0; i < 3; i++)
-                wBias[i] = double.Parse(strW[i]);
+                wBias[i] = double.Parse(textBox20.Text);
             mAtt.wBiasA = wBias;
             //漂移噪声
-            mAtt.sigu = double.Parse(textBox6.Text) * 1e-9;
-            //陀螺噪声
-            mAtt.sigv = double.Parse(textBox7.Text) * 1e-5;
+            mAtt.sigu = double.Parse(textBox21.Text) * 1e-5;
 
             if (!File.Exists(path + "\\ManeuverData_All.txt"))
             {

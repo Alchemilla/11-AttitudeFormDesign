@@ -41,15 +41,19 @@ ATTSIMDLL void attitudeDeterActivePushbroomStruct(AttParm mAtt,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
 //读取外部数据（包括主动推扫）然后仿真姿态
 ATTSIMDLL void attitudeSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro);
+ATTSIMDLL void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGyro);
 
 class attSim
 {
 public:
 	attSim();
 	~attSim();
+	//获取各种参数
+	void getQuatAndGyro(attGFDM &measGFDM);
 	void getAttParam(AttParm mAtt,string workpath);
 	void getAttParam(AttParm mAtt, string workpath, isStarGyro starGy);
 	void getQnGnum(int nQ, int nG);
+	//姿态仿真和确定和比较
 	void simQuatAndGyro15State(Quat *&qTrue, Quat *&qMeas, Gyro *&wTrue, Gyro *&wMeas);
 	void compareTrueNoise(Quat *qTrue, Quat *qMeas, double *qNoise);
 	void compareTrueEKF15State(string pathekf, string pathb, Quat *qTrue, Quat *qEst, double *dqOut, double *xest_store);

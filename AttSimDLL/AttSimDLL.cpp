@@ -1204,7 +1204,10 @@ void attSim::getQnGnum(int nQ, int nG)
 {
 	nQuat = nQ, nGyro = nG;
 }
+void attSim::getQuatAndGyro(attGFDM &measGFDM)
+{
 
+}
 //////////////////////////////////////////////////////////////////////////
 //功能：姿态仿真（15状态）
 //输入：卫星姿态参数结构体：attDat
@@ -1957,9 +1960,9 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 	//预先计算估计四元数的数量
 	double utStart = BmIm[0][0].UT;
 	int a = 1, b = 0;
-	for (int i = 1; i < nGyro;)
+	for (int i = 1; i < attDat.nGyro;)
 	{
-		if (a < nQuat && (BmIm[a][0].UT - utStart) <= (wMeas[i].UT - utStart))
+		if (a < attDat.nQuat && (BmIm[a][0].UT - utStart) <= (wMeas[i].UT - utStart))
 		{
 			utStart = BmIm[a][0].UT;	 a++;		b++;
 		}
@@ -1979,18 +1982,18 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 	p << poa, zero33, zero33, pog;//过程协方差
 	Q << sigv33, zero33, zero33, sigu33;//过程噪声
 	Qest(0, 0) = q0.q1, Qest(0, 1) = q0.q2;
-	Qest(0, 2) = q0.q3, Qest(0, 3) = q0.q4;
-	Quat *quatEst = new Quat[nGyro];
-	double *xest_store = new double[6 * nGyro];
-	quatEst[0].UT = q0.UT;
+	Qest(0, 2) = q0.q3, Qest(0, 3) = q0.q4;	
+	vector<Quat>quatEst(attDat.nGyro);
+	double *xest_store = new double[6 * attDat.nGyro];
+	quatEst[0].UT = utStart;
 	quatEst[0].q1 = Qest(b, 0), quatEst[0].q2 = Qest(b, 1);
 	quatEst[0].q3 = Qest(b, 2), quatEst[0].q4 = Qest(b, 3);
 	xest_store[0] = wMeas[0].UT; xest_store[1] = 0; xest_store[2] = 0;
 	xest_store[3] = 0; xest_store[4] = 0, xest_store[5] = 0;
 
-	for (int i = 1; i < nGyro;)
+	for (int i = 1; i < attDat.nGyro;)
 	{
-		if (a < nQuat && (BmIm[a][0].UT - utStart) <= (wMeas[i].UT - utStart))
+		if (a < attDat.nQuat && (BmIm[a][0].UT - utStart) <= (wMeas[i].UT - utStart))
 		{
 			/****************陀螺测量值预测***************/
 			dt = BmIm[a][0].UT - utStart;
@@ -2071,16 +2074,12 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 			//保存xest值
 			xest_store[6 * i + 0] = wMeas[i].UT; xest_store[6 * i + 1] = xest(b, 1); xest_store[6 * i + 2] = xest(b, 2);
 			xest_store[6 * i + 3] = xest(b, 3); xest_store[6 * i + 4] = xest(b, 4); xest_store[6 * i + 5] = xest(b, 5);
-
-			if (i % 500 == 0)
-			{
-				printf("已运行到第%d个陀螺值\n", i);
-			}
+			
 			b++;
 			i++;
 		}
 	}
-
+	outputQuat(quatEst, "\\EKFquater.txt");
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2318,14 +2317,14 @@ void attSim::preAttparam(attGFDM attMeas, Quat &q0,
 	{
 		num = 0;
 		if (starGyro.isG11 == true) { A[num] = G11[0], A[num + 1] = G11[1], A[num + 2] = G11[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
-		if (starGyro.isG12 == true) { A[num] = G12[0], A[num + 1] = G12[1], A[num + 2] = G12[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
-		if (starGyro.isG13 == true) { A[num] = G13[0], A[num + 1] = G13[1], A[num + 2] = G13[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
-		if (starGyro.isG21 == true) { A[num] = G21[0], A[num + 1] = G21[1], A[num + 2] = G21[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
-		if (starGyro.isG22 == true) { A[num] = G22[0], A[num + 1] = G22[1], A[num + 2] = G22[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
-		if (starGyro.isG23 == true) { A[num] = G23[0], A[num + 1] = G23[1], A[num + 2] = G23[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
-		if (starGyro.isG31 == true) { A[num] = G31[0], A[num + 1] = G31[1], A[num + 2] = G31[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
-		if (starGyro.isG32 == true) { A[num] = G32[0], A[num + 1] = G32[1], A[num + 2] = G32[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
-		if (starGyro.isG33 == true) { A[num] = G33[0], A[num + 1] = G33[1], A[num + 2] = G33[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
+		if (starGyro.isG12 == true) { A[num] = G12[0], A[num + 1] = G12[1], A[num + 2] = G12[2];	L[num / 3] = attMeas.gy12[a]; num += 3; }
+		if (starGyro.isG13 == true) { A[num] = G13[0], A[num + 1] = G13[1], A[num + 2] = G13[2];	L[num / 3] = attMeas.gy13[a]; num += 3; }
+		if (starGyro.isG21 == true) { A[num] = G21[0], A[num + 1] = G21[1], A[num + 2] = G21[2];	L[num / 3] = attMeas.gy21[a]; num += 3; }
+		if (starGyro.isG22 == true) { A[num] = G22[0], A[num + 1] = G22[1], A[num + 2] = G22[2];	L[num / 3] = attMeas.gy22[a]; num += 3; }
+		if (starGyro.isG23 == true) { A[num] = G23[0], A[num + 1] = G23[1], A[num + 2] = G23[2];	L[num / 3] = attMeas.gy23[a]; num += 3; }
+		if (starGyro.isG31 == true) { A[num] = G31[0], A[num + 1] = G31[1], A[num + 2] = G31[2];	L[num / 3] = attMeas.gy31[a]; num += 3; }
+		if (starGyro.isG32 == true) { A[num] = G32[0], A[num + 1] = G32[1], A[num + 2] = G32[2];	L[num / 3] = attMeas.gy32[a]; num += 3; }
+		if (starGyro.isG33 == true) { A[num] = G33[0], A[num + 1] = G33[1], A[num + 2] = G33[2];	L[num / 3] = attMeas.gy33[a]; num += 3; }
 		mBase.Transpose(A, AT, num/3,3);
 		mBase.Multi(AT, A, ATA, 3, num/3, 3);
 		mBase.invers_matrix(ATA, 3);
@@ -2658,17 +2657,14 @@ double attSim::starErrorModel(double sig)
 {
 	return abs(3.3643*sig*sig + 11.298*sig - 0.0526);
 }
-
 double attSim::triGyroErrorModel(double sig)
 {
 	return abs(0.0002*sig*sig - 0.00008*sig + 0.00005);
 }
-
 double attSim::fiberGyroErrorModel(double sig)
 {
 	return abs(0.0003*sig);
 }
-
 //////////////////////////////////////////////////////////////////////////
 //功能：输出星敏和陀螺数据
 //输入：GFDM姿态结构体attMeas；四元数文本out1；陀螺文本out2
@@ -2711,7 +2707,7 @@ void attSim::outputQuat(vector<Quat> qOut, string name)
 	fclose(fp);
 }
 /////////////////////////////////////////////////////////////////////////
-//功能：姿态仿真与确定（外部接口）
+//功能：姿态仿真（外部接口）
 //输入：工作路径：workpath，传感器指标：mAtt，星敏陀螺参与指示：starGyro
 //输出：真实四元数（J2000到本体）；带误差四元数（J2000到本体）
 //注意：
@@ -2723,16 +2719,32 @@ void attitudeSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro)
 	attSim GFDM; 
 	GFDM.getAttParam(mAtt, workpath, starGyro);
 	attGFDM measGFDM;
-	vector<Quat>qTure; vector<Gyro>wTrue;
-	vector<Quat>qMeas; vector<Gyro>wMeas;
+	vector<Quat>qTure;
 	//根据欧拉角计算四元数
 	GFDM.readAttparam(workpath, qTure);
 	//仿真带误差四元数
-	GFDM.simAttparam(qTure,measGFDM);
+	GFDM.simAttparam(qTure, measGFDM);
 	//卡尔曼滤波处理
 	GFDM.EKF6StateForStarOpticAxis(measGFDM);
 }
-
+/////////////////////////////////////////////////////////////////////////
+//功能：姿态确定（外部接口）
+//输入：工作路径：workpath，传感器指标：mAtt，星敏陀螺参与指示：starGyro
+//输出：真实四元数（J2000到本体）；带误差四元数（J2000到本体）
+//注意：
+//作者：GZC
+//日期：2018.01.09
+//////////////////////////////////////////////////////////////////////////
+void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGyro)
+{
+	attSim GFDM;
+	GFDM.getAttParam(mAtt, workpath, starGyro);
+	//
+	attGFDM measGFDM;
+	GFDM.getQuatAndGyro(measGFDM);
+	//卡尔曼滤波处理
+	GFDM.EKF6StateForStarOpticAxis(measGFDM);
+}
 //////////////////////////////////////////////////////////////////////////
 //功能：姿态仿真程序（仅仿真四元数和陀螺数据）
 //输入：AttParm结构体，包含下列参数
