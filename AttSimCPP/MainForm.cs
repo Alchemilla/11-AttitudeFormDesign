@@ -31,7 +31,7 @@ namespace AttSimCPP
         //double[] wBias = new double[3];
         //double[] sArr = new double[9];//陀螺安装和尺度误差
         //double[] stabW = new double[3];//姿态稳定度
-        string path;
+        string path,path2;
         public double[] qMeas, dq, bias, berr, dq2, bias2, berr2, qNs, xestAll, xestAll2;
         static int nSim1 = 0, nSim2 = 0;
 
@@ -388,6 +388,7 @@ namespace AttSimCPP
             simAtt1.Show();
         }
 
+
         /// <summary>
         /// 功能：EKF滤波残差
         /// </summary>
@@ -606,6 +607,7 @@ namespace AttSimCPP
             textBox19.Text = "0.006";//陀螺噪声
             textBox20.Text = "3";//常值漂移
             textBox21.Text = "0.0005";//随机游走
+            textBox22.Text = path;
           }
         /// <summary>
         /// 真实数据路径
@@ -621,6 +623,7 @@ namespace AttSimCPP
                 string localFilePath = openDlg.FileName.ToString(); //获得文件路径 
                 path = localFilePath.Substring(0, localFilePath.LastIndexOf("\\")); ;
                 ShowInfo("成功找到路径：" + path);
+                textBox22.Text = path;
             }
             else
                 ShowInfo("失败：未设置路径");
@@ -662,14 +665,84 @@ namespace AttSimCPP
             //漂移噪声
             mAtt.sigu = double.Parse(textBox21.Text) * 1e-5;
 
+            progressBar1.Minimum = 0;
+            progressBar1.Maximum = 100;
+            progressBar1.Value = 50;
+
             if (!File.Exists(path + "\\ManeuverData_All.txt"))
             {
                 ShowInfo("没有ManeuverData_All.txt文件");
                 MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
                 return;
             }
-            DLLImport.attitudeSimAndDeter(path,mAtt, starGyro);
+            ShowInfo("开始姿态仿真，生成星敏四元数和陀螺角速度");
+            DLLImport.ExternalFileAttitudeSim(path,mAtt, starGyro);
+            progressBar1.Value = 100;
+            ShowInfo("姿态仿真完毕");
+        }
+        /// <summary>
+        /// 设置安装矩阵文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button14_Click(object sender, EventArgs e)
+        {
+            ShowInfo("选择星敏陀螺安装文件路径");
+            OpenFileDialog openDlg = new OpenFileDialog();
+            if (openDlg.ShowDialog() == DialogResult.OK)
+            {
+                path2 = openDlg.FileName.ToString(); //获得文件路径 
+                ShowInfo("成功找到路径：" + path2);
+            }
+            else
+                ShowInfo("失败：未设置路径");
         }
 
+        private void button15_Click(object sender, EventArgs e)
+        {
+            //首先判断选中了哪些星敏和陀螺           
+            if (checkBox1.Checked) { starGyro.isA = true; } else starGyro.isA = false;
+            if (checkBox2.Checked) { starGyro.isB = true; } else starGyro.isB = false;
+            if (checkBox3.Checked) { starGyro.isC = true; } else starGyro.isC = false;
+            if (checkBox4.Checked) { starGyro.isG11 = true; } else starGyro.isG11 = false;
+            if (checkBox5.Checked) { starGyro.isG12 = true; } else starGyro.isG12 = false;
+            if (checkBox6.Checked) { starGyro.isG13 = true; } else starGyro.isG13 = false;
+            if (checkBox7.Checked) { starGyro.isG21 = true; } else starGyro.isG21 = false;
+            if (checkBox8.Checked) { starGyro.isG22 = true; } else starGyro.isG22 = false;
+            if (checkBox9.Checked) { starGyro.isG23 = true; } else starGyro.isG23 = false;
+            if (checkBox10.Checked) { starGyro.isG31 = true; } else starGyro.isG31 = false;
+            if (checkBox11.Checked) { starGyro.isG32 = true; } else starGyro.isG32 = false;
+            if (checkBox12.Checked) { starGyro.isG33 = true; } else starGyro.isG33 = false;
+
+            //获取星敏陀螺频率和总时长
+            //mAtt.totalT = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
+            mAtt.freqQ = Convert.ToInt32(textBox15.Text);
+            mAtt.freqG = Convert.ToInt32(textBox17.Text);//string转数值的第1种转换方式
+            //星敏参数
+            mAtt.sig_ST = double.Parse(textBox16.Text);//星敏误差(单位：角秒) 
+            //陀螺噪声
+            mAtt.sigv = double.Parse(textBox19.Text) * 1e-4;
+            //陀螺漂移
+            double[] wBias = new double[3];
+            for (int i = 0; i < 3; i++)
+                wBias[i] = double.Parse(textBox20.Text);
+            mAtt.wBiasA = wBias;
+            //漂移噪声
+            mAtt.sigu = double.Parse(textBox21.Text) * 1e-5;
+
+            progressBar1.Minimum = 0;
+            progressBar1.Maximum = 100;
+            progressBar1.Value = 40;
+            if (!File.Exists(path + "\\ManeuverData_All.txt"))
+            {
+                ShowInfo("没有ManeuverData_All.txt文件");
+                MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
+                return;
+            }
+            ShowInfo("开始姿态确定...");
+            DLLImport.ExternalFileAttitudeDeter(path, mAtt, starGyro);
+            ShowInfo("姿态仿真完毕");
+            progressBar1.Value = 100;
+        }
     }
 }

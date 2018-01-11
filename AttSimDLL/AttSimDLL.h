@@ -40,7 +40,7 @@ ATTSIMDLL void attitudeDeterActivePushbroomStruct(AttParm mAtt,
 	double BeforeAfterT[2], char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
 //读取外部数据（包括主动推扫）然后仿真姿态
-ATTSIMDLL void attitudeSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro);
+ATTSIMDLL void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGyro);
 ATTSIMDLL void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGyro);
 
 class attSim
@@ -49,7 +49,7 @@ public:
 	attSim();
 	~attSim();
 	//获取各种参数
-	void getQuatAndGyro(attGFDM &measGFDM);
+	void getQuatAndGyro(attGFDM &attMeas);
 	void getAttParam(AttParm mAtt,string workpath);
 	void getAttParam(AttParm mAtt, string workpath, isStarGyro starGy);
 	void getQnGnum(int nQ, int nG);

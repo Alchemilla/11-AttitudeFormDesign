@@ -1204,9 +1204,39 @@ void attSim::getQnGnum(int nQ, int nG)
 {
 	nQuat = nQ, nGyro = nG;
 }
-void attSim::getQuatAndGyro(attGFDM &measGFDM)
+void attSim::getQuatAndGyro(attGFDM &attMeas)
 {
+	//输入真实q值和角速度值
+	string quatPath = path + "\\QuatErr.txt"; string gyroPath = path + "\\GyroErr.txt";
+	int num1, num2; 
+	FILE *fp1 = fopen(quatPath.c_str(), "r");
+	fscanf(fp1, "%d\n", &num1);
+	Quat attReadA, attReadB, attReadC;
+	for (int a = 0; a < num1; a++)
+	{	
+			fscanf(fp1, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", &attReadA.UT,
+				&attReadA.q1, &attReadA.q2, &attReadA.q3, &attReadA.q4,
+				&attReadB.q1, &attReadB.q2, &attReadB.q3, &attReadB.q4,
+				&attReadC.q1, &attReadC.q2, &attReadC.q3, &attReadC.q4);
+			attReadB.UT = attReadC.UT = attReadA.UT;
+			attMeas.qA.push_back(attReadA);
+			attMeas.qB.push_back(attReadB);
+			attMeas.qC.push_back(attReadC);
+	}	
 
+	FILE *fp2 = fopen(gyroPath.c_str(), "r");
+	fscanf(fp2, "%d\n", &num2);
+	double ut,g11,g12,g13,g21,g22,g23,g31,g32,g33;
+	for (int a = 0; a < num2; a++)
+	{
+		fscanf(fp2, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", &ut,
+			&g11,&g12,&g13,&g21,&g22,&g23,&g31,&g32,&g33);
+		attMeas.UT.push_back(ut);
+		attMeas.gy11.push_back(g11); attMeas.gy12.push_back(g12); attMeas.gy13.push_back(g13);
+		attMeas.gy21.push_back(g21); attMeas.gy22.push_back(g32); attMeas.gy23.push_back(g23);
+		attMeas.gy31.push_back(g31); attMeas.gy32.push_back(g32); attMeas.gy33.push_back(g33);
+	}
+	fclose(fp1), fclose(fp2);
 }
 //////////////////////////////////////////////////////////////////////////
 //功能：姿态仿真（15状态）
@@ -1937,6 +1967,8 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 	vector<vector<BmImStar>>BmIm; vector<Gyro>wMeas; Quat q0;
 	//根据姿态数据得到初始四元数、光轴矢量、陀螺测量值；
 	preAttparam(attMeas, q0, BmIm, wMeas);
+	int nQ = BmIm.size();
+	int nG = wMeas.size();
 	//删掉四元数之前的陀螺数据
 	int ii = 0;
 	while ((wMeas[ii].UT - BmIm[0][0].UT) < 0)
@@ -1960,9 +1992,9 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 	//预先计算估计四元数的数量
 	double utStart = BmIm[0][0].UT;
 	int a = 1, b = 0;
-	for (int i = 1; i < attDat.nGyro;)
+	for (int i = 1; i < nG;)
 	{
-		if (a < attDat.nQuat && (BmIm[a][0].UT - utStart) <= (wMeas[i].UT - utStart))
+		if (a < nQ && (BmIm[a][0].UT - utStart) <= (wMeas[i].UT - utStart))
 		{
 			utStart = BmIm[a][0].UT;	 a++;		b++;
 		}
@@ -1983,17 +2015,17 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 	Q << sigv33, zero33, zero33, sigu33;//过程噪声
 	Qest(0, 0) = q0.q1, Qest(0, 1) = q0.q2;
 	Qest(0, 2) = q0.q3, Qest(0, 3) = q0.q4;	
-	vector<Quat>quatEst(attDat.nGyro);
-	double *xest_store = new double[6 * attDat.nGyro];
+	vector<Quat>quatEst(nG);
+	double *xest_store = new double[6 * nG];
 	quatEst[0].UT = utStart;
 	quatEst[0].q1 = Qest(b, 0), quatEst[0].q2 = Qest(b, 1);
 	quatEst[0].q3 = Qest(b, 2), quatEst[0].q4 = Qest(b, 3);
 	xest_store[0] = wMeas[0].UT; xest_store[1] = 0; xest_store[2] = 0;
 	xest_store[3] = 0; xest_store[4] = 0, xest_store[5] = 0;
 
-	for (int i = 1; i < attDat.nGyro;)
+	for (int i = 1; i < nG;)
 	{
-		if (a < attDat.nQuat && (BmIm[a][0].UT - utStart) <= (wMeas[i].UT - utStart))
+		if (a < nQ && (BmIm[a][0].UT - utStart) <= (wMeas[i].UT - utStart))
 		{
 			/****************陀螺测量值预测***************/
 			dt = BmIm[a][0].UT - utStart;
@@ -2714,7 +2746,7 @@ void attSim::outputQuat(vector<Quat> qOut, string name)
 //作者：GZC
 //日期：2018.01.09
 //////////////////////////////////////////////////////////////////////////
-void attitudeSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro)
+void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGyro)
 {
 	attSim GFDM; 
 	GFDM.getAttParam(mAtt, workpath, starGyro);
@@ -2725,7 +2757,7 @@ void attitudeSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro)
 	//仿真带误差四元数
 	GFDM.simAttparam(qTure, measGFDM);
 	//卡尔曼滤波处理
-	GFDM.EKF6StateForStarOpticAxis(measGFDM);
+	//GFDM.EKF6StateForStarOpticAxis(measGFDM);
 }
 /////////////////////////////////////////////////////////////////////////
 //功能：姿态确定（外部接口）
@@ -2739,7 +2771,7 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGyr
 {
 	attSim GFDM;
 	GFDM.getAttParam(mAtt, workpath, starGyro);
-	//
+	//从文件读取星敏陀螺数据
 	attGFDM measGFDM;
 	GFDM.getQuatAndGyro(measGFDM);
 	//卡尔曼滤波处理
