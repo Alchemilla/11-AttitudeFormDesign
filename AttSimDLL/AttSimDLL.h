@@ -48,6 +48,7 @@ public:
 	attSim();
 	~attSim();
 	void getAttParam(AttParm mAtt,string workpath);
+	void getAttParam(AttParm mAtt, string workpath, isStarGyro starGy);
 	void getQnGnum(int nQ, int nG);
 	void simQuatAndGyro15State(Quat *&qTrue, Quat *&qMeas, Gyro *&wTrue, Gyro *&wMeas);
 	void compareTrueNoise(Quat *qTrue, Quat *qMeas, double *qNoise);
@@ -57,18 +58,28 @@ public:
 	//以下为主动推扫相关函数
 	void EKF6StateForStarOpticAxis(attGFDM attMeas);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
-	void simAttparam(vector<Quat>qTrue, isStarGyro starGyro, attGFDM attMeas);
+	void simAttparam(vector<Quat>qTrue,attGFDM &attMeas);
 	bool readAttparam(string pushbroomDat, vector<Quat>&qTrue);
 	void preAttparam(attGFDM attMeas,Quat &q0, vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas);
 	void predictQuat(Gyro wMeas, Quat &Qk, double dt);
 	void calcuOmega(Quat qL, Quat qR, Gyro &wTrue);
 	//转换数据
-	void transCrj2StarGyro(isStarGyro starGyro, vector<Quat>qTrueInter1,vector<Gyro>wTrue,attGFDM &attMeas);
+	void transCrj2StarGyro(vector<Quat>qTrueInter1,vector<Gyro>wTrue,attGFDM &attMeas,bool isErr);
+	//增加误差
+	void addErrorForQuat(vector<Quat>&qSim);
+	void addErrorForGyro(vector<double>&wSim);
+	void addErrorForQuatActive(vector<Quat>&qSim);
+	void addErrorForTriGyroActive(vector<double>&wSim);
+	void addErrorForFiberGyroActive(vector<double>&wSim);
+	double starErrorModel(double sig);
+	double triGyroErrorModel(double sig);
+	double fiberGyroErrorModel(double sig);
 	//各种输出函数
-	void outputTrueQuatGyro(attGFDM attMeas, string out1, string out2);
+	void outputQuatGyroTXT(attGFDM attMeas, string out1, string out2);
+	void outputQuat(vector<Quat>qOut,string name);
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量
-	AttParm attDat;
+	AttParm attDat; isStarGyro starGyro;
 	string path;
 	static double starAali[9], starBali[9], starCali[9];//星敏安装
 	static double G11[3], G12[3], G13[3], G21[3], G22[3], G23[3], G31[3], G32[3], G33[3];//陀螺安装

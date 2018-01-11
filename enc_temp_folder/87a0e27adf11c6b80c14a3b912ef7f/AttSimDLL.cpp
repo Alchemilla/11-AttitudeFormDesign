@@ -2229,56 +2229,11 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 //输出：
 //注意：
 //作者：GZC
-//日期：2018.01.11
+//日期：2018.01.09
 //////////////////////////////////////////////////////////////////////////
-void attSim::preAttparam(attGFDM attMeas, Quat &q0, 
-	vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas)
+void attSim::preAttparam(attGFDM attMeas, Quat &q0, vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas)
 {
-	double Cbj[9], Crj[9], Cbr[9],Bm[3],Im[3]; Quat qCbj;
-	double optical[3] = { 0,0,1 };
-	for (int a = 0; a < attMeas.qA.size(); a++)
-	{
-		vector<BmImStar>BmImTmp;
-		BmImStar BmImTmp2;
-		if (starGyro.isA == true)
-		{
-			mBase.quat2matrix(attMeas.qA[a].q1, attMeas.qA[a].q2, attMeas.qA[a].q3, attMeas.qA[a].q4, Crj);
-			memcpy(Cbr, starAali, sizeof(double) * 9);//Crb
-			mBase.invers_matrix(Cbr, 3);//Cbr
-			mBase.invers_matrix(Crj, 3);//Cjr
-			mBase.Multi(Cbr, optical, Bm, 3, 3, 1);
-			mBase.Multi(Crj, optical, Im, 3, 3, 1);
-			memcpy(BmImTmp2.Bm, Bm, sizeof(double) * 3);
-			memcpy(BmImTmp2.Im, Im, sizeof(double) * 3);
-			BmImTmp.push_back(BmImTmp2);
-		}
 
-		if (starGyro.isB == true)
-		{
-			mBase.quat2matrix(attMeas.qB[a].q1, attMeas.qB[a].q2, attMeas.qB[a].q3, attMeas.qB[a].q4, Crj);
-			memcpy(Cbr, starBali, sizeof(double) * 9);//Crb
-			mBase.invers_matrix(Cbr, 3);//Cbr
-			mBase.invers_matrix(Crj, 3);//Cjr
-			mBase.Multi(Cbr, optical, Bm, 3, 3, 1);
-			mBase.Multi(Crj, optical, Im, 3, 3, 1);
-			memcpy(BmImTmp2.Bm, Bm, sizeof(double) * 3);
-			memcpy(BmImTmp2.Im, Im, sizeof(double) * 3);
-			BmImTmp.push_back(BmImTmp2);
-		}
-
-		if (starGyro.isC == true)
-		{
-			mBase.quat2matrix(attMeas.qC[a].q1, attMeas.qC[a].q2, attMeas.qC[a].q3, attMeas.qC[a].q4, Crj);
-			memcpy(Cbr, starCali, sizeof(double) * 9);//Crb
-			mBase.invers_matrix(Cbr, 3);//Cbr
-			mBase.invers_matrix(Crj, 3);//Cjr
-			mBase.Multi(Cbr, optical, Bm, 3, 3, 1);
-			mBase.Multi(Crj, optical, Im, 3, 3, 1);
-			memcpy(BmImTmp2.Bm, Bm, sizeof(double) * 3);
-			memcpy(BmImTmp2.Im, Im, sizeof(double) * 3);
-			BmImTmp.push_back(BmImTmp2);
-		}
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////

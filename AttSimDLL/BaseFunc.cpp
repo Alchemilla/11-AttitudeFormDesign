@@ -549,11 +549,11 @@ double BaseFunc::RandomDistribution(double mean, double sigma, int n, long randC
 		}
 		if (fabs(a[0]) > 1)
 		{
-			timetemp = (unsigned int)fabs(a[0]);
+			timetemp = (unsigned int)(fabs(a[0])* fabs(a[0])* fabs(a[0]));
 		}
 		else
 		{
-			timetemp = (unsigned int)1. / fabs(a[0]);
+			timetemp = (unsigned int)(1. / fabs(a[0]) / fabs(a[0]) / fabs(a[0]));
 		}
 	}
 	// 产生每次都相同的随机数,比如稳定度就需要用到
