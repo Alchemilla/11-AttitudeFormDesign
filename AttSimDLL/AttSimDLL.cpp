@@ -2697,6 +2697,66 @@ double attSim::fiberGyroErrorModel(double sig)
 {
 	return abs(0.0003*sig);
 }
+
+void attSim::compareTureEKF()
+{
+	string strpath = path + "\\Attitude.txt";
+	string strpath1 = path + "\\EKFquater.txt";
+	FILE *fpTrue = fopen(strpath.c_str(), "r");
+	FILE *fpEKF = fopen(strpath1.c_str(), "r");
+	int num,num2;
+	fscanf(fpEKF, "%d\n", &num);
+	double *UT=new double[num];
+	Quat *qEKF = new Quat[num];
+	for (int a = 0; a < num; a++)
+	{
+		fscanf(fpEKF, "%lf\t%lf\t%lf\t%lf\t%lf\n", &qEKF[a].UT, &qEKF[a].q1, &qEKF[a].q2, &qEKF[a].q3, &qEKF[a].q4);
+		UT[a] = qEKF[a].UT;
+	}
+	fscanf(fpTrue, "%d\n", &num2);
+	Quat *qTrue = new Quat[num2];
+	Quat *qTrueI = new Quat[num];
+	for (int a = 0; a < num; a++)
+	{
+		fscanf(fpTrue, "%lf\t%lf\t%lf\t%lf\t%lf\n", &qTrue[a].UT, &qTrue[a].q1, &qTrue[a].q2, &qTrue[a].q3, &qTrue[a].q4);
+	}
+	mBase.QuatInterpolation(qTrue, num2, UT, num, qTrueI);
+
+	//添加RMS指标(正确做法,2017.11.02)
+	double rmsQ1, rmsQ2, rmsQ3;
+	rmsQ1 = rmsQ2 = rmsQ3 = 0;
+	double aveQ1, aveQ2, aveQ3;
+	aveQ1 = aveQ2 = aveQ3 = 0;
+	Quat *dq3 = new Quat[num];
+
+	string strpath2 = path + "\\compare.txt";
+	FILE *fp= fopen(strpath2.c_str(), "w");
+	fprintf(fp, "%d\n", num);
+	for (int i = 0; i < num; i++)
+	{
+		qTrueI[i].q4 = -qTrueI[i].q4;
+		mBase.quatMult(qTrueI[i], qEKF[i], dq3[i]);
+		dq3[i].q1 = dq3[i].q1 * 2 / PI * 180 * 3600;
+		dq3[i].q2 = dq3[i].q2 * 2 / PI * 180 * 3600;
+		dq3[i].q3 = dq3[i].q3 * 2 / PI * 180 * 3600;
+		fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n",
+			qTrueI[i].UT, qTrueI[i].q1, qTrueI[i].q2, qTrueI[i].q3, qTrueI[i].q4,
+			qEKF[i].q1, qEKF[i].q2, qEKF[i].q3, qEKF[i].q4, dq3[i].q1, dq3[i].q2, dq3[i].q3);
+		aveQ1 += dq3[i].q1 / num; aveQ2 += dq3[i].q2 / num; aveQ3 += dq3[i].q3 / num;
+	}
+	for (int i = 0; i < num; i++)
+	{
+		rmsQ1 += pow(dq3[i].q1 - aveQ1, 2);
+		rmsQ2 += pow(dq3[i].q2 - aveQ2, 2);
+		rmsQ3 += pow(dq3[i].q3 - aveQ3, 2);
+	}
+	rmsQ1 = sqrt(rmsQ1 / (num - 1)); rmsQ2 = sqrt(rmsQ2 / (num - 1)); rmsQ3 = sqrt(rmsQ3 / (num - 1));
+	double rmsAll = sqrt(rmsQ1*rmsQ1 + rmsQ2*rmsQ2 + rmsQ3*rmsQ3);
+	fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\n", rmsQ1, rmsQ2, rmsQ3, rmsAll);
+	fclose(fp);
+	delete[] UT; UT = NULL; 
+	delete[] dq3, qEKF, qTrue, qTrueI; dq3 = qEKF = qTrueI = qTrue = NULL;
+}
 //////////////////////////////////////////////////////////////////////////
 //功能：输出星敏和陀螺数据
 //输入：GFDM姿态结构体attMeas；四元数文本out1；陀螺文本out2
@@ -2776,6 +2836,8 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGyr
 	GFDM.getQuatAndGyro(measGFDM);
 	//卡尔曼滤波处理
 	GFDM.EKF6StateForStarOpticAxis(measGFDM);
+	//姿态比较
+	GFDM.compareTureEKF();
 }
 //////////////////////////////////////////////////////////////////////////
 //功能：姿态仿真程序（仅仿真四元数和陀螺数据）

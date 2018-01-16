@@ -59,7 +59,9 @@ public:
 	void compareTrueEKF15State(string pathekf, string pathb, Quat *qTrue, Quat *qEst, double *dqOut, double *xest_store);
 	void ExtendedKalmanFilter15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
 	void EKFForwardAndBackforward15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
+	//////////////////////////////////////////////////////////////////////////
 	//以下为主动推扫相关函数
+	//////////////////////////////////////////////////////////////////////////
 	void EKF6StateForStarOpticAxis(attGFDM attMeas);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
 	void simAttparam(vector<Quat>qTrue,attGFDM &attMeas);
@@ -78,6 +80,8 @@ public:
 	double starErrorModel(double sig);
 	double triGyroErrorModel(double sig);
 	double fiberGyroErrorModel(double sig);
+	//比较函数
+	void compareTureEKF();
 	//各种输出函数
 	void outputQuatGyroTXT(attGFDM attMeas, string out1, string out2);
 	void outputQuat(vector<Quat>qOut,string name);
