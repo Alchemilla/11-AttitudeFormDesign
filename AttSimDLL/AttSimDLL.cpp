@@ -1169,9 +1169,13 @@ double attSim::starCali[] =//Crb
 	cos(67.7656 / 180 * PI),cos(26.5 / 180 * PI),cos(103.677 / 180 * PI),
 	cos(40.6285 / 180 * PI),cos(116.5 / 180 * PI),cos(118.31 / 180 * PI)
 };
-double attSim::G11[] = { -cos(35.2644 / 180 * PI)*cos(40. / 180 * PI), cos(35.2644 / 180 * PI)*cos(50. / 180 * PI) ,cos(54.7356 / 180 * PI) };
-double attSim::G12[] = { -cos(35.2644 / 180 * PI)*cos(80. / 180 * PI), -cos(35.2644 / 180 * PI)*cos(10. / 180 * PI) ,cos(54.7356 / 180 * PI) };
-double attSim::G13[] = { cos(35.2644 / 180 * PI)*cos(20. / 180 * PI), cos(35.2644 / 180 * PI)*cos(70. / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G11[] = { 1,0,0 };
+double attSim::G12[] = { 0,1,0 };
+double attSim::G13[] = { 0,0,1 };
+
+//double attSim::G11[] = { -cos(35.2644 / 180 * PI)*cos(40. / 180 * PI), cos(35.2644 / 180 * PI)*cos(50. / 180 * PI) ,cos(54.7356 / 180 * PI) };
+//double attSim::G12[] = { -cos(35.2644 / 180 * PI)*cos(80. / 180 * PI), -cos(35.2644 / 180 * PI)*cos(10. / 180 * PI) ,cos(54.7356 / 180 * PI) };
+//double attSim::G13[] = { cos(35.2644 / 180 * PI)*cos(20. / 180 * PI), cos(35.2644 / 180 * PI)*cos(70. / 180 * PI) ,cos(54.7356 / 180 * PI) };
 double attSim::G21[] = { cos(35.2644 / 180 * PI)*cos(60. / 180 * PI), cos(35.2644 / 180 * PI)*cos(30. / 180 * PI) ,cos(54.7356 / 180 * PI) };
 double attSim::G22[] = { -cos(35.2644 / 180 * PI),0 ,cos(54.7356 / 180 * PI) };
 double attSim::G23[] = { cos(35.2644 / 180 * PI)*cos(60. / 180 * PI), -cos(35.2644 / 180 * PI)*cos(30. / 180 * PI) ,cos(54.7356 / 180 * PI) };
@@ -1207,7 +1211,7 @@ void attSim::getQnGnum(int nQ, int nG)
 void attSim::getQuatAndGyro(attGFDM &attMeas)
 {
 	//输入真实q值和角速度值
-	string quatPath = path + "\\QuatErr.txt"; string gyroPath = path + "\\GyroErr.txt";
+	string quatPath = path + "\\QuatErr.txt"; string gyroPath = path + "\\GyroErr.txt";	
 	int num1, num2; 
 	FILE *fp1 = fopen(quatPath.c_str(), "r");
 	fscanf(fp1, "%d\n", &num1);
@@ -2022,6 +2026,9 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 	quatEst[0].q3 = Qest(b, 2), quatEst[0].q4 = Qest(b, 3);
 	xest_store[0] = wMeas[0].UT; xest_store[1] = 0; xest_store[2] = 0;
 	xest_store[3] = 0; xest_store[4] = 0, xest_store[5] = 0;
+	
+	string biasEst = path + "\\biasEst.txt";
+	FILE *fp = fopen(biasEst.c_str(), "w");
 
 	for (int i = 1; i < nG;)
 	{
@@ -2054,14 +2061,14 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 
 			/****************星敏测量值更新***************/
 			double Cbj[9];
-			mBase.quat2matrix(Qest(i, 0), Qest(i, 1), Qest(i, 2), Qest(i, 3), Cbj);//Cbj
+			mBase.quat2matrix(Qest(b, 0), Qest(b, 1), Qest(b, 2), Qest(b, 3), Cbj);//Cbj
 			int num = BmIm[a].size();
 			MatrixXd mH(3 * num, 6), mDetZ(3 * num, 1), k(6, 3 * num);
 			MatrixXd r1 = pow(sig, 2)*MatrixXd::Identity(3 * num, 3 * num);
 			Measurement(BmIm[a], Cbj, mH, mDetZ);
 			k = p*mH.transpose()*(mH*p*mH.transpose() + r1).inverse();//k(6*6)
 			p = (eye66 - k*mH)*p;
-			xest.row(i) = xest.row(i) + (k*mDetZ).transpose();
+			xest.row(b) = xest.row(b) + (k*mDetZ).transpose();
 			xe = 0.5*xest.row(b).head(3);
 			qe11 = Qest(b, 0) + xe(2)*Qest(b, 1) - xe(1)*Qest(b, 2) + xe(0)*Qest(b, 3);
 			qe22 = -xe(2)*Qest(b, 0) + Qest(b, 1) + xe(0)*Qest(b, 2) + xe(1)*Qest(b, 3);
@@ -2079,7 +2086,7 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 			dt = wMeas[i].UT - utStart;
 			utStart = wMeas[i].UT;
 			we(b, 0) = wMeas[i - 1].wx - xest(b, 3);//注意是i-1，因为此刻的四元数是上一刻陀螺递推而来
-			we(b, 1) = wMeas[i - 1].wy - xest(b, 4);
+			we(b, 1) = wMeas[i - 1].wy - xest(b, 4);//此时，根据qR和qL计算得到的Omega，时间与qL一致
 			we(b, 2) = wMeas[i - 1].wz - xest(b, 5);
 			w = sqrt(we(b, 0)*we(b, 0) + we(b, 1)*we(b, 1) + we(b, 2)*we(b, 2));
 			wa << 0, -we(b, 2), we(b, 1), we(b, 2), 0, -we(b, 0), -we(b, 1), we(b, 0), 0;
@@ -2106,11 +2113,13 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 			//保存xest值
 			xest_store[6 * i + 0] = wMeas[i].UT; xest_store[6 * i + 1] = xest(b, 1); xest_store[6 * i + 2] = xest(b, 2);
 			xest_store[6 * i + 3] = xest(b, 3); xest_store[6 * i + 4] = xest(b, 4); xest_store[6 * i + 5] = xest(b, 5);
-			
+			fprintf(fp, "%.15f\t%.15f\t%.15f\n", xest(b, 3), xest(b, 4), xest(b, 5));
+
 			b++;
 			i++;
 		}
 	}
+	fclose(fp);
 	outputQuat(quatEst, "\\EKFquater.txt");
 }
 
@@ -2401,7 +2410,7 @@ void attSim::predictQuat(Gyro wMeas, Quat &Qk, double dt)
 //功能：根据相邻四元数得到角速度
 //输入：相邻两个四元数qTrue
 //输出：角速度wTrue
-//注意：wx,wy,wz可能在不同转序时候不同
+//注意：wx,wy,wz可能在不同转序时候不同；陀螺数据获取时间和左q一致
 //作者：GZC
 //日期：2018.01.10
 //////////////////////////////////////////////////////////////////////////
@@ -2412,7 +2421,7 @@ void attSim::calcuOmega(Quat qL, Quat qR, Gyro &wTrue)
 	mBase.quat2matrix(qR.q1, qR.q2, qR.q3, qR.q4, rR);
 	mBase.Multi(rR, rL, Res, 3, 3, 3);
 	dt = qR.UT - qL.UT;
-	wTrue.UT = qR.UT;
+	wTrue.UT = qL.UT;
 	wTrue.wx = (Res[5] - Res[7]) / 2 / dt;
 	wTrue.wy = (Res[6] - Res[2]) / 2 / dt;
 	wTrue.wz = (Res[1] - Res[3]) / 2 / dt;
@@ -2608,7 +2617,7 @@ void attSim::addErrorForGyro(vector<double>&wSim)
 	double wbias1 = attDat.wBiasA[0];
 	double *bias1 = new double[attDat.nGyro]; 
 	double *wn1 = new double[attDat.nGyro]; 
-	mBase.RandomDistribution(wbias1*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), attDat.nGyro / 3, 0, bias1);//注意是*dt，matlab中是/dt
+	mBase.RandomDistribution(wbias1*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), attDat.nGyro, 0, bias1);//注意是*dt，matlab中是/dt
 	mBase.RandomDistribution(0, sqrt(attDat.sigv*attDat.sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG) / 3, attDat.nGyro, 0, wn1);
 	//添加测量误差后的星敏和陀螺数据
 	for (int i = 0; i < attDat.nGyro; i++)
@@ -2628,18 +2637,19 @@ void attSim::addErrorForGyro(vector<double>&wSim)
 //////////////////////////////////////////////////////////////////////////
 void attSim::addErrorForQuatActive(vector<Quat>&qSim)
 {
-	double sig_tracker, noise,vel;
+	double sig_tracker=1, vel, sig_trackerFact;
+	double *noise = new double[qSim.size()];
+	mBase.RandomDistribution(0, sig_tracker / 3, qSim.size(), 0, noise);
 	Gyro vOmega; 
 	vector<Quat>qMeas(qSim.size());
 	for (int a=0;a<qSim.size()-1;a++)
 	{
 		calcuOmega(qSim[a],qSim[a+1],vOmega);
 		vel = sqrt(pow(vOmega.wx / PI * 180, 2)+ pow(vOmega.wy / PI * 180, 2)+ pow(vOmega.wz / PI * 180, 2));
-		sig_tracker = starErrorModel(vel); 
-		mBase.RandomDistribution(0, sig_tracker/3, 1, 0, &noise); 
-		noise *= 0.5 / 3600 * PI / 180;
+		sig_trackerFact = starErrorModel(vel); 		
+		noise[a] *= 0.5 / 3600 * PI / 180*sig_trackerFact; 		
 		Quat q2;
-		q2.q1 = noise; q2.q2 = noise; q2.q3 = noise, q2.q4 = 1;
+		q2.q1 = noise[a]; q2.q2 = noise[a]; q2.q3 = noise[a], q2.q4 = 1;
 		mBase.quatMult(qSim[a], q2, qMeas[a]);
 		double q3norm = sqrt(pow(qMeas[a].q1, 2) + pow(qMeas[a].q2, 2) +
 			pow(qMeas[a].q3, 2) + pow(qMeas[a].q4, 2));
@@ -2647,7 +2657,7 @@ void attSim::addErrorForQuatActive(vector<Quat>&qSim)
 		qMeas[a].q1 /= q3norm; qMeas[a].q2 /= q3norm;
 		qMeas[a].q3 /= q3norm; qMeas[a].q4 /= q3norm;
 		qSim[a] = qMeas[a];
-	}
+	}	
 }
 //////////////////////////////////////////////////////////////////////////
 //功能：添加陀螺误差(主动推扫)
@@ -2662,13 +2672,16 @@ void attSim::addErrorForTriGyroActive(vector<double>&wSim)
 	//设置常值漂移和随机漂移噪声
 	double dtG = 1. / attDat.freqG;
 	double wbias = attDat.wBiasA[0];
-	double bias, wn,sigv;
+	double *wn = new double[wSim.size()];
+	double *bias = new double[wSim.size()];
+	double sigv=5e-5/180*PI,sigvFact;
+	mBase.RandomDistribution(0, sqrt(sigv*sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG) / 3, wSim.size(), 0, wn);
+	mBase.RandomDistribution(wbias*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG) / 3, wSim.size(), 0, bias);//注意是*dt，matlab中是/dt
+
 	for (int a=0;a<wSim.size();a++)
 	{
-		sigv = triGyroErrorModel(wSim[a]);
-		mBase.RandomDistribution(wbias*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG) / 3, 1, 0, &bias);//注意是*dt，matlab中是/dt
-		mBase.RandomDistribution(0, sqrt(sigv*sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG) / 3, 1, 0, &wn);
-		wSim[a] = wSim[a] + wn + bias;
+		sigvFact = triGyroErrorModel(wSim[a]);		
+		wSim[a] = wSim[a] + wn[a]* sigvFact/sigv + bias[a];		
 	}
 }
 void attSim::addErrorForFiberGyroActive(vector<double>&wSim)
@@ -2691,7 +2704,7 @@ double attSim::starErrorModel(double sig)
 }
 double attSim::triGyroErrorModel(double sig)
 {
-	return abs(0.0002*sig*sig - 0.00008*sig + 0.00005);
+	return abs(0.0002*sig*sig - 0.00008*sig + 0.00005)/180*PI;
 }
 double attSim::fiberGyroErrorModel(double sig)
 {

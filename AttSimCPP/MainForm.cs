@@ -366,7 +366,7 @@ namespace AttSimCPP
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Show();
         }
-                /// <summary>
+        /// <summary>
         /// 功能：双向EKF滤波残差
         /// </summary>
         private void button5_Click(object sender, EventArgs e)
@@ -387,8 +387,6 @@ namespace AttSimCPP
             simAtt1.Owner = this;                //将子窗体对象的所有者设为Form1
             simAtt1.Show();
         }
-
-
         /// <summary>
         /// 功能：EKF滤波残差
         /// </summary>
