@@ -1169,13 +1169,13 @@ double attSim::starCali[] =//Crb
 	cos(67.7656 / 180 * PI),cos(26.5 / 180 * PI),cos(103.677 / 180 * PI),
 	cos(40.6285 / 180 * PI),cos(116.5 / 180 * PI),cos(118.31 / 180 * PI)
 };
-double attSim::G11[] = { 1,0,0 };
-double attSim::G12[] = { 0,1,0 };
-double attSim::G13[] = { 0,0,1 };
+//double attSim::G11[] = { 1,0,0 };
+//double attSim::G12[] = { 0,1,0 };
+//double attSim::G13[] = { 0,0,1 };
 
-//double attSim::G11[] = { -cos(35.2644 / 180 * PI)*cos(40. / 180 * PI), cos(35.2644 / 180 * PI)*cos(50. / 180 * PI) ,cos(54.7356 / 180 * PI) };
-//double attSim::G12[] = { -cos(35.2644 / 180 * PI)*cos(80. / 180 * PI), -cos(35.2644 / 180 * PI)*cos(10. / 180 * PI) ,cos(54.7356 / 180 * PI) };
-//double attSim::G13[] = { cos(35.2644 / 180 * PI)*cos(20. / 180 * PI), cos(35.2644 / 180 * PI)*cos(70. / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G11[] = { -cos(35.2644 / 180 * PI)*cos(40. / 180 * PI), cos(35.2644 / 180 * PI)*cos(50. / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G12[] = { -cos(35.2644 / 180 * PI)*cos(80. / 180 * PI), -cos(35.2644 / 180 * PI)*cos(10. / 180 * PI) ,cos(54.7356 / 180 * PI) };
+double attSim::G13[] = { cos(35.2644 / 180 * PI)*cos(20. / 180 * PI), cos(35.2644 / 180 * PI)*cos(70. / 180 * PI) ,cos(54.7356 / 180 * PI) };
 double attSim::G21[] = { cos(35.2644 / 180 * PI)*cos(60. / 180 * PI), cos(35.2644 / 180 * PI)*cos(30. / 180 * PI) ,cos(54.7356 / 180 * PI) };
 double attSim::G22[] = { -cos(35.2644 / 180 * PI),0 ,cos(54.7356 / 180 * PI) };
 double attSim::G23[] = { cos(35.2644 / 180 * PI)*cos(60. / 180 * PI), -cos(35.2644 / 180 * PI)*cos(30. / 180 * PI) ,cos(54.7356 / 180 * PI) };
@@ -2042,10 +2042,13 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 			we(b, 2) = wMeas[i - 1].wz - xest(b, 5);
 			w = sqrt(we(b, 0)*we(b, 0) + we(b, 1)*we(b, 1) + we(b, 2)*we(b, 2));
 			wa << 0, -we(b, 2), we(b, 1), we(b, 2), 0, -we(b, 0), -we(b, 1), we(b, 0), 0;
+
+			//Propagate Covariance
 			fmat << -wa, -eye33, zero33, zero33;
 			gmat << -eye33, zero33, zero33, eye33;
 			phi = eye66 + fmat*dt;
 			gamma = (eye66*dt + fmat*dt*dt / 2)*gmat;
+			p = phi*p*phi.transpose() + gamma*Q*gamma.transpose();
 			//Propagate State
 			qw1 = we(b, 0) / w*sin(0.5*w*dt);
 			qw2 = we(b, 1) / w*sin(0.5*w*dt);
@@ -2053,8 +2056,6 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 			qw4 = cos(0.5*w*dt);
 			om << qw4, qw3, -qw2, qw1, -qw3, qw4, qw1, qw2, qw2, -qw1, qw4, qw3, -qw1, -qw2, -qw3, qw4;
 			Qest.row(b + 1) = (om*Qest.row(b).transpose()).transpose();
-			//Propagate Covariance
-			p = phi*p*phi.transpose() + gamma*Q*gamma.transpose();
 			xest.row(b + 1) = xest.row(b);
 			xest(b + 1, 0) = 0; xest(b + 1, 1) = 0; xest(b + 1, 2) = 0;
 			b++;
@@ -2090,10 +2091,13 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 			we(b, 2) = wMeas[i - 1].wz - xest(b, 5);
 			w = sqrt(we(b, 0)*we(b, 0) + we(b, 1)*we(b, 1) + we(b, 2)*we(b, 2));
 			wa << 0, -we(b, 2), we(b, 1), we(b, 2), 0, -we(b, 0), -we(b, 1), we(b, 0), 0;
+
+			//Propagate Covariance
 			fmat << -wa, -eye33, zero33, zero33;
 			gmat << -eye33, zero33, zero33, eye33;
 			phi = eye66 + fmat*dt;
 			gamma = (eye66*dt + fmat*dt*dt / 2)*gmat;
+			p = phi*p*phi.transpose() + gamma*Q*gamma.transpose();
 			//Propagate State
 			qw1 = we(b, 0) / w*sin(0.5*w*dt);
 			qw2 = we(b, 1) / w*sin(0.5*w*dt);
@@ -2101,8 +2105,6 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 			qw4 = cos(0.5*w*dt);
 			om << qw4, qw3, -qw2, qw1, -qw3, qw4, qw1, qw2, qw2, -qw1, qw4, qw3, -qw1, -qw2, -qw3, qw4;
 			Qest.row(b + 1) = (om*Qest.row(b).transpose()).transpose();
-			//Propagate Covariance
-			p = phi*p*phi.transpose() + gamma*Q*gamma.transpose();
 			xest.row(b + 1) = xest.row(b);
 			xest(b + 1, 0) = 0; xest(b + 1, 1) = 0; xest(b + 1, 2) = 0;
 
@@ -2144,7 +2146,7 @@ void attSim::Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, Matri
 		pbe_cr << 0, -pbe(2, a), pbe(1, a), pbe(2, a), 0, -pbe(0, a), -pbe(1, a), pbe(0, a), 0;
 		mH.block<3, 6>(3 * a, 0) << pbe_cr, MatrixXd::Zero(3, 3);
 		Map<MatrixXd>bm(BmIm[a].Bm, 3, 1);
-		mDetZ.block<3, 1>(3 * a, 0) << pbe.block<3, 1>(0, a) - bm;
+		mDetZ.block<3, 1>(3 * a, 0) << bm - pbe.block<3, 1>(0, a);
 	}
 }
 
