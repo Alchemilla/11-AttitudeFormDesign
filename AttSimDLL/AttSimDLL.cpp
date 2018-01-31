@@ -1237,7 +1237,7 @@ void attSim::getQuatAndGyro(attGFDM &attMeas)
 			&g11,&g12,&g13,&g21,&g22,&g23,&g31,&g32,&g33);
 		attMeas.UT.push_back(ut);
 		attMeas.gy11.push_back(g11); attMeas.gy12.push_back(g12); attMeas.gy13.push_back(g13);
-		attMeas.gy21.push_back(g21); attMeas.gy22.push_back(g32); attMeas.gy23.push_back(g23);
+		attMeas.gy21.push_back(g21); attMeas.gy22.push_back(g22); attMeas.gy23.push_back(g23);
 		attMeas.gy31.push_back(g31); attMeas.gy32.push_back(g32); attMeas.gy33.push_back(g33);
 	}
 	fclose(fp1), fclose(fp2);
@@ -2026,9 +2026,6 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 	quatEst[0].q3 = Qest(b, 2), quatEst[0].q4 = Qest(b, 3);
 	xest_store[0] = wMeas[0].UT; xest_store[1] = 0; xest_store[2] = 0;
 	xest_store[3] = 0; xest_store[4] = 0, xest_store[5] = 0;
-	
-	string biasEst = path + "\\biasEst.txt";
-	FILE *fp = fopen(biasEst.c_str(), "w");
 
 	for (int i = 1; i < nG;)
 	{
@@ -2115,13 +2112,11 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 			//±£´æxestÖµ
 			xest_store[6 * i + 0] = wMeas[i].UT; xest_store[6 * i + 1] = xest(b, 1); xest_store[6 * i + 2] = xest(b, 2);
 			xest_store[6 * i + 3] = xest(b, 3); xest_store[6 * i + 4] = xest(b, 4); xest_store[6 * i + 5] = xest(b, 5);
-			fprintf(fp, "%.15f\t%.15f\t%.15f\n", xest(b, 3), xest(b, 4), xest(b, 5));
-
 			b++;
 			i++;
 		}
 	}
-	fclose(fp);
+	outputBias(xest_store, nG, "\\BiasEstimate.txt");
 	outputQuat(quatEst, "\\EKFquater.txt");
 }
 
@@ -2356,7 +2351,7 @@ void attSim::preAttparam(attGFDM attMeas, Quat &q0,
 	double *L = new double[num];
 	double ATA[9], ATL[3],LS[3];
 	
-	for (int a=0;a<attMeas.gy11.size();a++)
+	for (int a=0;a<attMeas.UT.size();a++)
 	{
 		num = 0;
 		if (starGyro.isG11 == true) { A[num] = G11[0], A[num + 1] = G11[1], A[num + 2] = G11[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
@@ -2810,6 +2805,16 @@ void attSim::outputQuat(vector<Quat> qOut, string name)
 	for (int a=0;a<qOut.size();a++)
 	{
 		fprintf(fp, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\n", qOut[a].UT, qOut[a].q1, qOut[a].q2, qOut[a].q3, qOut[a].q4);
+	}
+	fclose(fp);
+}
+void attSim::outputBias(double *Bias, int num, string name)
+{
+	string biasEst = path + name;
+	FILE *fp = fopen(biasEst.c_str(), "w");
+	for (int a=0;a<num;a++)
+	{
+		fprintf(fp, "%.3f\t%.15f\t%.15f\t%.15f\n", Bias[6 * a], Bias[6 * a + 3], Bias[6 * a + 4], Bias[6 * a + 5]);
 	}
 	fclose(fp);
 }
