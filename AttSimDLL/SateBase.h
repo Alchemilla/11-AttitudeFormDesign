@@ -100,4 +100,9 @@ struct isStarGyro
 	//	isA = isB = isC = isG11 = isG12 = isG13 = isG21 = isG22 = isG23 = isG31 = isG32 = isG33 = false;
 	//}
 };
+//高频抖动频谱
+struct AttJitter
+{
+	double freq, phase, eulerX, eulerY, eulerZ;//频率，相位，欧拉角X,Y,Z  
+};
 #endif

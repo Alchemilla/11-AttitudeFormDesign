@@ -40,6 +40,11 @@ namespace AttSimCPP
         public bool isA, isB, isC;
         public bool isG11, isG12, isG13, isG21, isG22, isG23, isG31, isG32, isG33;
     };
+    [StructLayout(LayoutKind.Sequential)]
+    public struct AttJitter
+    {
+        public double freq,phase, eulerX, eulerY, eulerZ;//频率，相位，欧拉角X,Y,Z  
+    };
     public class DLLImport
     {     
         /// <summary>

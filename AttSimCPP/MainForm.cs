@@ -22,6 +22,7 @@ namespace AttSimCPP
         }
         public AttParm mAtt;
         public isStarGyro starGyro;
+        public AttJitter[] HighFreqJitter;
         //public int nQuat, nGyro;//陀螺和四元数个数
         //public int freqG, freqQ;//星敏陀螺采样频率            
         //public double dt;
@@ -398,6 +399,7 @@ namespace AttSimCPP
             simAtt1.Text = "EKF滤波残差";
             simAtt1.Show();
         }
+
         /// <summary>
         /// 功能：EKF结果和星敏噪声
         /// </summary>
@@ -695,7 +697,11 @@ namespace AttSimCPP
             else
                 ShowInfo("失败：未设置路径");
         }
-
+        /// <summary>
+        /// 真实数据开始滤波
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button15_Click(object sender, EventArgs e)
         {
             //首先判断选中了哪些星敏和陀螺           
@@ -742,5 +748,24 @@ namespace AttSimCPP
             ShowInfo("姿态仿真完毕");
             progressBar1.Value = 100;
         }
+        /// <summary>
+        /// 添加高频抖动
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button16_Click(object sender, EventArgs e)
+        {
+            ShowInfo("加载高频抖动参数");
+            OpenFileDialog openDlg = new OpenFileDialog();
+            if (openDlg.ShowDialog() == DialogResult.OK)
+            {
+                string JitterFilePath = openDlg.FileName.ToString(); //获得文件路径 
+                ShowInfo("成功找到路径：" + JitterFilePath);
+            }
+            else
+                ShowInfo("失败：未设置路径");
+    
+        }
+
     }
 }

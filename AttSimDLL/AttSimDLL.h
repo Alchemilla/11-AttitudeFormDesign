@@ -42,6 +42,7 @@ ATTSIMDLL void attitudeDeterActivePushbroomStruct(AttParm mAtt,
 //读取外部数据（包括主动推扫）然后仿真姿态
 ATTSIMDLL void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGyro);
 ATTSIMDLL void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGyro);
+ATTSIMDLL void ExternalFileHighFreqSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro);
 
 class attSim
 {
@@ -65,7 +66,9 @@ public:
 	void EKF6StateForStarOpticAxis(attGFDM attMeas);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
 	void simAttparam(vector<Quat>qTrue,attGFDM &attMeas);
+	void simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter);
 	bool readAttparam(string pushbroomDat, vector<Quat>&qTrue);
+	bool readAttJitterparam(vector<AttJitter>vecJitter);
 	void preAttparam(attGFDM attMeas,Quat &q0, vector<vector<BmImStar>>&BmIm, vector<Gyro>&wMeas);
 	void predictQuat(Gyro wMeas, Quat &Qk, double dt);
 	void calcuOmega(Quat qL, Quat qR, Gyro &wTrue);

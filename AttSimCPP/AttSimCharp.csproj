@@ -84,6 +84,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Jitter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Jitter.Designer.cs">
+      <DependentUpon>Jitter.cs</DependentUpon>
+    </Compile>
     <Compile Include="oneGraph.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -111,6 +117,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Jitter.resx">
+      <DependentUpon>Jitter.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="oneGraph.resx">
       <DependentUpon>oneGraph.cs</DependentUpon>
     </EmbeddedResource>

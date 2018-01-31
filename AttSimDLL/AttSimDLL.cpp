@@ -1211,30 +1211,30 @@ void attSim::getQnGnum(int nQ, int nG)
 void attSim::getQuatAndGyro(attGFDM &attMeas)
 {
 	//输入真实q值和角速度值
-	string quatPath = path + "\\QuatErr.txt"; string gyroPath = path + "\\GyroErr.txt";	
-	int num1, num2; 
+	string quatPath = path + "\\QuatErr.txt"; string gyroPath = path + "\\GyroErr.txt";
+	int num1, num2;
 	FILE *fp1 = fopen(quatPath.c_str(), "r");
 	fscanf(fp1, "%d\n", &num1);
 	Quat attReadA, attReadB, attReadC;
 	for (int a = 0; a < num1; a++)
-	{	
-			fscanf(fp1, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", &attReadA.UT,
-				&attReadA.q1, &attReadA.q2, &attReadA.q3, &attReadA.q4,
-				&attReadB.q1, &attReadB.q2, &attReadB.q3, &attReadB.q4,
-				&attReadC.q1, &attReadC.q2, &attReadC.q3, &attReadC.q4);
-			attReadB.UT = attReadC.UT = attReadA.UT;
-			attMeas.qA.push_back(attReadA);
-			attMeas.qB.push_back(attReadB);
-			attMeas.qC.push_back(attReadC);
-	}	
+	{
+		fscanf(fp1, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", &attReadA.UT,
+			&attReadA.q1, &attReadA.q2, &attReadA.q3, &attReadA.q4,
+			&attReadB.q1, &attReadB.q2, &attReadB.q3, &attReadB.q4,
+			&attReadC.q1, &attReadC.q2, &attReadC.q3, &attReadC.q4);
+		attReadB.UT = attReadC.UT = attReadA.UT;
+		attMeas.qA.push_back(attReadA);
+		attMeas.qB.push_back(attReadB);
+		attMeas.qC.push_back(attReadC);
+	}
 
 	FILE *fp2 = fopen(gyroPath.c_str(), "r");
 	fscanf(fp2, "%d\n", &num2);
-	double ut,g11,g12,g13,g21,g22,g23,g31,g32,g33;
+	double ut, g11, g12, g13, g21, g22, g23, g31, g32, g33;
 	for (int a = 0; a < num2; a++)
 	{
 		fscanf(fp2, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", &ut,
-			&g11,&g12,&g13,&g21,&g22,&g23,&g31,&g32,&g33);
+			&g11, &g12, &g13, &g21, &g22, &g23, &g31, &g32, &g33);
 		attMeas.UT.push_back(ut);
 		attMeas.gy11.push_back(g11); attMeas.gy12.push_back(g12); attMeas.gy13.push_back(g13);
 		attMeas.gy21.push_back(g21); attMeas.gy22.push_back(g22); attMeas.gy23.push_back(g23);
@@ -2018,7 +2018,7 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 	p << poa, zero33, zero33, pog;//过程协方差
 	Q << sigv33, zero33, zero33, sigu33;//过程噪声
 	Qest(0, 0) = q0.q1, Qest(0, 1) = q0.q2;
-	Qest(0, 2) = q0.q3, Qest(0, 3) = q0.q4;	
+	Qest(0, 2) = q0.q3, Qest(0, 3) = q0.q4;
 	vector<Quat>quatEst(nG);
 	double *xest_store = new double[6 * nG];
 	quatEst[0].UT = utStart;
@@ -2153,7 +2153,7 @@ void attSim::Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, Matri
 //作者：GZC
 //日期：2018.01.10
 //////////////////////////////////////////////////////////////////////////
-void attSim::simAttparam(vector<Quat>qTrue,  attGFDM &attMeas)
+void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 {
 	//首先仿真真实星敏和陀螺数据
 	attDat.nQuat = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*attDat.freqQ;
@@ -2183,12 +2183,66 @@ void attSim::simAttparam(vector<Quat>qTrue,  attGFDM &attMeas)
 
 	//根据安装，得到真实的三星敏和3陀螺测量数据
 	attGFDM attTrue;
-	transCrj2StarGyro(qTrueInter1, wTrue, attTrue,false);
+	transCrj2StarGyro(qTrueInter1, wTrue, attTrue, false);
 	outputQuatGyroTXT(attTrue, "\\Quat.txt", "\\Gyro.txt");//输出真实星敏四元数和陀螺角速度
-		
+
 	//根据安装，得到带误差的三星敏和3陀螺测量数据
-	transCrj2StarGyro(qTrueInter1, wTrue, attMeas,true);
+	transCrj2StarGyro(qTrueInter1, wTrue, attMeas, true);
 	outputQuatGyroTXT(attMeas, "\\QuatErr.txt", "\\GyroErr.txt");//输出带误差星敏四元数和陀螺角速度
+}
+
+//////////////////////////////////////////////////////////////////////////
+//功能：
+//输入：
+//输出：
+//注意：
+//作者：GZC
+//日期：2018.02.01
+//////////////////////////////////////////////////////////////////////////
+void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
+{
+	//高频角位移采样率
+	int sampleRate = 500;
+	double detT = 1. / sampleRate;
+	int nADS = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*sampleRate;
+	double *JitterEuler=new double[3*nADS];
+	memset(JitterEuler, 0, sizeof(double) * 3*nADS);
+	//计算每一时刻高频抖动量
+	for (int j = 0; j < vecJitter.size(); j++)
+	{
+		for (int a = 0; a < nADS; a++)
+		{
+			JitterEuler[3*a] += vecJitter[j].eulerX*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT);
+			JitterEuler[3 * a+1] += vecJitter[j].eulerY*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT);
+			JitterEuler[3 * a+2] += vecJitter[j].eulerZ*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT);
+		}
+	}
+	vector<double> utc(nADS+1); vector<Quat>qTrueInter; vector<Gyro> wADS(nADS);
+	for (int a = 0; a < nADS + 1; a++)//仿真nADS个角位移真实数据
+	{		utc[a] = qTrue[0].UT + detT*a;	}
+	mBase.QuatInterpolationVector(qTrue, utc, qTrueInter);//内插得到真实四元数
+	for (int a=0;a<nADS + 1;a++)//为四元数添加高频抖动
+	{
+		double rMeas[9],rJitter[9],rTure[9];
+		mBase.quat2matrix(qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4, rMeas);
+		mBase.Eulor2Matrix(JitterEuler[3 * a], JitterEuler[3 * a + 1], JitterEuler[3 * a + 2], 123, rJitter);
+		mBase.Multi(rJitter, rMeas, rTure, 3, 3, 3);
+		mBase.matrix2quat(rTure, qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4);
+	}
+	string adsPath = path + "ADS.txt";
+	FILE *fp = fopen(adsPath.c_str(), "w");
+	for (int a = 0; a < nADS; a++)
+	{
+		calcuOmega(qTrueInter[a], qTrueInter[a + 1], wADS[a]);
+		fprintf(fp, "%.3f\t%.15f\t%.15f\t%.15f\n", utc[a], wADS[a].wx, wADS[a].wy, wADS[a].wz);
+	}
+
+
+	//根据安装，得到真实的三星敏和3陀螺测量数据
+	attGFDM attTrue;
+	transCrj2StarGyro(qTrueInter, wADS, attTrue, false);
+	outputQuatGyroTXT(attTrue, "\\Quat.txt", "\\Gyro.txt");//输出真实星敏四元数和陀螺角速度
+
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -2261,6 +2315,30 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 }
 
 /////////////////////////////////////////////////////////////////////////
+//功能：读取高频抖动频谱文件
+//输入：HighFreqSimParam.txt
+//输出：姿态角和角速度
+//注意：
+//作者：GZC
+//日期：2018.01.09
+//////////////////////////////////////////////////////////////////////////
+bool attSim::readAttJitterparam(vector<AttJitter>vecJitter)
+{
+	string jitterPath = path + "HighFreqSimParam.txt";
+	FILE *fp = fopen(jitterPath.c_str(), "r");
+	if (!fp) { printf("文件不存在！\n"); return false; }
+	char tmp[512];
+	fscanf(fp, "%[^\n]\n", tmp);
+	AttJitter jitterTmp;
+	while (!feof(fp))
+	{
+		fscanf(fp, "%lf\t%lf\t%lf\t%lf\t%lf\n", &jitterTmp.freq,
+			&jitterTmp.phase, &jitterTmp.eulerX, &jitterTmp.eulerY, &jitterTmp.eulerZ);
+		vecJitter.push_back(jitterTmp);
+	}
+	return true;
+}
+/////////////////////////////////////////////////////////////////////////
 //功能：
 //输入：
 //输出：
@@ -2268,10 +2346,10 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 //作者：GZC
 //日期：2018.01.11
 //////////////////////////////////////////////////////////////////////////
-void attSim::preAttparam(attGFDM attMeas, Quat &q0, 
+void attSim::preAttparam(attGFDM attMeas, Quat &q0,
 	vector<vector<BmImStar>>&BmIm, vector<Gyro>&wMeas)
 {
-	double Cbj[9], Crj[9], Cbr[9],Bm[3],Im[3]; Quat qCbj;
+	double Cbj[9], Crj[9], Cbr[9], Bm[3], Im[3]; Quat qCbj;
 	double optical[3] = { 0,0,1 };
 	for (int a = 0; a < attMeas.qA.size(); a++)
 	{
@@ -2282,7 +2360,7 @@ void attSim::preAttparam(attGFDM attMeas, Quat &q0,
 			mBase.quat2matrix(attMeas.qA[a].q1, attMeas.qA[a].q2, attMeas.qA[a].q3, attMeas.qA[a].q4, Crj);
 			memcpy(Cbr, starAali, sizeof(double) * 9);//Crb
 			mBase.invers_matrix(Cbr, 3);//Cbr
-			if (a==0)
+			if (a == 0)
 			{
 				mBase.Multi(Cbr, Crj, Cbj, 3, 3, 3);
 				mBase.matrix2quat(Cbj, q0.q1, q0.q2, q0.q3, q0.q4);
@@ -2349,9 +2427,9 @@ void attSim::preAttparam(attGFDM attMeas, Quat &q0,
 	double *A = new double[num * 3];
 	double *AT = new double[3 * num];
 	double *L = new double[num];
-	double ATA[9], ATL[3],LS[3];
-	
-	for (int a=0;a<attMeas.UT.size();a++)
+	double ATA[9], ATL[3], LS[3];
+
+	for (int a = 0; a < attMeas.UT.size(); a++)
 	{
 		num = 0;
 		if (starGyro.isG11 == true) { A[num] = G11[0], A[num + 1] = G11[1], A[num + 2] = G11[2];	L[num / 3] = attMeas.gy11[a]; num += 3; }
@@ -2363,8 +2441,8 @@ void attSim::preAttparam(attGFDM attMeas, Quat &q0,
 		if (starGyro.isG31 == true) { A[num] = G31[0], A[num + 1] = G31[1], A[num + 2] = G31[2];	L[num / 3] = attMeas.gy31[a]; num += 3; }
 		if (starGyro.isG32 == true) { A[num] = G32[0], A[num + 1] = G32[1], A[num + 2] = G32[2];	L[num / 3] = attMeas.gy32[a]; num += 3; }
 		if (starGyro.isG33 == true) { A[num] = G33[0], A[num + 1] = G33[1], A[num + 2] = G33[2];	L[num / 3] = attMeas.gy33[a]; num += 3; }
-		mBase.Transpose(A, AT, num/3,3);
-		mBase.Multi(AT, A, ATA, 3, num/3, 3);
+		mBase.Transpose(A, AT, num / 3, 3);
+		mBase.Multi(AT, A, ATA, 3, num / 3, 3);
 		mBase.invers_matrix(ATA, 3);
 		mBase.Multi(AT, L, ATL, 3, num / 3, 1);
 		mBase.Multi(ATA, ATL, LS, 3, 3, 1);
@@ -2431,7 +2509,7 @@ void attSim::calcuOmega(Quat qL, Quat qR, Gyro &wTrue)
 //作者：GZC
 //日期：2018.01.10
 //////////////////////////////////////////////////////////////////////////
-void attSim::transCrj2StarGyro(vector<Quat>qTrueInter1, 
+void attSim::transCrj2StarGyro(vector<Quat>qTrueInter1,
 	vector<Gyro>wTrue, attGFDM &attMeas, bool isErr)
 {
 	double Cbj[9], Crj[9]; Quat qCrj;
@@ -2485,7 +2563,7 @@ void attSim::transCrj2StarGyro(vector<Quat>qTrueInter1,
 	if (isErr == true && starGyro.isA == true)		addErrorForQuatActive(attMeas.qA);
 	if (isErr == true && starGyro.isB == true)		addErrorForQuatActive(attMeas.qB);
 	if (isErr == true && starGyro.isC == true)		addErrorForQuatActive(attMeas.qC);
-	
+
 	for (int a = 0; a < wTrue.size(); a++)
 	{
 		attMeas.UT.push_back(wTrue[a].UT);
@@ -2561,7 +2639,7 @@ void attSim::transCrj2StarGyro(vector<Quat>qTrueInter1,
 	if (isErr == true && starGyro.isG13 == true)		addErrorForTriGyroActive(attMeas.gy13);
 	if (isErr == true && starGyro.isG21 == true)		addErrorForTriGyroActive(attMeas.gy21);
 	if (isErr == true && starGyro.isG22 == true)		addErrorForTriGyroActive(attMeas.gy22);
-	if (isErr == true && starGyro.isG23== true)		addErrorForTriGyroActive(attMeas.gy23);
+	if (isErr == true && starGyro.isG23 == true)		addErrorForTriGyroActive(attMeas.gy23);
 	if (isErr == true && starGyro.isG31 == true)		addErrorForFiberGyroActive(attMeas.gy31);
 	if (isErr == true && starGyro.isG32 == true)		addErrorForFiberGyroActive(attMeas.gy32);
 	if (isErr == true && starGyro.isG33 == true)		addErrorForFiberGyroActive(attMeas.gy33);
@@ -2608,12 +2686,12 @@ void attSim::addErrorForQuat(vector<Quat>&qSim)
 //日期：2018.01.11
 //////////////////////////////////////////////////////////////////////////
 void attSim::addErrorForGyro(vector<double>&wSim)
-{	
+{
 	//设置常值漂移和随机漂移噪声
 	double dtG = 1. / attDat.freqG;
 	double wbias1 = attDat.wBiasA[0];
-	double *bias1 = new double[attDat.nGyro]; 
-	double *wn1 = new double[attDat.nGyro]; 
+	double *bias1 = new double[attDat.nGyro];
+	double *wn1 = new double[attDat.nGyro];
 	mBase.RandomDistribution(wbias1*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), attDat.nGyro, 0, bias1);//注意是*dt，matlab中是/dt
 	mBase.RandomDistribution(0, sqrt(attDat.sigv*attDat.sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG) / 3, attDat.nGyro, 0, wn1);
 	//添加测量误差后的星敏和陀螺数据
@@ -2622,7 +2700,7 @@ void attSim::addErrorForGyro(vector<double>&wSim)
 		wSim[i] = wSim[i] + wn1[i] + bias1[i];
 	}
 	delete[]bias1; bias1 = NULL;
-	delete[]wn1; wn1=NULL;
+	delete[]wn1; wn1 = NULL;
 }
 //////////////////////////////////////////////////////////////////////////
 //功能：添加星敏误差(主动推扫)
@@ -2634,17 +2712,17 @@ void attSim::addErrorForGyro(vector<double>&wSim)
 //////////////////////////////////////////////////////////////////////////
 void attSim::addErrorForQuatActive(vector<Quat>&qSim)
 {
-	double sig_tracker=1, vel, sig_trackerFact;
+	double sig_tracker = 1, vel, sig_trackerFact;
 	double *noise = new double[qSim.size()];
 	mBase.RandomDistribution(0, sig_tracker / 3, qSim.size(), 0, noise);
-	Gyro vOmega; 
+	Gyro vOmega;
 	vector<Quat>qMeas(qSim.size());
-	for (int a=0;a<qSim.size()-1;a++)
+	for (int a = 0; a < qSim.size() - 1; a++)
 	{
-		calcuOmega(qSim[a],qSim[a+1],vOmega);
-		vel = sqrt(pow(vOmega.wx / PI * 180, 2)+ pow(vOmega.wy / PI * 180, 2)+ pow(vOmega.wz / PI * 180, 2));
-		sig_trackerFact = starErrorModel(vel); 		
-		noise[a] *= 0.5 / 3600 * PI / 180*sig_trackerFact; 		
+		calcuOmega(qSim[a], qSim[a + 1], vOmega);
+		vel = sqrt(pow(vOmega.wx / PI * 180, 2) + pow(vOmega.wy / PI * 180, 2) + pow(vOmega.wz / PI * 180, 2));
+		sig_trackerFact = starErrorModel(vel);
+		noise[a] *= 0.5 / 3600 * PI / 180 * sig_trackerFact;
 		Quat q2;
 		q2.q1 = noise[a]; q2.q2 = noise[a]; q2.q3 = noise[a], q2.q4 = 1;
 		mBase.quatMult(qSim[a], q2, qMeas[a]);
@@ -2654,7 +2732,7 @@ void attSim::addErrorForQuatActive(vector<Quat>&qSim)
 		qMeas[a].q1 /= q3norm; qMeas[a].q2 /= q3norm;
 		qMeas[a].q3 /= q3norm; qMeas[a].q4 /= q3norm;
 		qSim[a] = qMeas[a];
-	}	
+	}
 }
 //////////////////////////////////////////////////////////////////////////
 //功能：添加陀螺误差(主动推扫)
@@ -2671,14 +2749,14 @@ void attSim::addErrorForTriGyroActive(vector<double>&wSim)
 	double wbias = attDat.wBiasA[0];
 	double *wn = new double[wSim.size()];
 	double *bias = new double[wSim.size()];
-	double sigv=5e-5/180*PI,sigvFact;
+	double sigv = 5e-5 / 180 * PI, sigvFact;
 	mBase.RandomDistribution(0, sqrt(sigv*sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG) / 3, wSim.size(), 0, wn);
 	mBase.RandomDistribution(wbias*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG) / 3, wSim.size(), 0, bias);//注意是*dt，matlab中是/dt
 
-	for (int a=0;a<wSim.size();a++)
+	for (int a = 0; a < wSim.size(); a++)
 	{
-		sigvFact = triGyroErrorModel(wSim[a]);		
-		wSim[a] = wSim[a] + wn[a]* sigvFact/sigv + bias[a];		
+		sigvFact = triGyroErrorModel(wSim[a]);
+		wSim[a] = wSim[a] + wn[a] * sigvFact / sigv + bias[a];
 	}
 }
 void attSim::addErrorForFiberGyroActive(vector<double>&wSim)
@@ -2686,7 +2764,7 @@ void attSim::addErrorForFiberGyroActive(vector<double>&wSim)
 	//设置常值漂移和随机漂移噪声
 	double dtG = 1. / attDat.freqG;
 	double wbias = attDat.wBiasA[0];
-	double bias, wn,sigv;
+	double bias, wn, sigv;
 	for (int a = 0; a < wSim.size(); a++)
 	{
 		sigv = fiberGyroErrorModel(wSim[a]);
@@ -2701,7 +2779,7 @@ double attSim::starErrorModel(double sig)
 }
 double attSim::triGyroErrorModel(double sig)
 {
-	return abs(0.0002*sig*sig - 0.00008*sig + 0.00005)/180*PI;
+	return abs(0.0002*sig*sig - 0.00008*sig + 0.00005) / 180 * PI;
 }
 double attSim::fiberGyroErrorModel(double sig)
 {
@@ -2714,9 +2792,9 @@ void attSim::compareTureEKF()
 	string strpath1 = path + "\\EKFquater.txt";
 	FILE *fpTrue = fopen(strpath.c_str(), "r");
 	FILE *fpEKF = fopen(strpath1.c_str(), "r");
-	int num,num2;
+	int num, num2;
 	fscanf(fpEKF, "%d\n", &num);
-	double *UT=new double[num];
+	double *UT = new double[num];
 	Quat *qEKF = new Quat[num];
 	for (int a = 0; a < num; a++)
 	{
@@ -2740,7 +2818,7 @@ void attSim::compareTureEKF()
 	Quat *dq3 = new Quat[num];
 
 	string strpath2 = path + "\\compare.txt";
-	FILE *fp= fopen(strpath2.c_str(), "w");
+	FILE *fp = fopen(strpath2.c_str(), "w");
 	fprintf(fp, "%d\n", num);
 	for (int i = 0; i < num; i++)
 	{
@@ -2764,7 +2842,7 @@ void attSim::compareTureEKF()
 	double rmsAll = sqrt(rmsQ1*rmsQ1 + rmsQ2*rmsQ2 + rmsQ3*rmsQ3);
 	fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\n", rmsQ1, rmsQ2, rmsQ3, rmsAll);
 	fclose(fp);
-	delete[] UT; UT = NULL; 
+	delete[] UT; UT = NULL;
 	delete[] dq3, qEKF, qTrue, qTrueI; dq3 = qEKF = qTrueI = qTrue = NULL;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -2775,7 +2853,7 @@ void attSim::compareTureEKF()
 //作者：GZC
 //日期：2018.01.10
 //////////////////////////////////////////////////////////////////////////
-void attSim::outputQuatGyroTXT(attGFDM attMeas,string out1,string out2)
+void attSim::outputQuatGyroTXT(attGFDM attMeas, string out1, string out2)
 {
 	//输出真实q值和角速度值
 	string quatPath = path + out1; string gyroPath = path + out2;
@@ -2802,7 +2880,7 @@ void attSim::outputQuat(vector<Quat> qOut, string name)
 	string Cbj = path + name;
 	FILE *fp = fopen(Cbj.c_str(), "w");
 	fprintf(fp, "%d\n", qOut.size());
-	for (int a=0;a<qOut.size();a++)
+	for (int a = 0; a < qOut.size(); a++)
 	{
 		fprintf(fp, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\n", qOut[a].UT, qOut[a].q1, qOut[a].q2, qOut[a].q3, qOut[a].q4);
 	}
@@ -2812,7 +2890,7 @@ void attSim::outputBias(double *Bias, int num, string name)
 {
 	string biasEst = path + name;
 	FILE *fp = fopen(biasEst.c_str(), "w");
-	for (int a=0;a<num;a++)
+	for (int a = 0; a < num; a++)
 	{
 		fprintf(fp, "%.3f\t%.15f\t%.15f\t%.15f\n", Bias[6 * a], Bias[6 * a + 3], Bias[6 * a + 4], Bias[6 * a + 5]);
 	}
@@ -2828,7 +2906,7 @@ void attSim::outputBias(double *Bias, int num, string name)
 //////////////////////////////////////////////////////////////////////////
 void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGyro)
 {
-	attSim GFDM; 
+	attSim GFDM;
 	GFDM.getAttParam(mAtt, workpath, starGyro);
 	attGFDM measGFDM;
 	vector<Quat>qTure;
@@ -2858,6 +2936,31 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGyr
 	GFDM.EKF6StateForStarOpticAxis(measGFDM);
 	//姿态比较
 	GFDM.compareTureEKF();
+}
+/////////////////////////////////////////////////////////////////////////
+//功能：高频姿态仿真与确定（外部接口）
+//输入：工作路径：workpath，传感器指标：mAtt，星敏陀螺参与指示：starGyro
+//输出：真实四元数（J2000到本体）；带误差四元数（J2000到本体）
+//注意：
+//作者：GZC
+//日期：2018.01.09
+//////////////////////////////////////////////////////////////////////////
+void ExternalFileHighFreqSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro)
+{
+	attSim GFDM;
+	GFDM.getAttParam(mAtt, workpath, starGyro);
+	attGFDM measGFDM;
+	vector<Quat>qTure;
+	//根据欧拉角计算四元数
+	GFDM.readAttparam(workpath, qTure);
+	//读取高频抖动数据
+	vector<AttJitter>vecJitter;
+	GFDM.readAttJitterparam(vecJitter);
+	//在真实四元数上加高频抖动，并且得到高频角位移数据
+	GFDM.simAttJitterparam(qTure, vecJitter);
+	//仿真带高频误差的四元数和陀螺角速度
+	GFDM.simAttparam(qTure, measGFDM);
+
 }
 //////////////////////////////////////////////////////////////////////////
 //功能：姿态仿真程序（仅仿真四元数和陀螺数据）
