@@ -39,6 +39,7 @@ namespace AttSimCPP
     {
         public bool isA, isB, isC;
         public bool isG11, isG12, isG13, isG21, isG22, isG23, isG31, isG32, isG33;
+        public bool isJitter;
     };
     [StructLayout(LayoutKind.Sequential)]
     public struct AttJitter

@@ -1966,11 +1966,8 @@ void attSim::EKFForwardAndBackforward15State(Quat *qMeas, Gyro *wMeas, Quat *&qu
 //作者：GZC
 //日期：2017.11.28  更新 2018.01.08
 //////////////////////////////////////////////////////////////////////////
-void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
+void attSim::EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm,vector<Gyro>wMeas,Quat q0)
 {
-	vector<vector<BmImStar>>BmIm; vector<Gyro>wMeas; Quat q0;
-	//根据姿态数据得到初始四元数、光轴矢量、陀螺测量值；
-	preAttparam(attMeas, q0, BmIm, wMeas);
 	int nQ = BmIm.size();
 	int nG = wMeas.size();
 	//删掉四元数之前的陀螺数据
@@ -2116,8 +2113,15 @@ void attSim::EKF6StateForStarOpticAxis(attGFDM attMeas)
 			i++;
 		}
 	}
-	outputBias(xest_store, nG, "\\BiasEstimate.txt");
-	outputQuat(quatEst, "\\EKFquater.txt");
+	if (starGyro.isJitter==false)
+	{
+		outputBias(xest_store, nG, "\\BiasEstimate.txt");
+		outputQuat(quatEst, "\\EKFquater.txt");
+	}
+	else
+	{
+		outputQuat(quatEst, "\\EKFJitterquater.txt");
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2199,10 +2203,10 @@ void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 //作者：GZC
 //日期：2018.02.01
 //////////////////////////////////////////////////////////////////////////
-void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
+void attSim::simAttJitterparam(vector<Quat>qTrue, vector<AttJitter>vecJitter)
 {
 	//高频角位移采样率
-	int sampleRate = 500;
+	int sampleRate = 1000;
 	double detT = 1. / sampleRate;
 	int nADS = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*sampleRate;
 	double *JitterEuler=new double[3*nADS];
@@ -2212,9 +2216,9 @@ void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 	{
 		for (int a = 0; a < nADS; a++)
 		{
-			JitterEuler[3*a] += vecJitter[j].eulerX*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT);
-			JitterEuler[3 * a+1] += vecJitter[j].eulerY*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT);
-			JitterEuler[3 * a+2] += vecJitter[j].eulerZ*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT);
+			JitterEuler[3 * a] += vecJitter[j].eulerX / 3600 / 180 * PI*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a+1] += vecJitter[j].eulerY / 3600 / 180 * PI*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a+2] += vecJitter[j].eulerZ / 3600 / 180 * PI*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT*a);
 		}
 	}
 	vector<double> utc(nADS+1); vector<Quat>qTrueInter; vector<Gyro> wADS(nADS);
@@ -2229,20 +2233,19 @@ void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 		mBase.Multi(rJitter, rMeas, rTure, 3, 3, 3);
 		mBase.matrix2quat(rTure, qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4);
 	}
-	string adsPath = path + "ADS.txt";
-	FILE *fp = fopen(adsPath.c_str(), "w");
+	string adsPath = path + "\\ADS.txt";//角位移
+	string qTruePath = path + "\\Attitude.txt";//真实姿态
+	FILE *fp1 = fopen(adsPath.c_str(), "w");
+	FILE *fp2 = fopen(qTruePath.c_str(), "w");
+	fprintf(fp2, "%d\n", nADS);
 	for (int a = 0; a < nADS; a++)
 	{
 		calcuOmega(qTrueInter[a], qTrueInter[a + 1], wADS[a]);
-		fprintf(fp, "%.3f\t%.15f\t%.15f\t%.15f\n", utc[a], wADS[a].wx, wADS[a].wy, wADS[a].wz);
+		fprintf(fp1, "%.5f\t%.15f\t%.15f\t%.15f\n", utc[a], wADS[a].wx, wADS[a].wy, wADS[a].wz);
+		fprintf(fp2, "%.5f\t%.15f\t%.15f\t%.15f\t%.15f\n", qTrueInter[a].UT,
+			qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4);
 	}
-
-
-	//根据安装，得到真实的三星敏和3陀螺测量数据
-	attGFDM attTrue;
-	transCrj2StarGyro(qTrueInter, wADS, attTrue, false);
-	outputQuatGyroTXT(attTrue, "\\Quat.txt", "\\Gyro.txt");//输出真实星敏四元数和陀螺角速度
-
+	fclose(fp1),fclose(fp2);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -2322,9 +2325,9 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 //作者：GZC
 //日期：2018.01.09
 //////////////////////////////////////////////////////////////////////////
-bool attSim::readAttJitterparam(vector<AttJitter>vecJitter)
+bool attSim::readAttJitterparam(vector<AttJitter>&vecJitter)
 {
-	string jitterPath = path + "HighFreqSimParam.txt";
+	string jitterPath = path + "\\HighFreqSimParam.txt";
 	FILE *fp = fopen(jitterPath.c_str(), "r");
 	if (!fp) { printf("文件不存在！\n"); return false; }
 	char tmp[512];
@@ -2337,6 +2340,26 @@ bool attSim::readAttJitterparam(vector<AttJitter>vecJitter)
 		vecJitter.push_back(jitterTmp);
 	}
 	return true;
+}
+/////////////////////////////////////////////////////////////////////////
+//功能：读取高频抖动频谱文件
+//输入：HighFreqSimParam.txt
+//输出：姿态角和角速度
+//注意：
+//作者：GZC
+//日期：2018.01.09
+//////////////////////////////////////////////////////////////////////////
+void attSim::readAttJitterTXT(vector<Gyro>&wMeas)
+{
+	string adsPath = path + "\\ADS.txt";//角位移
+	FILE *fp = fopen(adsPath.c_str(), "r");
+	Gyro wMeasTmp;
+	while (!feof(fp))
+	{
+		fscanf(fp, "%lf\t%lf\t%lf\t%lf\n", &wMeasTmp.UT, &wMeasTmp.wx, &wMeasTmp.wy, &wMeasTmp.wz);
+		wMeas.push_back(wMeasTmp);
+	}
+	fclose(fp);
 }
 /////////////////////////////////////////////////////////////////////////
 //功能：
@@ -2789,7 +2812,11 @@ double attSim::fiberGyroErrorModel(double sig)
 void attSim::compareTureEKF()
 {
 	string strpath = path + "\\Attitude.txt";
-	string strpath1 = path + "\\EKFquater.txt";
+	string strpath1;
+	if (starGyro.isJitter==false)
+	{		strpath1 = path + "\\EKFquater.txt";	}
+	else
+	{		strpath1 = path + "\\EKFJitterquater.txt";	}
 	FILE *fpTrue = fopen(strpath.c_str(), "r");
 	FILE *fpEKF = fopen(strpath1.c_str(), "r");
 	int num, num2;
@@ -2904,18 +2931,23 @@ void attSim::outputBias(double *Bias, int num, string name)
 //作者：GZC
 //日期：2018.01.09
 //////////////////////////////////////////////////////////////////////////
-void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGyro)
+void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 {
 	attSim GFDM;
-	GFDM.getAttParam(mAtt, workpath, starGyro);
+	GFDM.getAttParam(mAtt, workpath, starGy);
 	attGFDM measGFDM;
 	vector<Quat>qTure;
 	//根据欧拉角计算四元数
 	GFDM.readAttparam(workpath, qTure);
 	//仿真带误差四元数
 	GFDM.simAttparam(qTure, measGFDM);
-	//卡尔曼滤波处理
-	//GFDM.EKF6StateForStarOpticAxis(measGFDM);
+	if (starGy.isJitter==true)
+	{
+		//读取高频抖动数据
+		vector<AttJitter>vecJitter;
+		GFDM.readAttJitterparam(vecJitter);
+		GFDM.simAttJitterparam(qTure, vecJitter);	//在真实四元数上加高频抖动，并且得到高频角位移数据
+	}
 }
 /////////////////////////////////////////////////////////////////////////
 //功能：姿态确定（外部接口）
@@ -2925,43 +2957,30 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGyro)
 //作者：GZC
 //日期：2018.01.09
 //////////////////////////////////////////////////////////////////////////
-void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGyro)
+void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy)
 {
 	attSim GFDM;
-	GFDM.getAttParam(mAtt, workpath, starGyro);
+	GFDM.getAttParam(mAtt, workpath, starGy);
 	//从文件读取星敏陀螺数据
-	attGFDM measGFDM;
-	GFDM.getQuatAndGyro(measGFDM);
-	//卡尔曼滤波处理
-	GFDM.EKF6StateForStarOpticAxis(measGFDM);
+	attGFDM measGFDM;vector<vector<BmImStar>>BmIm; vector<Gyro>wMeas; Quat q0;
+	GFDM.getQuatAndGyro(measGFDM);		
+	//根据姿态数据得到初始四元数、光轴矢量、陀螺测量值；
+	GFDM.preAttparam(measGFDM, q0, BmIm, wMeas);	
+	
+	if(starGy.isJitter=true)//如果有高频，则将陀螺数据替换
+	{
+		starGy.isJitter = false; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
+		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
+		starGy.isJitter = true; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
+		wMeas.clear();
+		GFDM.readAttJitterTXT(wMeas);
+		//卡尔曼滤波处理
+		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);
+	}
 	//姿态比较
 	GFDM.compareTureEKF();
 }
-/////////////////////////////////////////////////////////////////////////
-//功能：高频姿态仿真与确定（外部接口）
-//输入：工作路径：workpath，传感器指标：mAtt，星敏陀螺参与指示：starGyro
-//输出：真实四元数（J2000到本体）；带误差四元数（J2000到本体）
-//注意：
-//作者：GZC
-//日期：2018.01.09
-//////////////////////////////////////////////////////////////////////////
-void ExternalFileHighFreqSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro)
-{
-	attSim GFDM;
-	GFDM.getAttParam(mAtt, workpath, starGyro);
-	attGFDM measGFDM;
-	vector<Quat>qTure;
-	//根据欧拉角计算四元数
-	GFDM.readAttparam(workpath, qTure);
-	//读取高频抖动数据
-	vector<AttJitter>vecJitter;
-	GFDM.readAttJitterparam(vecJitter);
-	//在真实四元数上加高频抖动，并且得到高频角位移数据
-	GFDM.simAttJitterparam(qTure, vecJitter);
-	//仿真带高频误差的四元数和陀螺角速度
-	GFDM.simAttparam(qTure, measGFDM);
 
-}
 //////////////////////////////////////////////////////////////////////////
 //功能：姿态仿真程序（仅仿真四元数和陀螺数据）
 //输入：AttParm结构体，包含下列参数

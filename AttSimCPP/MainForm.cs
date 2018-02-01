@@ -648,6 +648,7 @@ namespace AttSimCPP
             if (checkBox10.Checked) { starGyro.isG31 = true; } else starGyro.isG31 = false;
             if (checkBox11.Checked)  { starGyro.isG32 = true; } else starGyro.isG32 = false;
             if (checkBox12.Checked)  { starGyro.isG33 = true; } else starGyro.isG33 = false;
+            if (checkBox13.Checked) { starGyro.isJitter = true; } else starGyro.isJitter = false;
 
             //获取星敏陀螺频率和总时长
             //mAtt.totalT = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
@@ -717,6 +718,7 @@ namespace AttSimCPP
             if (checkBox10.Checked) { starGyro.isG31 = true; } else starGyro.isG31 = false;
             if (checkBox11.Checked) { starGyro.isG32 = true; } else starGyro.isG32 = false;
             if (checkBox12.Checked) { starGyro.isG33 = true; } else starGyro.isG33 = false;
+            if (checkBox13.Checked) { starGyro.isJitter = true; } else starGyro.isJitter = false;
 
             //获取星敏陀螺频率和总时长
             //mAtt.totalT = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
@@ -761,10 +763,11 @@ namespace AttSimCPP
             {
                 string JitterFilePath = openDlg.FileName.ToString(); //获得文件路径 
                 ShowInfo("成功找到路径：" + JitterFilePath);
+                checkBox13.Checked = true;
+                textBox24.Text = JitterFilePath;
             }
             else
-                ShowInfo("失败：未设置路径");
-    
+                ShowInfo("失败：未设置路径");    
         }
 
     }

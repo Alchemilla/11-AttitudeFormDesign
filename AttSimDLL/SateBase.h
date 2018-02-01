@@ -95,6 +95,7 @@ struct isStarGyro
 {
 	BOOL isA, isB, isC;
 	BOOL isG11, isG12, isG13, isG21, isG22, isG23, isG31, isG32, isG33;
+	BOOL isJitter;
 	//isStarGyro()
 	//{
 	//	isA = isB = isC = isG11 = isG12 = isG13 = isG21 = isG22 = isG23 = isG31 = isG32 = isG33 = false;

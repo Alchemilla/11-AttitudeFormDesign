@@ -40,9 +40,8 @@ ATTSIMDLL void attitudeDeterActivePushbroomStruct(AttParm mAtt,
 	double BeforeAfterT[2], char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
 //读取外部数据（包括主动推扫）然后仿真姿态
-ATTSIMDLL void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGyro);
-ATTSIMDLL void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGyro);
-ATTSIMDLL void ExternalFileHighFreqSimAndDeter(char * workpath, AttParm mAtt, isStarGyro starGyro);
+ATTSIMDLL void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy);
+ATTSIMDLL void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy);
 
 class attSim
 {
@@ -63,12 +62,13 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	//以下为主动推扫相关函数
 	//////////////////////////////////////////////////////////////////////////
-	void EKF6StateForStarOpticAxis(attGFDM attMeas);
+	void EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
 	void simAttparam(vector<Quat>qTrue,attGFDM &attMeas);
-	void simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter);
+	void simAttJitterparam(vector<Quat>qTrue, vector<AttJitter>vecJitter);
 	bool readAttparam(string pushbroomDat, vector<Quat>&qTrue);
-	bool readAttJitterparam(vector<AttJitter>vecJitter);
+	bool readAttJitterparam(vector<AttJitter>&vecJitter);
+	void readAttJitterTXT(vector<Gyro>&wMeas);
 	void preAttparam(attGFDM attMeas,Quat &q0, vector<vector<BmImStar>>&BmIm, vector<Gyro>&wMeas);
 	void predictQuat(Gyro wMeas, Quat &Qk, double dt);
 	void calcuOmega(Quat qL, Quat qR, Gyro &wTrue);
@@ -91,7 +91,7 @@ public:
 	void outputBias(double *Bias, int num, string name);
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量
-	AttParm attDat; isStarGyro starGyro;
+	AttParm attDat;	isStarGyro starGyro;
 	string path;
 	static double starAali[9], starBali[9], starCali[9];//星敏安装
 	static double G11[3], G12[3], G13[3], G21[3], G22[3], G23[3], G31[3], G32[3], G33[3];//陀螺安装
