@@ -2206,7 +2206,7 @@ void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 void attSim::simAttJitterparam(vector<Quat>qTrue, vector<AttJitter>vecJitter)
 {
 	//高频角位移采样率
-	int sampleRate = 1000;
+	int sampleRate = attDat.ADSfreq;
 	double detT = 1. / sampleRate;
 	int nADS = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*sampleRate;
 	double *JitterEuler=new double[3*nADS];
@@ -2216,9 +2216,9 @@ void attSim::simAttJitterparam(vector<Quat>qTrue, vector<AttJitter>vecJitter)
 	{
 		for (int a = 0; a < nADS; a++)
 		{
-			JitterEuler[3 * a] += vecJitter[j].eulerX / 3600 / 180 * PI*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT*a);
-			JitterEuler[3 * a+1] += vecJitter[j].eulerY / 3600 / 180 * PI*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT*a);
-			JitterEuler[3 * a+2] += vecJitter[j].eulerZ / 3600 / 180 * PI*cos(vecJitter[j].phase + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a] += vecJitter[j].eulerX / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a+1] += vecJitter[j].eulerY / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a+2] += vecJitter[j].eulerZ / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
 		}
 	}
 	vector<double> utc(nADS+1); vector<Quat>qTrueInter; vector<Gyro> wADS(nADS);

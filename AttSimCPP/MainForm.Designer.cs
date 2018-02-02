@@ -64,11 +64,12 @@
             this.button9 = new System.Windows.Forms.Button();
             this.TabControl = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.checkBox13 = new System.Windows.Forms.CheckBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.textBox21 = new System.Windows.Forms.TextBox();
             this.textBox20 = new System.Windows.Forms.TextBox();
             this.textBox19 = new System.Windows.Forms.TextBox();
-            this.textBox17 = new System.Windows.Forms.TextBox();
             this.label17 = new System.Windows.Forms.Label();
             this.checkBox10 = new System.Windows.Forms.CheckBox();
             this.label15 = new System.Windows.Forms.Label();
@@ -93,6 +94,8 @@
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.label16 = new System.Windows.Forms.Label();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.textBox24 = new System.Windows.Forms.TextBox();
+            this.button16 = new System.Windows.Forms.Button();
             this.textBox23 = new System.Windows.Forms.TextBox();
             this.textBox22 = new System.Windows.Forms.TextBox();
             this.button14 = new System.Windows.Forms.Button();
@@ -116,13 +119,14 @@
             this.textBox13 = new System.Windows.Forms.TextBox();
             this.textBox14 = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.button16 = new System.Windows.Forms.Button();
-            this.textBox24 = new System.Windows.Forms.TextBox();
-            this.groupBox9 = new System.Windows.Forms.GroupBox();
-            this.checkBox13 = new System.Windows.Forms.CheckBox();
+            this.label22 = new System.Windows.Forms.Label();
+            this.textBox17 = new System.Windows.Forms.TextBox();
+            this.textBox25 = new System.Windows.Forms.TextBox();
+            this.label23 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.TabControl.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            this.groupBox9.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox7.SuspendLayout();
@@ -131,7 +135,6 @@
             this.tabPage2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.groupBox9.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -505,6 +508,29 @@
             this.tabPage3.Text = "==数据接口==";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // groupBox9
+            // 
+            this.groupBox9.Controls.Add(this.label23);
+            this.groupBox9.Controls.Add(this.textBox25);
+            this.groupBox9.Controls.Add(this.label22);
+            this.groupBox9.Controls.Add(this.checkBox13);
+            this.groupBox9.Location = new System.Drawing.Point(977, 157);
+            this.groupBox9.Name = "groupBox9";
+            this.groupBox9.Size = new System.Drawing.Size(192, 330);
+            this.groupBox9.TabIndex = 28;
+            this.groupBox9.TabStop = false;
+            this.groupBox9.Text = "高频设置";
+            // 
+            // checkBox13
+            // 
+            this.checkBox13.AutoSize = true;
+            this.checkBox13.Location = new System.Drawing.Point(6, 85);
+            this.checkBox13.Name = "checkBox13";
+            this.checkBox13.Size = new System.Drawing.Size(175, 34);
+            this.checkBox13.TabIndex = 38;
+            this.checkBox13.Text = "是否高频";
+            this.checkBox13.UseVisualStyleBackColor = true;
+            // 
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.textBox21);
@@ -560,15 +586,6 @@
             this.textBox19.Name = "textBox19";
             this.textBox19.Size = new System.Drawing.Size(103, 38);
             this.textBox19.TabIndex = 35;
-            // 
-            // textBox17
-            // 
-            this.textBox17.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox17.Location = new System.Drawing.Point(843, 81);
-            this.textBox17.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox17.Name = "textBox17";
-            this.textBox17.Size = new System.Drawing.Size(103, 38);
-            this.textBox17.TabIndex = 32;
             // 
             // label17
             // 
@@ -818,6 +835,27 @@
             this.groupBox7.TabIndex = 26;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "数据处理";
+            // 
+            // textBox24
+            // 
+            this.textBox24.Font = new System.Drawing.Font("宋体", 8F);
+            this.textBox24.Location = new System.Drawing.Point(203, 140);
+            this.textBox24.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox24.Name = "textBox24";
+            this.textBox24.Size = new System.Drawing.Size(660, 38);
+            this.textBox24.TabIndex = 41;
+            // 
+            // button16
+            // 
+            this.button16.BackColor = System.Drawing.Color.Transparent;
+            this.button16.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.button16.Location = new System.Drawing.Point(21, 120);
+            this.button16.Name = "button16";
+            this.button16.Size = new System.Drawing.Size(177, 70);
+            this.button16.TabIndex = 40;
+            this.button16.Text = "高频参数";
+            this.button16.UseVisualStyleBackColor = false;
+            this.button16.Click += new System.EventHandler(this.button16_Click);
             // 
             // textBox23
             // 
@@ -1110,46 +1148,43 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "程序日志";
             // 
-            // button16
+            // label22
             // 
-            this.button16.BackColor = System.Drawing.Color.Transparent;
-            this.button16.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.button16.Location = new System.Drawing.Point(21, 120);
-            this.button16.Name = "button16";
-            this.button16.Size = new System.Drawing.Size(177, 70);
-            this.button16.TabIndex = 40;
-            this.button16.Text = "高频参数";
-            this.button16.UseVisualStyleBackColor = false;
-            this.button16.Click += new System.EventHandler(this.button16_Click);
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(5, 147);
+            this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(137, 30);
+            this.label22.TabIndex = 38;
+            this.label22.Text = "采样频率";
             // 
-            // textBox24
+            // textBox17
             // 
-            this.textBox24.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox24.Location = new System.Drawing.Point(203, 140);
-            this.textBox24.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox24.Name = "textBox24";
-            this.textBox24.Size = new System.Drawing.Size(660, 38);
-            this.textBox24.TabIndex = 41;
+            this.textBox17.Font = new System.Drawing.Font("宋体", 8F);
+            this.textBox17.Location = new System.Drawing.Point(843, 81);
+            this.textBox17.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox17.Name = "textBox17";
+            this.textBox17.Size = new System.Drawing.Size(103, 38);
+            this.textBox17.TabIndex = 32;
             // 
-            // groupBox9
+            // textBox25
             // 
-            this.groupBox9.Controls.Add(this.checkBox13);
-            this.groupBox9.Location = new System.Drawing.Point(977, 157);
-            this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(192, 330);
-            this.groupBox9.TabIndex = 28;
-            this.groupBox9.TabStop = false;
-            this.groupBox9.Text = "高频设置";
+            this.textBox25.Font = new System.Drawing.Font("宋体", 8F);
+            this.textBox25.Location = new System.Drawing.Point(6, 192);
+            this.textBox25.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox25.Name = "textBox25";
+            this.textBox25.Size = new System.Drawing.Size(103, 38);
+            this.textBox25.TabIndex = 38;
             // 
-            // checkBox13
+            // label23
             // 
-            this.checkBox13.AutoSize = true;
-            this.checkBox13.Location = new System.Drawing.Point(6, 85);
-            this.checkBox13.Name = "checkBox13";
-            this.checkBox13.Size = new System.Drawing.Size(175, 34);
-            this.checkBox13.TabIndex = 38;
-            this.checkBox13.Text = "是否高频";
-            this.checkBox13.UseVisualStyleBackColor = true;
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(127, 197);
+            this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(45, 30);
+            this.label23.TabIndex = 39;
+            this.label23.Text = "Hz";
             // 
             // MainForm
             // 
@@ -1168,6 +1203,8 @@
             this.groupBox1.ResumeLayout(false);
             this.TabControl.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
+            this.groupBox9.ResumeLayout(false);
+            this.groupBox9.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
             this.groupBox4.ResumeLayout(false);
@@ -1183,8 +1220,6 @@
             this.tableLayoutPanel1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            this.groupBox9.ResumeLayout(false);
-            this.groupBox9.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1272,7 +1307,6 @@
         private System.Windows.Forms.TextBox textBox21;
         private System.Windows.Forms.TextBox textBox20;
         private System.Windows.Forms.TextBox textBox19;
-        private System.Windows.Forms.TextBox textBox17;
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.GroupBox groupBox8;
         private System.Windows.Forms.TextBox textBox16;
@@ -1283,6 +1317,10 @@
         private System.Windows.Forms.GroupBox groupBox9;
         private System.Windows.Forms.CheckBox checkBox13;
         private System.Windows.Forms.TextBox textBox24;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.TextBox textBox25;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.TextBox textBox17;
     }
 }
 

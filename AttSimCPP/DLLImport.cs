@@ -22,7 +22,8 @@ namespace AttSimCPP
         public double[] wBiasA;//陀螺漂移
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
         public double[] sArr;//陀螺尺度因子和安装偏差
-        public double sig_ST, sigu, sigv;//星敏陀螺参数        
+        public double sig_ST, sigu, sigv;//星敏陀螺参数    
+        public int ADSfreq;//高频角位移测量频率
     };
     [StructLayout(LayoutKind.Sequential)]
     public struct Quat

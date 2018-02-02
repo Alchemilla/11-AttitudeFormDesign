@@ -17,6 +17,7 @@ struct AttParm
 	double qInitial[4], wBiasA[3];//初始四元数，陀螺漂移
 	double sArr[9];//陀螺尺度因子和安装偏差
 	double sig_ST, sigu, sigv;//星敏陀螺参数
+	int ADSfreq;
 
 	// 重载操作符=
 	AttParm& operator=(const AttParm &s)
@@ -31,6 +32,7 @@ struct AttParm
 		this->sig_ST = s.sig_ST;
 		this->sigu = s.sigu;
 		this->sigv = s.sigv;
+		this->ADSfreq = s.ADSfreq;
 		return *this;
 	}
 };

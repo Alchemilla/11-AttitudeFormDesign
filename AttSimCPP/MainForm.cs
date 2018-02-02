@@ -608,6 +608,7 @@ namespace AttSimCPP
             textBox20.Text = "3";//常值漂移
             textBox21.Text = "0.0005";//随机游走
             textBox22.Text = path;
+            textBox25.Text = "1000";
           }
         /// <summary>
         /// 真实数据路径
@@ -665,6 +666,8 @@ namespace AttSimCPP
             mAtt.wBiasA = wBias;
             //漂移噪声
             mAtt.sigu = double.Parse(textBox21.Text) * 1e-5;
+            //高频角位移测量频率
+            mAtt.ADSfreq = int.Parse(textBox25.Text);
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
@@ -735,6 +738,8 @@ namespace AttSimCPP
             mAtt.wBiasA = wBias;
             //漂移噪声
             mAtt.sigu = double.Parse(textBox21.Text) * 1e-5;
+            //高频角位移测量频率
+            mAtt.ADSfreq = int.Parse(textBox25.Text);
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
