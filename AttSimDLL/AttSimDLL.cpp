@@ -2270,7 +2270,9 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 	{
 		fscanf(fp1, "%*lf\t%*lf\t%lf\t%lf\t%lf\t%lf\t%[^\n]\n", &eulerTmp.UT,
 			&eulerTmp.wx, &eulerTmp.wy, &eulerTmp.wz, tmp);
-		eulerTmp.wx /= 180 * PI, eulerTmp.wy /= 180 * PI, eulerTmp.wz /= 180 * PI;
+		eulerTmp.wx = eulerTmp.wx / 180 * PI;
+		eulerTmp.wy = eulerTmp.wy / 180 * PI;
+		eulerTmp.wz = eulerTmp.wz / 180 * PI;
 		euler.push_back(eulerTmp);
 	}
 
