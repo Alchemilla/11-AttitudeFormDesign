@@ -669,6 +669,9 @@ namespace AttSimCPP
             //高频角位移测量频率
             mAtt.ADSfreq = int.Parse(textBox25.Text);
 
+            //星敏安装矩阵
+            mAtt.install = textBox23.Text;
+
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 50;
@@ -697,6 +700,7 @@ namespace AttSimCPP
             {
                 path2 = openDlg.FileName.ToString(); //获得文件路径 
                 ShowInfo("成功找到路径：" + path2);
+                textBox23.Text = path2;
             }
             else
                 ShowInfo("失败：未设置路径");

@@ -49,6 +49,7 @@ public:
 	attSim();
 	~attSim();
 	//获取各种参数
+	void getInstallParam(AttParm mAtt);
 	void getQuatAndGyro(attGFDM &attMeas);
 	void getAttParam(AttParm mAtt,string workpath);
 	void getAttParam(AttParm mAtt, string workpath, isStarGyro starGy);
