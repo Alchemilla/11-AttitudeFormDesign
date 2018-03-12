@@ -2350,7 +2350,30 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 		qTrueTmp.UT = euler[a].UT;
 		qTrue.push_back(qTrueTmp);
 	}
-	outputQuat(qTrue, "\\Attitude.txt");
+	outputQuat(qTrue, "\\ATT.txt");
+	return true;
+}
+
+/////////////////////////////////////////////////////////////////////////
+//功能：读取原始四元数
+//输入：ATT.txt
+//输出：姿态角和角速度
+//注意：
+//作者：GZC
+//日期：2018.03.12
+//////////////////////////////////////////////////////////////////////////
+bool attSim::readAttparam2(string quatPath, vector<Quat>&qTrue)
+{
+	FILE *fp = fopen(quatPath.c_str(), "r");
+	if (!fp) { printf("文件不存在！\n"); return false; }
+	int num; Quat tmp;
+	fscanf(fp, "%d\n", &num);
+	for (int a = 0; a < num; a++)
+	{
+		fscanf(fp, "%lf\t%lf\t%lf\t%lf\t%lf\n", &tmp.UT, &tmp.q1, &tmp.q2, &tmp.q3, &tmp.q4);
+		qTrue.push_back(tmp);
+	}
+	fclose(fp);
 	return true;
 }
 
@@ -2835,7 +2858,7 @@ void attSim::addErrorForFiberGyroActive(vector<double>&wSim)
 }
 double attSim::starErrorModel(double sig)
 {
-	return abs(3.3643*sig*sig + 11.298*sig - 0.0526);
+	return abs(0.2339*sig*sig + 0.2982*sig + 0.4678);
 }
 double attSim::triGyroErrorModel(double sig)
 {
@@ -2843,12 +2866,12 @@ double attSim::triGyroErrorModel(double sig)
 }
 double attSim::fiberGyroErrorModel(double sig)
 {
-	return abs(0.0003*sig);
+	return abs(0.0003*sig*sig + 7E-05*sig - 3E-15);
 }
 
 void attSim::compareTureEKF()
 {
-	string strpath = path + "\\Attitude.txt";
+	string strpath = path + "\\ATT.txt";
 	string strpath1;
 	if (starGyro.isJitter==false)
 	{		strpath1 = path + "\\EKFquater.txt";	}
@@ -2873,6 +2896,7 @@ void attSim::compareTureEKF()
 		fscanf(fpTrue, "%lf\t%lf\t%lf\t%lf\t%lf\n", &qTrue[a].UT, &qTrue[a].q1, &qTrue[a].q2, &qTrue[a].q3, &qTrue[a].q4);
 	}
 	mBase.QuatInterpolation(qTrue, num2, UT, num, qTrueI);
+	fclose(fpEKF), fclose(fpTrue);
 
 	//添加RMS指标(正确做法,2017.11.02)
 	double rmsQ1, rmsQ2, rmsQ3;
@@ -2974,8 +2998,12 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 	GFDM.getAttParam(mAtt, workpath, starGy);
 	attGFDM measGFDM;
 	vector<Quat>qTure;
-	//根据欧拉角计算四元数
-	GFDM.readAttparam(workpath, qTure);
+	if (mAtt.quatPath[0]==0)
+	{		//根据欧拉角计算四元数
+		GFDM.readAttparam(workpath, qTure);	}
+	else
+	{		//直接从ATT.txt中读取姿态
+		GFDM.readAttparam2(mAtt.quatPath, qTure);	}
 	//仿真带误差四元数
 	GFDM.simAttparam(qTure, measGFDM);
 	if (starGy.isJitter==true)
@@ -3006,7 +3034,7 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy)
 	//根据姿态数据得到初始四元数、光轴矢量、陀螺测量值；
 	GFDM.preAttparam(measGFDM, q0, BmIm, wMeas);	
 	
-	if(starGy.isJitter=true)//如果有高频，则将陀螺数据替换
+	if(starGy.isJitter==true)//如果有高频，则将陀螺数据替换
 	{
 		starGy.isJitter = false; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
 		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
@@ -3015,6 +3043,10 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy)
 		GFDM.readAttJitterTXT(wMeas);
 		//卡尔曼滤波处理
 		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);
+	}
+	else
+	{
+		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
 	}
 	//姿态比较
 	GFDM.compareTureEKF();

@@ -35,6 +35,7 @@ namespace AttSimCPP
         string path,path2;
         public double[] qMeas, dq, bias, berr, dq2, bias2, berr2, qNs, xestAll, xestAll2;
         static int nSim1 = 0, nSim2 = 0;
+        bool isJitterIndex = false;
 
         /// <summary>
         /// 功能：星敏陀螺仿真和姿态确定主程序
@@ -411,6 +412,7 @@ namespace AttSimCPP
             simAtt1.Text = "EKF星敏噪声";
             simAtt1.Show();
         }
+
         /// <summary>
         /// 功能：双向EKF结果和星敏噪声
         /// </summary>
@@ -422,6 +424,7 @@ namespace AttSimCPP
             simAtt1.Text = "双向星敏噪声";
             simAtt1.Show();
         }
+
         /// <summary>
         /// 功能：考虑陀螺安装和尺度
         /// </summary>
@@ -601,13 +604,13 @@ namespace AttSimCPP
         {
             checkBox1.Checked = checkBox2.Checked =  true;
             textBox15.Text = "4";//星敏测量频率
-            textBox17.Text = "8";//陀螺测量频率
-            //textBox16.Text = "1";//星敏噪声
-            //textBox19.Text = "0.006";//陀螺噪声
-            textBox20.Text = "3";//常值漂移
-            textBox21.Text = "0.0005";//随机游走
+            textBox17.Text = "8";//陀螺测量频率            
+            textBox20.Text = "0.0005";//常值漂移
+            textBox21.Text = "0.00005";//随机游走
             textBox22.Text = path;
-            textBox25.Text = "1000";
+            textBox25.Text = "1000";//角位移测量频率
+            textBox11.Text = "0.003";//角位移-随机
+            textBox12.Text = "0.05";//角位移-漂移
           }
         /// <summary>
         /// 真实数据路径
@@ -616,7 +619,7 @@ namespace AttSimCPP
         /// <param name="e"></param>
         private void button12_Click(object sender, EventArgs e)
         {
-            ShowInfo("选择姿轨行时文件路径");
+            ShowInfo("选择欧拉角和轨道文件路径");
             OpenFileDialog openDlg = new OpenFileDialog();
             if (openDlg.ShowDialog() == DialogResult.OK)
             {
@@ -624,6 +627,7 @@ namespace AttSimCPP
                 path = localFilePath.Substring(0, localFilePath.LastIndexOf("\\")); ;
                 ShowInfo("成功找到路径：" + path);
                 textBox22.Text = path;
+                //textBox13.Clear();
             }
             else
                 ShowInfo("失败：未设置路径");
@@ -643,7 +647,7 @@ namespace AttSimCPP
             starGyro.isG11 = false;           starGyro.isG12 = false;            starGyro.isG13 = false;
             starGyro.isG21 = false;            starGyro.isG22 = false;           starGyro.isG23 = false;
             starGyro.isG31 = true;            starGyro.isG32 = true;            starGyro.isG33 = true;
-            if (checkBox13.Checked) { starGyro.isJitter = true; } else starGyro.isJitter = false;
+            starGyro.isJitter = isJitterIndex;
 
             //获取星敏陀螺频率和总时长
             //mAtt.totalT = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
@@ -652,7 +656,7 @@ namespace AttSimCPP
             //星敏参数
             mAtt.sig_ST = 1;//星敏误差(单位：角秒) 
             //陀螺噪声
-            mAtt.sigv = 0.006;//陀螺噪声
+            mAtt.sigv = 0.006 * 1e-4;//陀螺噪声
             //陀螺漂移
             double[] wBias = new double[3];
             for (int i = 0; i < 3; i++)
@@ -669,12 +673,17 @@ namespace AttSimCPP
             progressBar1.Maximum = 100;
             progressBar1.Value = 50;
 
-            if (!File.Exists(path + "\\ManeuverData_All.txt"))
+            if (!File.Exists(mAtt.quatPath))
             {
-                ShowInfo("没有ManeuverData_All.txt文件");
-                MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
-                return;
+                ShowInfo("没有ATT.txt文件");
+                if (!File.Exists(path + "\\ManeuverData_All.txt"))
+                {
+                    ShowInfo("没有ManeuverData_All.txt文件");
+                    MessageBox.Show("请设置包含ManeuverData_All.txt路径；或者 ATT.txt", "警告", MessageBoxButtons.OK);
+                    return;
+                }
             }
+            else { path = mAtt.quatPath.Substring(0, mAtt.quatPath.LastIndexOf("\\")); }
             ShowInfo("开始姿态仿真，生成星敏四元数和陀螺角速度");
             DLLImport.ExternalFileAttitudeSim(path,mAtt, starGyro);
             progressBar1.Value = 100;
@@ -713,7 +722,7 @@ namespace AttSimCPP
             starGyro.isG11 = false; starGyro.isG12 = false; starGyro.isG13 = false;
             starGyro.isG21 = false; starGyro.isG22 = false; starGyro.isG23 = false;
             starGyro.isG31 = true; starGyro.isG32 = true; starGyro.isG33 = true;
-            if (checkBox13.Checked) { starGyro.isJitter = true; } else starGyro.isJitter = false;
+            starGyro.isJitter = isJitterIndex;
 
             //获取星敏陀螺频率和总时长
             //mAtt.totalT = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
@@ -722,7 +731,7 @@ namespace AttSimCPP
             //星敏参数
             mAtt.sig_ST = 1;//星敏误差(单位：角秒) 
             //陀螺噪声
-            mAtt.sigv = 0.006;
+            mAtt.sigv = 0.006 * 1e-4;
             //陀螺漂移
             double[] wBias = new double[3];
             for (int i = 0; i < 3; i++)
@@ -738,12 +747,17 @@ namespace AttSimCPP
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 40;
-            if (!File.Exists(path + "\\ManeuverData_All.txt"))
+            if (!File.Exists(mAtt.quatPath))
             {
-                ShowInfo("没有ManeuverData_All.txt文件");
-                MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
-                return;
+                ShowInfo("没有ATT.txt文件");
+                if (!File.Exists(path + "\\ManeuverData_All.txt"))
+                {
+                    ShowInfo("没有ManeuverData_All.txt文件");
+                    MessageBox.Show("请设置包含ManeuverData_All.txt路径；或者 ATT.txt", "警告", MessageBoxButtons.OK);
+                    return;
+                }
             }
+            else { path = mAtt.quatPath.Substring(0, mAtt.quatPath.LastIndexOf("\\")); }
             ShowInfo("开始姿态确定...");
             DLLImport.ExternalFileAttitudeDeter(path, mAtt, starGyro);
             ShowInfo("姿态仿真完毕");
@@ -762,12 +776,36 @@ namespace AttSimCPP
             {
                 string JitterFilePath = openDlg.FileName.ToString(); //获得文件路径 
                 ShowInfo("成功找到路径：" + JitterFilePath);
-                checkBox13.Checked = true;
                 textBox24.Text = JitterFilePath;
+                isJitterIndex = true;
             }
             else
                 ShowInfo("失败：未设置路径");    
         }
 
+        /// <summary>
+        /// 添加原始四元数
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button17_Click(object sender, EventArgs e)
+        {
+            ShowInfo("加载原始四元数参数");
+            OpenFileDialog openDlg = new OpenFileDialog();
+            if (openDlg.ShowDialog() == DialogResult.OK)
+            {
+                string QuatFilePath = openDlg.FileName.ToString(); //获得文件路径 
+                ShowInfo("成功找到路径：" + QuatFilePath);
+                textBox13.Text = QuatFilePath;
+                mAtt.quatPath = QuatFilePath;
+            }
+            else
+                ShowInfo("失败：未设置原始四元数路径");
+        }
+
+        private void textBox22_TextChanged(object sender, EventArgs e)
+        {
+            mAtt.quatPath=null;
+        }
     }
 }

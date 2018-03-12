@@ -25,7 +25,9 @@ namespace AttSimCPP
         public double sig_ST, sigu, sigv;//星敏陀螺参数    
         public int ADSfreq;//高频角位移测量频率
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
-        public string install;
+        public string install;//星敏安装矩阵路径
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
+        public string quatPath;//原始四元数路径
     };
     [StructLayout(LayoutKind.Sequential)]
     public struct Quat
