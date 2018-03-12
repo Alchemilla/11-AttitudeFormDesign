@@ -668,7 +668,6 @@ namespace AttSimCPP
             mAtt.sigu = double.Parse(textBox21.Text) * 1e-5;
             //高频角位移测量频率
             mAtt.ADSfreq = int.Parse(textBox25.Text);
-
             //星敏安装矩阵
             mAtt.install = textBox23.Text;
 
@@ -744,6 +743,8 @@ namespace AttSimCPP
             mAtt.sigu = double.Parse(textBox21.Text) * 1e-5;
             //高频角位移测量频率
             mAtt.ADSfreq = int.Parse(textBox25.Text);
+            //星敏安装矩阵
+            mAtt.install = textBox23.Text;
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
