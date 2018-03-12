@@ -352,7 +352,7 @@
             this.txtInfo.Name = "txtInfo";
             this.txtInfo.ReadOnly = true;
             this.txtInfo.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtInfo.Size = new System.Drawing.Size(1188, 413);
+            this.txtInfo.Size = new System.Drawing.Size(1188, 262);
             this.txtInfo.TabIndex = 24;
             // 
             // progressBar1
@@ -477,7 +477,7 @@
             this.TabControl.Margin = new System.Windows.Forms.Padding(2);
             this.TabControl.Name = "TabControl";
             this.TabControl.SelectedIndex = 0;
-            this.TabControl.Size = new System.Drawing.Size(1196, 836);
+            this.TabControl.Size = new System.Drawing.Size(1196, 987);
             this.TabControl.TabIndex = 32;
             // 
             // tabPage3
@@ -490,7 +490,7 @@
             this.tabPage3.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage3.Size = new System.Drawing.Size(1176, 778);
+            this.tabPage3.Size = new System.Drawing.Size(1176, 929);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "==数据接口==";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -503,7 +503,7 @@
             this.groupBox9.Controls.Add(this.checkBox13);
             this.groupBox9.Location = new System.Drawing.Point(977, 157);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(192, 330);
+            this.groupBox9.Size = new System.Drawing.Size(192, 474);
             this.groupBox9.TabIndex = 28;
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "高频设置";
@@ -571,7 +571,7 @@
             this.groupBox5.Location = new System.Drawing.Point(7, 157);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.groupBox5.Size = new System.Drawing.Size(964, 330);
+            this.groupBox5.Size = new System.Drawing.Size(964, 474);
             this.groupBox5.TabIndex = 26;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "陀螺参数设置(至少选择3个不同方向陀螺)";
@@ -854,7 +854,7 @@
             this.groupBox7.Controls.Add(this.button15);
             this.groupBox7.Controls.Add(this.button12);
             this.groupBox7.Controls.Add(this.button13);
-            this.groupBox7.Location = new System.Drawing.Point(7, 493);
+            this.groupBox7.Location = new System.Drawing.Point(7, 637);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Size = new System.Drawing.Size(1162, 285);
             this.groupBox7.TabIndex = 26;
@@ -1039,11 +1039,11 @@
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.txtInfo);
-            this.groupBox2.Location = new System.Drawing.Point(0, 842);
+            this.groupBox2.Location = new System.Drawing.Point(0, 993);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox2.Size = new System.Drawing.Size(1196, 456);
+            this.groupBox2.Size = new System.Drawing.Size(1196, 305);
             this.groupBox2.TabIndex = 33;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "程序日志";
@@ -1060,7 +1060,7 @@
             this.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "MainForm";
-            this.Text = "姿态确定仿真软件";
+            this.Text = "点一仿真论证--姿态仿真与处理";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.TabControl.ResumeLayout(false);

@@ -1183,6 +1183,46 @@ double attSim::G31[] = { -cos(35.2644 / 180 * PI)*cos(20. / 180 * PI), cos(35.26
 double attSim::G32[] = { cos(35.2644 / 180 * PI)*cos(40. / 180 * PI), cos(35.2644 / 180 * PI)*cos(50. / 180 * PI) ,-cos(54.7356 / 180 * PI) };
 double attSim::G33[] = { cos(35.2644 / 180 * PI)*cos(80. / 180 * PI), -cos(35.2644 / 180 * PI)*cos(10. / 180 * PI) ,-cos(54.7356 / 180 * PI) };
 BaseFunc mBase;
+
+//////////////////////////////////////////////////////////////////////////
+//功能：获取星敏感器的安装
+//输入：姿态参数结构体：mAtt（全局）
+//输出：更新 starAali，starBali，starCali参数
+//注意：文本格式固定
+//作者：GZC
+//日期：2018.03.12
+//////////////////////////////////////////////////////////////////////////
+void attSim::getInstallParam(AttParm mAtt)
+{
+	string ins = mAtt.install;
+	FILE *fp = fopen(ins.c_str(), "r");
+	char tmp[128];
+	fscanf(fp, "%[^\n]\n", tmp);
+	double tmp1, tmp2, tmp3;
+	for (int a=0;a<3;a++)
+	{
+		fscanf(fp, "%lf\t%lf\t%lf\n", &tmp1, &tmp2, &tmp3);
+		starAali[3 * a] = cos(tmp1 / 180 * PI); 
+		starAali[3 * a + 1] = cos(tmp2 / 180 * PI);
+		starAali[3 * a + 2] = cos(tmp3 / 180 * PI);
+	}
+	fscanf(fp, "%[^\n]\n", tmp);
+	for (int a = 0; a < 3; a++)
+	{
+		fscanf(fp, "%lf\t%lf\t%lf\n", &tmp1, &tmp2, &tmp3);
+		starBali[3 * a] = cos(tmp1 / 180 * PI);
+		starBali[3 * a + 1] = cos(tmp2 / 180 * PI);
+		starBali[3 * a + 2] = cos(tmp3 / 180 * PI);
+	}
+	fscanf(fp, "%[^\n]\n", tmp);
+	for (int a = 0; a < 3; a++)
+	{
+		fscanf(fp, "%lf\t%lf\t%lf\n", &tmp1, &tmp2, &tmp3);
+		starCali[3 * a] = cos(tmp1 / 180 * PI);
+		starCali[3 * a + 1] = cos(tmp2 / 180 * PI);
+		starCali[3 * a + 2] = cos(tmp3 / 180 * PI);
+	}
+}
 //////////////////////////////////////////////////////////////////////////
 //功能：获取姿态仿真参数
 //输入：姿态参数结构体：mAtt（全局）
@@ -2216,9 +2256,9 @@ void attSim::simAttJitterparam(vector<Quat>qTrue, vector<AttJitter>vecJitter)
 	{
 		for (int a = 0; a < nADS; a++)
 		{
-			JitterEuler[3 * a] += vecJitter[j].eulerX / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
-			JitterEuler[3 * a+1] += vecJitter[j].eulerY / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
-			JitterEuler[3 * a+2] += vecJitter[j].eulerZ / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a] += vecJitter[j].eulerX / 2 / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a+1] += vecJitter[j].eulerY / 2 / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a+2] += vecJitter[j].eulerZ / 2 / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
 		}
 	}
 	vector<double> utc(nADS+1); vector<Quat>qTrueInter; vector<Gyro> wADS(nADS);
@@ -2934,6 +2974,8 @@ void attSim::outputBias(double *Bias, int num, string name)
 void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 {
 	attSim GFDM;
+	//首先考虑星敏安装的问题
+	if (mAtt.install[0]!=0)	{		GFDM.getInstallParam(mAtt);	}
 	GFDM.getAttParam(mAtt, workpath, starGy);
 	attGFDM measGFDM;
 	vector<Quat>qTure;
@@ -2960,6 +3002,8 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy)
 {
 	attSim GFDM;
+	//首先考虑星敏安装的问题
+	if (mAtt.install[0] != 0) { GFDM.getInstallParam(mAtt); }
 	GFDM.getAttParam(mAtt, workpath, starGy);
 	//从文件读取星敏陀螺数据
 	attGFDM measGFDM;vector<vector<BmImStar>>BmIm; vector<Gyro>wMeas; Quat q0;
