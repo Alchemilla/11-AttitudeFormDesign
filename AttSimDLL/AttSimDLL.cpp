@@ -1273,11 +1273,8 @@ void attSim::getQuatAndGyro(attGFDM &attMeas)
 	double ut, g11, g12, g13, g21, g22, g23, g31, g32, g33;
 	for (int a = 0; a < num2; a++)
 	{
-		fscanf(fp2, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", &ut,
-			&g11, &g12, &g13, &g21, &g22, &g23, &g31, &g32, &g33);
+		fscanf(fp2, "%lf\t%lf\t%lf\t%lf\n", &ut, &g31, &g32, &g33);
 		attMeas.UT.push_back(ut);
-		attMeas.gy11.push_back(g11); attMeas.gy12.push_back(g12); attMeas.gy13.push_back(g13);
-		attMeas.gy21.push_back(g21); attMeas.gy22.push_back(g22); attMeas.gy23.push_back(g23);
 		attMeas.gy31.push_back(g31); attMeas.gy32.push_back(g32); attMeas.gy33.push_back(g33);
 	}
 	fclose(fp1), fclose(fp2);
@@ -2936,9 +2933,7 @@ void attSim::outputQuatGyroTXT(attGFDM attMeas, string out1, string out2)
 	fprintf(fp2, "%d\n", attMeas.gy11.size());
 	for (int a = 0; a < attMeas.gy11.size(); a++)
 	{
-		fprintf(fp2, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n", attMeas.UT[a], attMeas.gy11[a],
-			attMeas.gy12[a], attMeas.gy13[a], attMeas.gy21[a], attMeas.gy22[a], attMeas.gy23[a], attMeas.gy31[a],
-			attMeas.gy32[a], attMeas.gy33[a]);
+		fprintf(fp2, "%.3f\t%.9f\t%.9f\t%.9f\n", attMeas.UT[a], 	attMeas.gy31[a],	attMeas.gy32[a], attMeas.gy33[a]);
 	}
 	fclose(fp1), fclose(fp2);
 }
