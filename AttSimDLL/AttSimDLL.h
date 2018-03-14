@@ -66,7 +66,7 @@ public:
 	void EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
 	void simAttparam(vector<Quat>qTrue,attGFDM &attMeas);
-	void simAttJitterparam(vector<Quat>qTrue, vector<AttJitter>vecJitter);
+	void simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter);
 	bool readAttparam(string pushbroomDat, vector<Quat>&qTrue);
 	bool readAttparam2(string quatPath, vector<Quat>&qTrue);
 	bool readAttJitterparam(vector<AttJitter>&vecJitter);

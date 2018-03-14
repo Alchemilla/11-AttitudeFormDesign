@@ -2240,7 +2240,7 @@ void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 //作者：GZC
 //日期：2018.02.01
 //////////////////////////////////////////////////////////////////////////
-void attSim::simAttJitterparam(vector<Quat>qTrue, vector<AttJitter>vecJitter)
+void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 {
 	//高频角位移采样率
 	int sampleRate = attDat.ADSfreq;
@@ -2284,6 +2284,8 @@ void attSim::simAttJitterparam(vector<Quat>qTrue, vector<AttJitter>vecJitter)
 			qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4);
 	}
 	fclose(fp1),fclose(fp2);
+	qTrue.clear();
+	qTrue.assign(qTrueInter.begin(), qTrueInter.end());
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -3009,8 +3011,6 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 	else
 	{		//直接从ATT.txt中读取姿态
 		GFDM.readAttparam2(mAtt.quatPath, qTure);	}
-	//仿真带误差四元数
-	GFDM.simAttparam(qTure, measGFDM);
 	if (mAtt.JitterPath[0]!=0)//高频文件存在时
 	{
 		//读取高频抖动数据
@@ -3018,6 +3018,8 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 		GFDM.readAttJitterparam(vecJitter);
 		GFDM.simAttJitterparam(qTure, vecJitter);	//在真实四元数上加高频抖动，并且得到高频角位移数据
 	}
+	//仿真带误差四元数
+	GFDM.simAttparam(qTure, measGFDM);
 }
 /////////////////////////////////////////////////////////////////////////
 //功能：姿态确定（外部接口）
