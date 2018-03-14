@@ -28,6 +28,8 @@ namespace AttSimCPP
         public string install;//星敏安装矩阵路径
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
         public string quatPath;//原始四元数路径
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
+        public string JitterPath;//高频文件路径
     };
     [StructLayout(LayoutKind.Sequential)]
     public struct Quat

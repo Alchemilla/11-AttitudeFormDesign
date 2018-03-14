@@ -2253,21 +2253,22 @@ void attSim::simAttJitterparam(vector<Quat>qTrue, vector<AttJitter>vecJitter)
 	{
 		for (int a = 0; a < nADS; a++)
 		{
-			JitterEuler[3 * a] += vecJitter[j].eulerX / 2 / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
-			JitterEuler[3 * a+1] += vecJitter[j].eulerY / 2 / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
-			JitterEuler[3 * a+2] += vecJitter[j].eulerZ / 2 / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a] += vecJitter[j].eulerX  / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a+1] += vecJitter[j].eulerY  / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a+2] += vecJitter[j].eulerZ / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
 		}
 	}
 	vector<double> utc(nADS+1); vector<Quat>qTrueInter; vector<Gyro> wADS(nADS);
 	for (int a = 0; a < nADS + 1; a++)//仿真nADS个角位移真实数据
 	{		utc[a] = qTrue[0].UT + detT*a;	}
 	mBase.QuatInterpolationVector(qTrue, utc, qTrueInter);//内插得到真实四元数
+	
 	for (int a=0;a<nADS + 1;a++)//为四元数添加高频抖动
 	{
 		double rMeas[9],rJitter[9],rTure[9];
 		mBase.quat2matrix(qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4, rMeas);
 		mBase.Eulor2Matrix(JitterEuler[3 * a], JitterEuler[3 * a + 1], JitterEuler[3 * a + 2], 123, rJitter);
-		mBase.Multi(rJitter, rMeas, rTure, 3, 3, 3);
+		mBase.Multi( rJitter, rMeas, rTure, 3, 3, 3);
 		mBase.matrix2quat(rTure, qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4);
 	}
 	string adsPath = path + "\\ADS.txt";//角位移
@@ -2390,7 +2391,7 @@ bool attSim::readAttparam2(string quatPath, vector<Quat>&qTrue)
 //////////////////////////////////////////////////////////////////////////
 bool attSim::readAttJitterparam(vector<AttJitter>&vecJitter)
 {
-	string jitterPath = path + "\\HighFreqSimParam.txt";
+	string jitterPath = attDat.JitterPath;
 	FILE *fp = fopen(jitterPath.c_str(), "r");
 	if (!fp) { printf("文件不存在！\n"); return false; }
 	char tmp[512];
@@ -2914,7 +2915,8 @@ void attSim::compareTureEKF()
 	for (int i = 0; i < num; i++)
 	{
 		qTrueI[i].q4 = -qTrueI[i].q4;
-		mBase.quatMult(qTrueI[i], qEKF[i], dq3[i]);
+		//mBase.quatMult(qTrueI[i], qEKF[i], dq3[i]);
+		mBase.quatMult( qEKF[i],qTrueI[i], dq3[i]);
 		dq3[i].q1 = dq3[i].q1 * 2 / PI * 180 * 3600;
 		dq3[i].q2 = dq3[i].q2 * 2 / PI * 180 * 3600;
 		dq3[i].q3 = dq3[i].q3 * 2 / PI * 180 * 3600;
@@ -3009,7 +3011,7 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 		GFDM.readAttparam2(mAtt.quatPath, qTure);	}
 	//仿真带误差四元数
 	GFDM.simAttparam(qTure, measGFDM);
-	if (starGy.isJitter==true)
+	if (mAtt.JitterPath[0]!=0)//高频文件存在时
 	{
 		//读取高频抖动数据
 		vector<AttJitter>vecJitter;
