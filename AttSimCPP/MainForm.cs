@@ -775,6 +775,7 @@ namespace AttSimCPP
                 ShowInfo("成功找到路径：" + JitterFilePath);
                 checkBox13.Checked = true;
                 textBox24.Text = JitterFilePath;
+                mAtt.sJitter = JitterFilePath;
             }
             else
                 ShowInfo("失败：未设置路径");    

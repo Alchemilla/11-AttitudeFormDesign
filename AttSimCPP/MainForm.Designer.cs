@@ -492,18 +492,20 @@
             this.tabPage3.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage3.Size = new System.Drawing.Size(1176, 929);
             this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "==数据接口==";
+            this.tabPage3.Text = "==姿态参数==";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // groupBox9
             // 
+            this.groupBox9.Controls.Add(this.textBox24);
             this.groupBox9.Controls.Add(this.label23);
+            this.groupBox9.Controls.Add(this.button16);
             this.groupBox9.Controls.Add(this.textBox25);
             this.groupBox9.Controls.Add(this.label22);
             this.groupBox9.Controls.Add(this.checkBox13);
-            this.groupBox9.Location = new System.Drawing.Point(977, 157);
+            this.groupBox9.Location = new System.Drawing.Point(-6, 536);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(192, 474);
+            this.groupBox9.Size = new System.Drawing.Size(1175, 178);
             this.groupBox9.TabIndex = 28;
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "高频设置";
@@ -511,7 +513,7 @@
             // label23
             // 
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(127, 197);
+            this.label23.Location = new System.Drawing.Point(155, 116);
             this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(45, 30);
@@ -521,7 +523,7 @@
             // textBox25
             // 
             this.textBox25.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox25.Location = new System.Drawing.Point(6, 192);
+            this.textBox25.Location = new System.Drawing.Point(34, 111);
             this.textBox25.Margin = new System.Windows.Forms.Padding(2);
             this.textBox25.Name = "textBox25";
             this.textBox25.Size = new System.Drawing.Size(103, 38);
@@ -530,7 +532,7 @@
             // label22
             // 
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(5, 147);
+            this.label22.Location = new System.Drawing.Point(33, 66);
             this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(137, 30);
@@ -540,7 +542,7 @@
             // checkBox13
             // 
             this.checkBox13.AutoSize = true;
-            this.checkBox13.Location = new System.Drawing.Point(6, 85);
+            this.checkBox13.Location = new System.Drawing.Point(587, 41);
             this.checkBox13.Name = "checkBox13";
             this.checkBox13.Size = new System.Drawing.Size(175, 34);
             this.checkBox13.TabIndex = 38;
@@ -568,10 +570,10 @@
             this.groupBox5.Controls.Add(this.checkBox4);
             this.groupBox5.Controls.Add(this.groupBox6);
             this.groupBox5.Controls.Add(this.groupBox8);
-            this.groupBox5.Location = new System.Drawing.Point(7, 157);
+            this.groupBox5.Location = new System.Drawing.Point(7, 211);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.groupBox5.Size = new System.Drawing.Size(964, 474);
+            this.groupBox5.Size = new System.Drawing.Size(1162, 319);
             this.groupBox5.TabIndex = 26;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "陀螺参数设置(至少选择3个不同方向陀螺)";
@@ -579,7 +581,7 @@
             // textBox21
             // 
             this.textBox21.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox21.Location = new System.Drawing.Point(843, 255);
+            this.textBox21.Location = new System.Drawing.Point(971, 254);
             this.textBox21.Margin = new System.Windows.Forms.Padding(2);
             this.textBox21.Name = "textBox21";
             this.textBox21.Size = new System.Drawing.Size(103, 38);
@@ -588,7 +590,7 @@
             // textBox20
             // 
             this.textBox20.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox20.Location = new System.Drawing.Point(843, 197);
+            this.textBox20.Location = new System.Drawing.Point(971, 196);
             this.textBox20.Margin = new System.Windows.Forms.Padding(2);
             this.textBox20.Name = "textBox20";
             this.textBox20.Size = new System.Drawing.Size(103, 38);
@@ -597,7 +599,7 @@
             // textBox19
             // 
             this.textBox19.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox19.Location = new System.Drawing.Point(843, 139);
+            this.textBox19.Location = new System.Drawing.Point(971, 138);
             this.textBox19.Margin = new System.Windows.Forms.Padding(2);
             this.textBox19.Name = "textBox19";
             this.textBox19.Size = new System.Drawing.Size(103, 38);
@@ -606,7 +608,7 @@
             // textBox17
             // 
             this.textBox17.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox17.Location = new System.Drawing.Point(843, 81);
+            this.textBox17.Location = new System.Drawing.Point(971, 80);
             this.textBox17.Margin = new System.Windows.Forms.Padding(2);
             this.textBox17.Name = "textBox17";
             this.textBox17.Size = new System.Drawing.Size(103, 38);
@@ -615,7 +617,7 @@
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(537, 258);
+            this.label17.Location = new System.Drawing.Point(665, 257);
             this.label17.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(296, 30);
@@ -635,7 +637,7 @@
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(537, 84);
+            this.label15.Location = new System.Drawing.Point(665, 83);
             this.label15.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(201, 30);
@@ -645,7 +647,7 @@
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(537, 142);
+            this.label20.Location = new System.Drawing.Point(665, 141);
             this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(232, 30);
@@ -665,7 +667,7 @@
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(537, 200);
+            this.label21.Location = new System.Drawing.Point(665, 199);
             this.label21.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(232, 30);
@@ -764,14 +766,16 @@
             // 
             this.groupBox4.Controls.Add(this.textBox16);
             this.groupBox4.Controls.Add(this.textBox15);
+            this.groupBox4.Controls.Add(this.textBox23);
             this.groupBox4.Controls.Add(this.checkBox3);
             this.groupBox4.Controls.Add(this.label19);
+            this.groupBox4.Controls.Add(this.button14);
             this.groupBox4.Controls.Add(this.checkBox2);
             this.groupBox4.Controls.Add(this.checkBox1);
             this.groupBox4.Controls.Add(this.label16);
             this.groupBox4.Location = new System.Drawing.Point(7, 20);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(1162, 131);
+            this.groupBox4.Size = new System.Drawing.Size(1162, 185);
             this.groupBox4.TabIndex = 27;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "星敏参数设置(至少选择两个星敏)";
@@ -846,17 +850,13 @@
             // 
             // groupBox7
             // 
-            this.groupBox7.Controls.Add(this.textBox24);
-            this.groupBox7.Controls.Add(this.button16);
-            this.groupBox7.Controls.Add(this.textBox23);
             this.groupBox7.Controls.Add(this.textBox22);
-            this.groupBox7.Controls.Add(this.button14);
             this.groupBox7.Controls.Add(this.button15);
             this.groupBox7.Controls.Add(this.button12);
             this.groupBox7.Controls.Add(this.button13);
-            this.groupBox7.Location = new System.Drawing.Point(7, 637);
+            this.groupBox7.Location = new System.Drawing.Point(7, 720);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(1162, 285);
+            this.groupBox7.Size = new System.Drawing.Size(1162, 202);
             this.groupBox7.TabIndex = 26;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "数据处理";
@@ -864,7 +864,7 @@
             // textBox24
             // 
             this.textBox24.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox24.Location = new System.Drawing.Point(203, 140);
+            this.textBox24.Location = new System.Drawing.Point(474, 111);
             this.textBox24.Margin = new System.Windows.Forms.Padding(2);
             this.textBox24.Name = "textBox24";
             this.textBox24.Size = new System.Drawing.Size(660, 38);
@@ -874,7 +874,7 @@
             // 
             this.button16.BackColor = System.Drawing.Color.Transparent;
             this.button16.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.button16.Location = new System.Drawing.Point(21, 120);
+            this.button16.Location = new System.Drawing.Point(292, 91);
             this.button16.Name = "button16";
             this.button16.Size = new System.Drawing.Size(177, 70);
             this.button16.TabIndex = 40;
@@ -885,16 +885,16 @@
             // textBox23
             // 
             this.textBox23.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox23.Location = new System.Drawing.Point(203, 219);
+            this.textBox23.Location = new System.Drawing.Point(223, 117);
             this.textBox23.Margin = new System.Windows.Forms.Padding(2);
             this.textBox23.Name = "textBox23";
-            this.textBox23.Size = new System.Drawing.Size(660, 38);
+            this.textBox23.Size = new System.Drawing.Size(867, 38);
             this.textBox23.TabIndex = 39;
             // 
             // textBox22
             // 
             this.textBox22.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox22.Location = new System.Drawing.Point(203, 63);
+            this.textBox22.Location = new System.Drawing.Point(203, 103);
             this.textBox22.Margin = new System.Windows.Forms.Padding(2);
             this.textBox22.Name = "textBox22";
             this.textBox22.Size = new System.Drawing.Size(660, 38);
@@ -902,7 +902,7 @@
             // 
             // button14
             // 
-            this.button14.Location = new System.Drawing.Point(21, 199);
+            this.button14.Location = new System.Drawing.Point(41, 97);
             this.button14.Name = "button14";
             this.button14.Size = new System.Drawing.Size(177, 70);
             this.button14.TabIndex = 22;
@@ -913,7 +913,7 @@
             // button15
             // 
             this.button15.BackColor = System.Drawing.Color.BurlyWood;
-            this.button15.Location = new System.Drawing.Point(928, 155);
+            this.button15.Location = new System.Drawing.Point(919, 117);
             this.button15.Name = "button15";
             this.button15.Size = new System.Drawing.Size(171, 70);
             this.button15.TabIndex = 25;
@@ -923,7 +923,7 @@
             // 
             // button12
             // 
-            this.button12.Location = new System.Drawing.Point(21, 44);
+            this.button12.Location = new System.Drawing.Point(21, 84);
             this.button12.Name = "button12";
             this.button12.Size = new System.Drawing.Size(177, 70);
             this.button12.TabIndex = 21;
@@ -935,7 +935,7 @@
             // 
             this.button13.BackColor = System.Drawing.Color.Bisque;
             this.button13.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.button13.Location = new System.Drawing.Point(928, 55);
+            this.button13.Location = new System.Drawing.Point(919, 31);
             this.button13.Name = "button13";
             this.button13.Size = new System.Drawing.Size(171, 70);
             this.button13.TabIndex = 22;
@@ -975,9 +975,9 @@
             this.tabPage1.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage1.Size = new System.Drawing.Size(1176, 778);
+            this.tabPage1.Size = new System.Drawing.Size(1176, 929);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "==仿真实验==";
+            this.tabPage1.Text = "========";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // label18
@@ -1060,7 +1060,7 @@
             this.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "MainForm";
-            this.Text = "点一仿真论证--姿态仿真与处理";
+            this.Text = "事后姿态处理";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.TabControl.ResumeLayout(false);

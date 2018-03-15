@@ -2256,9 +2256,9 @@ void attSim::simAttJitterparam(vector<Quat>qTrue, vector<AttJitter>vecJitter)
 	{
 		for (int a = 0; a < nADS; a++)
 		{
-			JitterEuler[3 * a] += vecJitter[j].eulerX / 2 / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
-			JitterEuler[3 * a+1] += vecJitter[j].eulerY / 2 / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
-			JitterEuler[3 * a+2] += vecJitter[j].eulerZ / 2 / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a] += vecJitter[j].eulerX / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a+1] += vecJitter[j].eulerY / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a+2] += vecJitter[j].eulerZ / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
 		}
 	}
 	vector<double> utc(nADS+1); vector<Quat>qTrueInter; vector<Gyro> wADS(nADS);
@@ -2369,7 +2369,7 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 //////////////////////////////////////////////////////////////////////////
 bool attSim::readAttJitterparam(vector<AttJitter>&vecJitter)
 {
-	string jitterPath = path + "\\HighFreqSimParam.txt";
+	string jitterPath = attDat.sJitter;
 	FILE *fp = fopen(jitterPath.c_str(), "r");
 	if (!fp) { printf("文件不存在！\n"); return false; }
 	char tmp[512];

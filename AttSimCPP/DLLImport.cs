@@ -26,6 +26,8 @@ namespace AttSimCPP
         public int ADSfreq;//高频角位移测量频率
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
         public string install;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
+        public string sJitter;
     };
     [StructLayout(LayoutKind.Sequential)]
     public struct Quat
