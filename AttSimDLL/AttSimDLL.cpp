@@ -2245,6 +2245,16 @@ void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 	//高频角位移采样率
 	int sampleRate = attDat.ADSfreq;
 	double detT = 1. / sampleRate;
+	//int Sample = 0;
+	//for (int a=0;a<vecJitter.size();a++)
+	//{
+	//	int tmpSample2 = vecJitter[a].freq;
+	//	if (tmpSample2>Sample)
+	//	{
+	//		Sample = tmpSample2;
+	//	}
+	//}
+	////double detT = 0.5 / Sample;
 	int nADS = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*sampleRate;
 	double *JitterEuler=new double[3*nADS];
 	memset(JitterEuler, 0, sizeof(double) * 3*nADS);
@@ -2811,7 +2821,7 @@ void attSim::addErrorForQuatActive(vector<Quat>&qSim)
 		calcuOmega(qSim[a], qSim[a + 1], vOmega);
 		vel = sqrt(pow(vOmega.wx / PI * 180, 2) + pow(vOmega.wy / PI * 180, 2) + pow(vOmega.wz / PI * 180, 2));
 		sig_trackerFact = starErrorModel(vel);
-		noise[a] *= 0.5 / 3600 * PI / 180 * sig_trackerFact;
+		noise[a] = noise[a] * 0.5 / 3600 * PI / 180 * sig_trackerFact;
 		Quat q2;
 		q2.q1 = noise[a]; q2.q2 = noise[a]; q2.q3 = noise[a], q2.q4 = 1;
 		mBase.quatMult(qSim[a], q2, qMeas[a]);
@@ -2875,9 +2885,9 @@ double attSim::fiberGyroErrorModel(double sig)
 	return abs(0.0003*sig*sig + 7E-05*sig - 3E-15);
 }
 
-void attSim::compareTureEKF()
+void attSim::compareTureEKF(string outName)
 {
-	string strpath = path + "\\ATT.txt";
+	string strpath = path + "\\Attitude.txt";
 	string strpath1;
 	if (starGyro.isJitter==false)
 	{		strpath1 = path + "\\EKFquater.txt";	}
@@ -2887,21 +2897,21 @@ void attSim::compareTureEKF()
 	FILE *fpEKF = fopen(strpath1.c_str(), "r");
 	int num, num2;
 	fscanf(fpEKF, "%d\n", &num);
-	double *UT = new double[num];
 	Quat *qEKF = new Quat[num];
 	for (int a = 0; a < num; a++)
 	{
 		fscanf(fpEKF, "%lf\t%lf\t%lf\t%lf\t%lf\n", &qEKF[a].UT, &qEKF[a].q1, &qEKF[a].q2, &qEKF[a].q3, &qEKF[a].q4);
-		UT[a] = qEKF[a].UT;
 	}
 	fscanf(fpTrue, "%d\n", &num2);
+	double *UT = new double[num2];
 	Quat *qTrue = new Quat[num2];
-	Quat *qTrueI = new Quat[num];
-	for (int a = 0; a < num; a++)
+	Quat *qEKFInter = new Quat[num2];
+	for (int a = 0; a < num2; a++)
 	{
 		fscanf(fpTrue, "%lf\t%lf\t%lf\t%lf\t%lf\n", &qTrue[a].UT, &qTrue[a].q1, &qTrue[a].q2, &qTrue[a].q3, &qTrue[a].q4);
+		UT[a] = qTrue[a].UT;
 	}
-	mBase.QuatInterpolation(qTrue, num2, UT, num, qTrueI);
+	mBase.QuatInterpolation(qEKF, num, UT, num2, qEKFInter);
 	fclose(fpEKF), fclose(fpTrue);
 
 	//添加RMS指标(正确做法,2017.11.02)
@@ -2909,36 +2919,36 @@ void attSim::compareTureEKF()
 	rmsQ1 = rmsQ2 = rmsQ3 = 0;
 	double aveQ1, aveQ2, aveQ3;
 	aveQ1 = aveQ2 = aveQ3 = 0;
-	Quat *dq3 = new Quat[num];
+	Quat *dq3 = new Quat[num2];
 
-	string strpath2 = path + "\\compare.txt";
+	string strpath2 = path + outName;
 	FILE *fp = fopen(strpath2.c_str(), "w");
-	fprintf(fp, "%d\n", num);
-	for (int i = 0; i < num; i++)
+	//fprintf(fp, "%d\n", num2);
+	for (int i = 0; i < num2; i++)
 	{
-		qTrueI[i].q4 = -qTrueI[i].q4;
+		qEKFInter[i].q4 = -qEKFInter[i].q4;
 		//mBase.quatMult(qTrueI[i], qEKF[i], dq3[i]);
-		mBase.quatMult( qEKF[i],qTrueI[i], dq3[i]);
+		mBase.quatMult(qTrue[i], qEKFInter[i], dq3[i]);
 		dq3[i].q1 = dq3[i].q1 * 2 / PI * 180 * 3600;
 		dq3[i].q2 = dq3[i].q2 * 2 / PI * 180 * 3600;
 		dq3[i].q3 = dq3[i].q3 * 2 / PI * 180 * 3600;
 		fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n",
-			qTrueI[i].UT, qTrueI[i].q1, qTrueI[i].q2, qTrueI[i].q3, qTrueI[i].q4,
-			qEKF[i].q1, qEKF[i].q2, qEKF[i].q3, qEKF[i].q4, dq3[i].q1, dq3[i].q2, dq3[i].q3);
-		aveQ1 += dq3[i].q1 / num; aveQ2 += dq3[i].q2 / num; aveQ3 += dq3[i].q3 / num;
+			qTrue[i].UT, qTrue[i].q1, qTrue[i].q2, qTrue[i].q3, qTrue[i].q4,
+			qEKFInter[i].q1, qEKFInter[i].q2, qEKFInter[i].q3, qEKFInter[i].q4, dq3[i].q1, dq3[i].q2, dq3[i].q3);
+		aveQ1 += dq3[i].q1 / num2; aveQ2 += dq3[i].q2 / num2; aveQ3 += dq3[i].q3 / num2;
 	}
-	for (int i = 0; i < num; i++)
+	for (int i = 0; i < num2; i++)
 	{
 		rmsQ1 += pow(dq3[i].q1 - aveQ1, 2);
 		rmsQ2 += pow(dq3[i].q2 - aveQ2, 2);
 		rmsQ3 += pow(dq3[i].q3 - aveQ3, 2);
 	}
-	rmsQ1 = sqrt(rmsQ1 / (num - 1)); rmsQ2 = sqrt(rmsQ2 / (num - 1)); rmsQ3 = sqrt(rmsQ3 / (num - 1));
+	rmsQ1 = sqrt(rmsQ1 / (num2 - 1)); rmsQ2 = sqrt(rmsQ2 / (num2 - 1)); rmsQ3 = sqrt(rmsQ3 / (num2 - 1));
 	double rmsAll = sqrt(rmsQ1*rmsQ1 + rmsQ2*rmsQ2 + rmsQ3*rmsQ3);
-	fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\n", rmsQ1, rmsQ2, rmsQ3, rmsAll);
+	//fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\n", rmsQ1, rmsQ2, rmsQ3, rmsAll);
 	fclose(fp);
 	delete[] UT; UT = NULL;
-	delete[] dq3, qEKF, qTrue, qTrueI; dq3 = qEKF = qTrueI = qTrue = NULL;
+	delete[] dq3, qEKF, qTrue, qEKFInter; dq3 = qEKF = qEKFInter = qTrue = NULL;
 }
 //////////////////////////////////////////////////////////////////////////
 //功能：输出星敏和陀螺数据
@@ -3045,18 +3055,19 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy)
 	{
 		starGy.isJitter = false; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
 		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
-		starGy.isJitter = true; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
+		GFDM.compareTureEKF("\\compareEKFvsTure.txt");
+		starGy.isJitter = true; GFDM.getAttParam(mAtt, workpath, starGy);
 		wMeas.clear();
 		GFDM.readAttJitterTXT(wMeas);
 		//卡尔曼滤波处理
 		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);
+		GFDM.compareTureEKF("\\compareADSvsTure.txt");
 	}
 	else
 	{
-		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
+		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果		
+		GFDM.compareTureEKF("\\compareEKFvsTure.txt");
 	}
-	//姿态比较
-	GFDM.compareTureEKF();
 }
 
 //////////////////////////////////////////////////////////////////////////

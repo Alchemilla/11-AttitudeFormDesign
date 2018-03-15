@@ -86,7 +86,7 @@ public:
 	double triGyroErrorModel(double sig);
 	double fiberGyroErrorModel(double sig);
 	//比较函数
-	void compareTureEKF();
+	void compareTureEKF(string outName);
 	//各种输出函数
 	void outputQuatGyroTXT(attGFDM attMeas, string out1, string out2);
 	void outputQuat(vector<Quat>qOut,string name);
