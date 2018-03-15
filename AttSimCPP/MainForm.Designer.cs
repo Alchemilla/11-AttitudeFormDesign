@@ -65,10 +65,10 @@
             this.TabControl = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
-            this.label23 = new System.Windows.Forms.Label();
+            this.textBox24 = new System.Windows.Forms.TextBox();
+            this.button16 = new System.Windows.Forms.Button();
             this.textBox25 = new System.Windows.Forms.TextBox();
             this.label22 = new System.Windows.Forms.Label();
-            this.checkBox13 = new System.Windows.Forms.CheckBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.textBox21 = new System.Windows.Forms.TextBox();
             this.textBox20 = new System.Windows.Forms.TextBox();
@@ -92,17 +92,15 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.textBox16 = new System.Windows.Forms.TextBox();
             this.textBox15 = new System.Windows.Forms.TextBox();
+            this.textBox23 = new System.Windows.Forms.TextBox();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.label19 = new System.Windows.Forms.Label();
+            this.button14 = new System.Windows.Forms.Button();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.label16 = new System.Windows.Forms.Label();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
-            this.textBox24 = new System.Windows.Forms.TextBox();
-            this.button16 = new System.Windows.Forms.Button();
-            this.textBox23 = new System.Windows.Forms.TextBox();
             this.textBox22 = new System.Windows.Forms.TextBox();
-            this.button14 = new System.Windows.Forms.Button();
             this.button15 = new System.Windows.Forms.Button();
             this.button12 = new System.Windows.Forms.Button();
             this.button13 = new System.Windows.Forms.Button();
@@ -352,7 +350,7 @@
             this.txtInfo.Name = "txtInfo";
             this.txtInfo.ReadOnly = true;
             this.txtInfo.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtInfo.Size = new System.Drawing.Size(1188, 262);
+            this.txtInfo.Size = new System.Drawing.Size(1188, 373);
             this.txtInfo.TabIndex = 24;
             // 
             // progressBar1
@@ -477,7 +475,7 @@
             this.TabControl.Margin = new System.Windows.Forms.Padding(2);
             this.TabControl.Name = "TabControl";
             this.TabControl.SelectedIndex = 0;
-            this.TabControl.Size = new System.Drawing.Size(1196, 987);
+            this.TabControl.Size = new System.Drawing.Size(1196, 876);
             this.TabControl.TabIndex = 32;
             // 
             // tabPage3
@@ -490,7 +488,7 @@
             this.tabPage3.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage3.Size = new System.Drawing.Size(1176, 929);
+            this.tabPage3.Size = new System.Drawing.Size(1176, 818);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "==姿态参数==";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -498,56 +496,55 @@
             // groupBox9
             // 
             this.groupBox9.Controls.Add(this.textBox24);
-            this.groupBox9.Controls.Add(this.label23);
             this.groupBox9.Controls.Add(this.button16);
             this.groupBox9.Controls.Add(this.textBox25);
             this.groupBox9.Controls.Add(this.label22);
-            this.groupBox9.Controls.Add(this.checkBox13);
             this.groupBox9.Location = new System.Drawing.Point(-6, 536);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(1175, 178);
+            this.groupBox9.Size = new System.Drawing.Size(1175, 130);
             this.groupBox9.TabIndex = 28;
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "高频设置";
             // 
-            // label23
+            // textBox24
             // 
-            this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(155, 116);
-            this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(45, 30);
-            this.label23.TabIndex = 39;
-            this.label23.Text = "Hz";
+            this.textBox24.Font = new System.Drawing.Font("宋体", 8F);
+            this.textBox24.Location = new System.Drawing.Point(216, 61);
+            this.textBox24.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox24.Name = "textBox24";
+            this.textBox24.Size = new System.Drawing.Size(582, 38);
+            this.textBox24.TabIndex = 41;
+            // 
+            // button16
+            // 
+            this.button16.BackColor = System.Drawing.Color.Transparent;
+            this.button16.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.button16.Location = new System.Drawing.Point(34, 41);
+            this.button16.Name = "button16";
+            this.button16.Size = new System.Drawing.Size(177, 70);
+            this.button16.TabIndex = 40;
+            this.button16.Text = "高频参数";
+            this.button16.UseVisualStyleBackColor = false;
+            this.button16.Click += new System.EventHandler(this.button16_Click);
             // 
             // textBox25
             // 
             this.textBox25.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox25.Location = new System.Drawing.Point(34, 111);
+            this.textBox25.Location = new System.Drawing.Point(1048, 61);
             this.textBox25.Margin = new System.Windows.Forms.Padding(2);
             this.textBox25.Name = "textBox25";
-            this.textBox25.Size = new System.Drawing.Size(103, 38);
+            this.textBox25.Size = new System.Drawing.Size(106, 38);
             this.textBox25.TabIndex = 38;
             // 
             // label22
             // 
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(33, 66);
+            this.label22.Location = new System.Drawing.Point(834, 61);
             this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(137, 30);
+            this.label22.Size = new System.Drawing.Size(201, 30);
             this.label22.TabIndex = 38;
-            this.label22.Text = "采样频率";
-            // 
-            // checkBox13
-            // 
-            this.checkBox13.AutoSize = true;
-            this.checkBox13.Location = new System.Drawing.Point(587, 41);
-            this.checkBox13.Name = "checkBox13";
-            this.checkBox13.Size = new System.Drawing.Size(175, 34);
-            this.checkBox13.TabIndex = 38;
-            this.checkBox13.Text = "是否高频";
-            this.checkBox13.UseVisualStyleBackColor = true;
+            this.label22.Text = "采样频率(Hz)";
             // 
             // groupBox5
             // 
@@ -798,6 +795,15 @@
             this.textBox15.Size = new System.Drawing.Size(55, 38);
             this.textBox15.TabIndex = 30;
             // 
+            // textBox23
+            // 
+            this.textBox23.Font = new System.Drawing.Font("宋体", 8F);
+            this.textBox23.Location = new System.Drawing.Point(203, 129);
+            this.textBox23.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox23.Name = "textBox23";
+            this.textBox23.Size = new System.Drawing.Size(887, 38);
+            this.textBox23.TabIndex = 39;
+            // 
             // checkBox3
             // 
             this.checkBox3.AutoSize = true;
@@ -817,6 +823,16 @@
             this.label19.Size = new System.Drawing.Size(200, 30);
             this.label19.TabIndex = 29;
             this.label19.Text = "星敏噪声(″)";
+            // 
+            // button14
+            // 
+            this.button14.Location = new System.Drawing.Point(21, 109);
+            this.button14.Name = "button14";
+            this.button14.Size = new System.Drawing.Size(177, 70);
+            this.button14.TabIndex = 22;
+            this.button14.Text = "安装矩阵";
+            this.button14.UseVisualStyleBackColor = true;
+            this.button14.Click += new System.EventHandler(this.button14_Click);
             // 
             // checkBox2
             // 
@@ -854,66 +870,26 @@
             this.groupBox7.Controls.Add(this.button15);
             this.groupBox7.Controls.Add(this.button12);
             this.groupBox7.Controls.Add(this.button13);
-            this.groupBox7.Location = new System.Drawing.Point(7, 720);
+            this.groupBox7.Location = new System.Drawing.Point(14, 672);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(1162, 202);
+            this.groupBox7.Size = new System.Drawing.Size(1162, 135);
             this.groupBox7.TabIndex = 26;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "数据处理";
             // 
-            // textBox24
-            // 
-            this.textBox24.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox24.Location = new System.Drawing.Point(474, 111);
-            this.textBox24.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox24.Name = "textBox24";
-            this.textBox24.Size = new System.Drawing.Size(660, 38);
-            this.textBox24.TabIndex = 41;
-            // 
-            // button16
-            // 
-            this.button16.BackColor = System.Drawing.Color.Transparent;
-            this.button16.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.button16.Location = new System.Drawing.Point(292, 91);
-            this.button16.Name = "button16";
-            this.button16.Size = new System.Drawing.Size(177, 70);
-            this.button16.TabIndex = 40;
-            this.button16.Text = "高频参数";
-            this.button16.UseVisualStyleBackColor = false;
-            this.button16.Click += new System.EventHandler(this.button16_Click);
-            // 
-            // textBox23
-            // 
-            this.textBox23.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox23.Location = new System.Drawing.Point(223, 117);
-            this.textBox23.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox23.Name = "textBox23";
-            this.textBox23.Size = new System.Drawing.Size(867, 38);
-            this.textBox23.TabIndex = 39;
-            // 
             // textBox22
             // 
             this.textBox22.Font = new System.Drawing.Font("宋体", 8F);
-            this.textBox22.Location = new System.Drawing.Point(203, 103);
+            this.textBox22.Location = new System.Drawing.Point(196, 60);
             this.textBox22.Margin = new System.Windows.Forms.Padding(2);
             this.textBox22.Name = "textBox22";
-            this.textBox22.Size = new System.Drawing.Size(660, 38);
+            this.textBox22.Size = new System.Drawing.Size(582, 38);
             this.textBox22.TabIndex = 38;
-            // 
-            // button14
-            // 
-            this.button14.Location = new System.Drawing.Point(41, 97);
-            this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(177, 70);
-            this.button14.TabIndex = 22;
-            this.button14.Text = "安装矩阵";
-            this.button14.UseVisualStyleBackColor = true;
-            this.button14.Click += new System.EventHandler(this.button14_Click);
             // 
             // button15
             // 
             this.button15.BackColor = System.Drawing.Color.BurlyWood;
-            this.button15.Location = new System.Drawing.Point(919, 117);
+            this.button15.Location = new System.Drawing.Point(975, 40);
             this.button15.Name = "button15";
             this.button15.Size = new System.Drawing.Size(171, 70);
             this.button15.TabIndex = 25;
@@ -923,7 +899,7 @@
             // 
             // button12
             // 
-            this.button12.Location = new System.Drawing.Point(21, 84);
+            this.button12.Location = new System.Drawing.Point(14, 41);
             this.button12.Name = "button12";
             this.button12.Size = new System.Drawing.Size(177, 70);
             this.button12.TabIndex = 21;
@@ -935,7 +911,7 @@
             // 
             this.button13.BackColor = System.Drawing.Color.Bisque;
             this.button13.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.button13.Location = new System.Drawing.Point(919, 31);
+            this.button13.Location = new System.Drawing.Point(798, 40);
             this.button13.Name = "button13";
             this.button13.Size = new System.Drawing.Size(171, 70);
             this.button13.TabIndex = 22;
@@ -1039,11 +1015,11 @@
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.txtInfo);
-            this.groupBox2.Location = new System.Drawing.Point(0, 993);
+            this.groupBox2.Location = new System.Drawing.Point(0, 882);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox2.Size = new System.Drawing.Size(1196, 305);
+            this.groupBox2.Size = new System.Drawing.Size(1196, 416);
             this.groupBox2.TabIndex = 33;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "程序日志";
@@ -1163,9 +1139,7 @@
         private System.Windows.Forms.TextBox textBox22;
         private System.Windows.Forms.Button button16;
         private System.Windows.Forms.GroupBox groupBox9;
-        private System.Windows.Forms.CheckBox checkBox13;
         private System.Windows.Forms.TextBox textBox24;
-        private System.Windows.Forms.Label label23;
         private System.Windows.Forms.TextBox textBox25;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.TextBox textBox17;

@@ -66,7 +66,7 @@ public:
 	void EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
 	void simAttparam(vector<Quat>qTrue,attGFDM &attMeas);
-	void simAttJitterparam(vector<Quat>qTrue, vector<AttJitter>vecJitter);
+	void simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter);
 	bool readAttparam(string pushbroomDat, vector<Quat>&qTrue);
 	bool readAttJitterparam(vector<AttJitter>&vecJitter);
 	void readAttJitterTXT(vector<Gyro>&wMeas);
@@ -85,7 +85,7 @@ public:
 	double triGyroErrorModel(double sig);
 	double fiberGyroErrorModel(double sig);
 	//比较函数
-	void compareTureEKF();
+	void compareTureEKF(string outName);
 	//各种输出函数
 	void outputQuatGyroTXT(attGFDM attMeas, string out1, string out2);
 	void outputQuat(vector<Quat>qOut,string name);
