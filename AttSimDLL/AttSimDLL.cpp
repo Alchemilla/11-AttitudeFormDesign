@@ -1222,6 +1222,20 @@ void attSim::getInstallParam(AttParm mAtt)
 		starCali[3 * a + 1] = cos(tmp2 / 180 * PI);
 		starCali[3 * a + 2] = cos(tmp3 / 180 * PI);
 	}
+	//三个陀螺的安装
+	fscanf(fp, "%[^\n]\n", tmp);
+	fscanf(fp, "%lf\t%lf\t%lf\n", &G11[0], &G11[1], &G11[2]);
+	fscanf(fp, "%lf\t%lf\t%lf\n", &G12[0], &G12[1], &G12[2]);
+	fscanf(fp, "%lf\t%lf\t%lf\n", &G13[0], &G13[1], &G13[2]);
+	fscanf(fp, "%[^\n]\n", tmp);
+	fscanf(fp, "%lf\t%lf\t%lf\n", &G21[0], &G21[1], &G21[2]);
+	fscanf(fp, "%lf\t%lf\t%lf\n", &G22[0], &G22[1], &G22[2]);
+	fscanf(fp, "%lf\t%lf\t%lf\n", &G23[0], &G23[1], &G23[2]);
+	fscanf(fp, "%[^\n]\n", tmp);
+	fscanf(fp, "%lf\t%lf\t%lf\n", &G31[0], &G31[1], &G31[2]);
+	fscanf(fp, "%lf\t%lf\t%lf\n", &G32[0], &G32[1], &G32[2]);
+	fscanf(fp, "%lf\t%lf\t%lf\n", &G33[0], &G33[1], &G33[2]);
+	fclose(fp);
 }
 //////////////////////////////////////////////////////////////////////////
 //功能：获取姿态仿真参数
@@ -1251,10 +1265,11 @@ void attSim::getQnGnum(int nQ, int nG)
 void attSim::getQuatAndGyro(attGFDM &attMeas)
 {
 	//输入真实q值和角速度值
-	string quatPath = path + "\\QuatErr.txt"; string gyroPath = path + "\\GyroErr.txt";
-	int num1, num2;
+	string quatPath = path + "\\STSQuatErr.txt"; string gyroPath = path + "\\GyroErr.txt";
+	int num1, num2;	char tmp[512];
 	FILE *fp1 = fopen(quatPath.c_str(), "r");
 	fscanf(fp1, "%d\n", &num1);
+	fscanf(fp1, "%[^\n]\n",tmp);
 	Quat attReadA, attReadB, attReadC;
 	for (int a = 0; a < num1; a++)
 	{
@@ -1270,11 +1285,15 @@ void attSim::getQuatAndGyro(attGFDM &attMeas)
 
 	FILE *fp2 = fopen(gyroPath.c_str(), "r");
 	fscanf(fp2, "%d\n", &num2);
+	fscanf(fp2, "%[^\n]\n",tmp);
 	double ut, g11, g12, g13, g21, g22, g23, g31, g32, g33;
 	for (int a = 0; a < num2; a++)
 	{
 		fscanf(fp2, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", &ut,
 			&g11, &g12, &g13, &g21, &g22, &g23, &g31, &g32, &g33);
+		g11 = g11 / 180 * PI, g12 = g12 / 180 * PI, g13 = g13 / 180 * PI;
+		g21 = g21 / 180 * PI, g22 = g22 / 180 * PI, g23 = g23 / 180 * PI;
+		g31 = g31 / 180 * PI, g32 = g32 / 180 * PI, g33 = g33 / 180 * PI;
 		attMeas.UT.push_back(ut);
 		attMeas.gy11.push_back(g11); attMeas.gy12.push_back(g12); attMeas.gy13.push_back(g13);
 		attMeas.gy21.push_back(g21); attMeas.gy22.push_back(g22); attMeas.gy23.push_back(g23);
@@ -2228,11 +2247,11 @@ void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 	//根据安装，得到真实的三星敏和3陀螺测量数据
 	attGFDM attTrue;
 	transCrj2StarGyro(qTrueInter1, wTrue, attTrue, false);
-	outputQuatGyroTXT(attTrue, "\\Quat.txt", "\\Gyro.txt");//输出真实星敏四元数和陀螺角速度
+	outputQuatGyroTXT(attTrue, "\\STSQuat.txt", "\\Gyro.txt");//输出真实星敏四元数和陀螺角速度
 
 	//根据安装，得到带误差的三星敏和3陀螺测量数据
 	transCrj2StarGyro(qTrueInter1, wTrue, attMeas, true);
-	outputQuatGyroTXT(attMeas, "\\QuatErr.txt", "\\GyroErr.txt");//输出带误差星敏四元数和陀螺角速度
+	outputQuatGyroTXT(attMeas, "\\STSQuatErr.txt", "\\GyroErr.txt");//输出带误差星敏四元数和陀螺角速度
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2274,14 +2293,17 @@ void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 		mBase.matrix2quat(rTure, qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4);
 	}
 	string adsPath = path + "\\ADS.txt";//角位移
-	string qTruePath = path + "\\Attitude.txt";//真实姿态
+	string qTruePath = path + "\\SateQuat.txt";//真实姿态
 	FILE *fp1 = fopen(adsPath.c_str(), "w");
+	fprintf(fp1, "%d\n", nADS);
+	fprintf(fp1, "---时间---------角位移x(°/s)--------角位移y(°/s)--------角位移z(°/s)\n");
 	FILE *fp2 = fopen(qTruePath.c_str(), "w");
 	fprintf(fp2, "%d\n", nADS);
+	fprintf(fp2, "---时间---------q1----------q2----------q3----------qs\n");
 	for (int a = 0; a < nADS; a++)
 	{
 		calcuOmega(qTrueInter[a], qTrueInter[a + 1], wADS[a]);
-		fprintf(fp1, "%.5f\t%.15f\t%.15f\t%.15f\n", utc[a], wADS[a].wx, wADS[a].wy, wADS[a].wz);
+		fprintf(fp1, "%.5f\t%.15f\t%.15f\t%.15f\n", utc[a], wADS[a].wx / PI * 180, wADS[a].wy / PI * 180, wADS[a].wz / PI * 180);
 		fprintf(fp2, "%.5f\t%.15f\t%.15f\t%.15f\t%.15f\n", qTrueInter[a].UT,
 			qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4);
 	}
@@ -2357,7 +2379,7 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 		qTrueTmp.UT = euler[a].UT;
 		qTrue.push_back(qTrueTmp);
 	}
-	outputQuat(qTrue, "\\Attitude.txt");
+	outputQuat(qTrue, "\\SateQuat.txt");
 	return true;
 }
 
@@ -2398,9 +2420,15 @@ void attSim::readAttJitterTXT(vector<Gyro>&wMeas)
 	string adsPath = path + "\\ADS.txt";//角位移
 	FILE *fp = fopen(adsPath.c_str(), "r");
 	Gyro wMeasTmp;
+	char tmp[512];
+	fscanf(fp, "%[^\n]\n", tmp);
+	fscanf(fp, "%[^\n]\n",tmp);
 	while (!feof(fp))
 	{
 		fscanf(fp, "%lf\t%lf\t%lf\t%lf\n", &wMeasTmp.UT, &wMeasTmp.wx, &wMeasTmp.wy, &wMeasTmp.wz);
+		wMeasTmp.wx = wMeasTmp.wx / 180 * PI;
+		wMeasTmp.wy = wMeasTmp.wy / 180 * PI;
+		wMeasTmp.wz = wMeasTmp.wz / 180 * PI;
 		wMeas.push_back(wMeasTmp);
 	}
 	fclose(fp);
@@ -2855,7 +2883,7 @@ double attSim::fiberGyroErrorModel(double sig)
 
 void attSim::compareTureEKF(string outName)
 {
-	string strpath = path + "\\Attitude.txt";
+	string strpath = path + "\\SateQuat.txt";
 	string strpath1;
 	if (starGyro.isJitter == false)
 	{
@@ -2867,14 +2895,16 @@ void attSim::compareTureEKF(string outName)
 	}
 	FILE *fpTrue = fopen(strpath.c_str(), "r");
 	FILE *fpEKF = fopen(strpath1.c_str(), "r");
-	int num, num2;
+	int num, num2; char tmp[512];
 	fscanf(fpEKF, "%d\n", &num);
+	fscanf(fpEKF, "%[^\n]\n",tmp);
 	Quat *qEKF = new Quat[num];
 	for (int a = 0; a < num; a++)
 	{
 		fscanf(fpEKF, "%lf\t%lf\t%lf\t%lf\t%lf\n", &qEKF[a].UT, &qEKF[a].q1, &qEKF[a].q2, &qEKF[a].q3, &qEKF[a].q4);
 	}
 	fscanf(fpTrue, "%d\n", &num2);
+	fscanf(fpTrue, "%[^\n]\n",tmp);
 	double *UT = new double[num2];
 	Quat *qTrue = new Quat[num2];
 	Quat *qEKFInter = new Quat[num2];
@@ -2895,7 +2925,7 @@ void attSim::compareTureEKF(string outName)
 
 	string strpath2 = path + outName;
 	FILE *fp = fopen(strpath2.c_str(), "w");
-	//fprintf(fp, "%d\n", num2);
+	fprintf(fp, "------时间----------真实q1-------真实q2-------真实q3-------真实qs------估计q1-------估计q2-------估计q3-------估计qs------x轴误差(″)---y轴误差(″)---z轴误差(″)\n");
 	for (int i = 0; i < num2; i++)
 	{
 		qEKFInter[i].q4 = -qEKFInter[i].q4;
@@ -2936,6 +2966,7 @@ void attSim::outputQuatGyroTXT(attGFDM attMeas, string out1, string out2)
 	string quatPath = path + out1; string gyroPath = path + out2;
 	FILE *fp1 = fopen(quatPath.c_str(), "w");
 	fprintf(fp1, "%d\n", attMeas.qA.size());
+	fprintf(fp1, "---时间--------星敏Aq1----星敏Aq2----星敏Aq3----星敏Aqs------星敏Bq1----星敏Bq2----星敏Bq3----星敏Bqs------星敏Cq1----星敏Cq2----星敏Cq3----星敏Cqs\n");
 	for (int a = 0; a < attMeas.qA.size(); a++)
 	{
 		fprintf(fp1, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n", attMeas.qA[a].UT,
@@ -2944,11 +2975,12 @@ void attSim::outputQuatGyroTXT(attGFDM attMeas, string out1, string out2)
 	}
 	FILE *fp2 = fopen(gyroPath.c_str(), "w");
 	fprintf(fp2, "%d\n", attMeas.gy11.size());
+	fprintf(fp2, "---时间------陀螺1Wx(°/s)--陀螺1Wy(°/s)--陀螺1Wz(°/s)--陀螺2Wx(°/s)--陀螺2Wy(°/s)--陀螺2Wz(°/s)--陀螺3Wx(°/s)--陀螺3Wy(°/s)--陀螺3Wz(°/s)\n");
 	for (int a = 0; a < attMeas.gy11.size(); a++)
 	{
-		fprintf(fp2, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n", attMeas.UT[a], attMeas.gy11[a],
-			attMeas.gy12[a], attMeas.gy13[a], attMeas.gy21[a], attMeas.gy22[a], attMeas.gy23[a], attMeas.gy31[a],
-			attMeas.gy32[a], attMeas.gy33[a]);
+		fprintf(fp2, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n", attMeas.UT[a], attMeas.gy11[a]/PI*180,
+			attMeas.gy12[a] / PI * 180, attMeas.gy13[a] / PI * 180, attMeas.gy21[a] / PI * 180, attMeas.gy22[a] / PI * 180, 
+			attMeas.gy23[a] / PI * 180, attMeas.gy31[a] / PI * 180,	 attMeas.gy32[a] / PI * 180, attMeas.gy33[a] / PI * 180);
 	}
 	fclose(fp1), fclose(fp2);
 }
@@ -2957,6 +2989,7 @@ void attSim::outputQuat(vector<Quat> qOut, string name)
 	string Cbj = path + name;
 	FILE *fp = fopen(Cbj.c_str(), "w");
 	fprintf(fp, "%d\n", qOut.size());
+	fprintf(fp, "---时间---------q1----------q2----------q3----------qs\n");
 	for (int a = 0; a < qOut.size(); a++)
 	{
 		fprintf(fp, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\n", qOut[a].UT, qOut[a].q1, qOut[a].q2, qOut[a].q3, qOut[a].q4);
@@ -2967,6 +3000,7 @@ void attSim::outputBias(double *Bias, int num, string name)
 {
 	string biasEst = path + name;
 	FILE *fp = fopen(biasEst.c_str(), "w");
+	fprintf(fp, "---时间--------------b1----------------b2------------------b3\n");
 	for (int a = 0; a < num; a++)
 	{
 		fprintf(fp, "%.3f\t%.15f\t%.15f\t%.15f\n", Bias[6 * a], Bias[6 * a + 3], Bias[6 * a + 4], Bias[6 * a + 5]);
