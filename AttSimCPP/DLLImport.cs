@@ -144,7 +144,7 @@ namespace AttSimCPP
         /// <param name="path"></param>
         /// <param name="mAtt"></param>
         [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void ExternalFileAttitudeDeter(string path, AttParm mAtt, isStarGyro starGyro);
+        public static extern void ExternalFileAttitudeDeter(string path, AttParm mAtt, isStarGyro starGyro,bool isBinFilter);
 
         //以下函数暂时不用
         /// <summary>

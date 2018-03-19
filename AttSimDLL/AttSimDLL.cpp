@@ -2183,6 +2183,267 @@ void attSim::EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm,vector<Gyro>
 	}
 }
 
+void attSim::EKFForAndBackStarOpticAxis(vector<vector<BmImStar>> BmIm, vector<Gyro> wMeas, Quat q0)
+{
+	int nQ = BmIm.size();
+	int nG = wMeas.size();
+	//删掉四元数之前的陀螺数据
+	int ii = 0;
+	while ((wMeas[ii].UT - BmIm[0][0].UT) < 0)
+	{
+		ii++;
+	}
+	wMeas.erase(wMeas.begin(), wMeas.begin() + ii);
+
+	double sig = 0.5 * attDat.sig_ST / 3600 * PI / 180;//星敏噪声，角秒转弧度
+	double w, dt, qw1, qw2, qw3, qw4, qmm1, qmm2, qmm3, qe11, qe22, qe33, qe44;
+	Matrix3d zero33, eye33, poa, pog, r, sigu33, sigv33, wa;
+	MatrixXd p(6, 6), Q(6, 6), eye66(6, 6), xe(1, 3), tempqe(4, 1), om(4, 4),
+		fmat(6, 6), gmat(6, 6), phi(6, 6), gamma(6, 6);
+	eye33 << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+	zero33 << MatrixXd::Zero(3, 3);
+	poa << pow((0.1*PI / 180), 2)*eye33;//初始姿态误差协方差0.1°
+	pog << pow((0.2*PI / 180 / 3600), 2)*eye33;//初始陀螺误差协方差0.2°/Hr
+	r << pow(sig, 2)*eye33;//星敏噪声	
+	eye66 << eye33, zero33, zero33, eye33;
+
+	//预先计算估计四元数的数量
+	double utStart = BmIm[0][0].UT;
+	int a = 1, b = 0;
+	for (int i = 1; i < nG;)
+	{
+		if (a < nQ && (BmIm[a][0].UT - utStart) <= (wMeas[i].UT - utStart))
+		{
+			utStart = BmIm[a][0].UT;	 a++;		b++;
+		}
+		else
+		{
+			utStart = wMeas[i].UT;	 i++;		 b++;
+		}
+	}
+	MatrixXd Qest(b + 1, 4), we(b + 1, 3), xest(b + 1, 6);
+
+	/************************************************************************/
+	/*									卡尔曼滤波正向递推过程	                                  */
+	/************************************************************************/
+	//设置递推初始值
+	a = 1, b = 0;
+	utStart = BmIm[0][0].UT;
+	xest.row(0) << 0, 0, 0, 0, 0, 0;//状态初始值
+	sigv33 << pow(attDat.sigv, 2)*eye33;//陀螺噪声
+	sigu33 << pow(attDat.sigu, 2)*eye33;//陀螺漂移噪声
+	p << poa, zero33, zero33, pog;//过程协方差
+	Q << sigv33, zero33, zero33, sigu33;//过程噪声
+	Qest(0, 0) = q0.q1, Qest(0, 1) = q0.q2;
+	Qest(0, 2) = q0.q3, Qest(0, 3) = q0.q4;
+	vector<Quat>quatEst(nG);
+	double *xest_store = new double[6 * nG];
+	quatEst[0].UT = utStart;
+	quatEst[0].q1 = Qest(b, 0), quatEst[0].q2 = Qest(b, 1);
+	quatEst[0].q3 = Qest(b, 2), quatEst[0].q4 = Qest(b, 3);
+	xest_store[0] = wMeas[0].UT; xest_store[1] = 0; xest_store[2] = 0;
+	xest_store[3] = 0; xest_store[4] = 0, xest_store[5] = 0;
+
+	for (int i = 1; i < nG;)
+	{
+		if (a < nQ && (BmIm[a][0].UT - utStart) <= (wMeas[i].UT - utStart))
+		{
+			/****************陀螺测量值预测***************/
+			dt = BmIm[a][0].UT - utStart;
+			utStart = BmIm[a][0].UT;
+			we(b, 0) = wMeas[i - 1].wx - xest(b, 3);
+			we(b, 1) = wMeas[i - 1].wy - xest(b, 4);
+			we(b, 2) = wMeas[i - 1].wz - xest(b, 5);
+			w = sqrt(we(b, 0)*we(b, 0) + we(b, 1)*we(b, 1) + we(b, 2)*we(b, 2));
+			wa << 0, -we(b, 2), we(b, 1), we(b, 2), 0, -we(b, 0), -we(b, 1), we(b, 0), 0;
+
+			//Propagate Covariance
+			fmat << -wa, -eye33, zero33, zero33;
+			gmat << -eye33, zero33, zero33, eye33;
+			phi = eye66 + fmat*dt;
+			gamma = (eye66*dt + fmat*dt*dt / 2)*gmat;
+			p = phi*p*phi.transpose() + gamma*Q*gamma.transpose();
+			//Propagate State
+			qw1 = we(b, 0) / w*sin(0.5*w*dt);
+			qw2 = we(b, 1) / w*sin(0.5*w*dt);
+			qw3 = we(b, 2) / w*sin(0.5*w*dt);
+			qw4 = cos(0.5*w*dt);
+			om << qw4, qw3, -qw2, qw1, -qw3, qw4, qw1, qw2, qw2, -qw1, qw4, qw3, -qw1, -qw2, -qw3, qw4;
+			Qest.row(b + 1) = (om*Qest.row(b).transpose()).transpose();
+			xest.row(b + 1) = xest.row(b);
+			xest(b + 1, 0) = 0; xest(b + 1, 1) = 0; xest(b + 1, 2) = 0;
+			b++;
+
+			/****************星敏测量值更新***************/
+			double Cbj[9];
+			mBase.quat2matrix(Qest(b, 0), Qest(b, 1), Qest(b, 2), Qest(b, 3), Cbj);//Cbj
+			int num = BmIm[a].size();
+			MatrixXd mH(3 * num, 6), mDetZ(3 * num, 1), k(6, 3 * num);
+			MatrixXd r1 = pow(sig, 2)*MatrixXd::Identity(3 * num, 3 * num);
+			Measurement(BmIm[a], Cbj, mH, mDetZ);
+			k = p*mH.transpose()*(mH*p*mH.transpose() + r1).inverse();//k(6*6)
+			p = (eye66 - k*mH)*p;
+			xest.row(b) = xest.row(b) + (k*mDetZ).transpose();
+			xe = 0.5*xest.row(b).head(3);
+			qe11 = Qest(b, 0) + xe(2)*Qest(b, 1) - xe(1)*Qest(b, 2) + xe(0)*Qest(b, 3);
+			qe22 = -xe(2)*Qest(b, 0) + Qest(b, 1) + xe(0)*Qest(b, 2) + xe(1)*Qest(b, 3);
+			qe33 = xe(1)*Qest(b, 0) - xe(0)*Qest(b, 1) + Qest(b, 2) + xe(2)*Qest(b, 3);
+			qe44 = -xe(0)*Qest(b, 0) - xe(1)*Qest(b, 1) - xe(2)*Qest(b, 2) + Qest(b, 3);
+			tempqe << qe11, qe22, qe33, qe44;
+			tempqe.normalize();
+			Qest.row(b) << tempqe(0), tempqe(1), tempqe(2), tempqe(3);
+
+			a++;
+		}
+		else
+		{
+			/****************陀螺测量值预测***************/
+			dt = wMeas[i].UT - utStart;
+			utStart = wMeas[i].UT;
+			we(b, 0) = wMeas[i - 1].wx - xest(b, 3);//注意是i-1，因为此刻的四元数是上一刻陀螺递推而来
+			we(b, 1) = wMeas[i - 1].wy - xest(b, 4);//此时，根据qR和qL计算得到的Omega，时间与qL一致
+			we(b, 2) = wMeas[i - 1].wz - xest(b, 5);
+			w = sqrt(we(b, 0)*we(b, 0) + we(b, 1)*we(b, 1) + we(b, 2)*we(b, 2));
+			wa << 0, -we(b, 2), we(b, 1), we(b, 2), 0, -we(b, 0), -we(b, 1), we(b, 0), 0;
+
+			//Propagate Covariance
+			fmat << -wa, -eye33, zero33, zero33;
+			gmat << -eye33, zero33, zero33, eye33;
+			phi = eye66 + fmat*dt;
+			gamma = (eye66*dt + fmat*dt*dt / 2)*gmat;
+			p = phi*p*phi.transpose() + gamma*Q*gamma.transpose();
+			//Propagate State
+			qw1 = we(b, 0) / w*sin(0.5*w*dt);
+			qw2 = we(b, 1) / w*sin(0.5*w*dt);
+			qw3 = we(b, 2) / w*sin(0.5*w*dt);
+			qw4 = cos(0.5*w*dt);
+			om << qw4, qw3, -qw2, qw1, -qw3, qw4, qw1, qw2, qw2, -qw1, qw4, qw3, -qw1, -qw2, -qw3, qw4;
+			Qest.row(b + 1) = (om*Qest.row(b).transpose()).transpose();
+			xest.row(b + 1) = xest.row(b);
+			xest(b + 1, 0) = 0; xest(b + 1, 1) = 0; xest(b + 1, 2) = 0;
+
+			quatEst[i].UT = wMeas[i].UT;
+			quatEst[i].q1 = Qest(b + 1, 0), quatEst[i].q2 = Qest(b + 1, 1);
+			quatEst[i].q3 = Qest(b + 1, 2), quatEst[i].q4 = Qest(b + 1, 3);
+
+			//保存xest值
+			xest_store[6 * i + 0] = wMeas[i].UT; xest_store[6 * i + 1] = xest(b, 1); xest_store[6 * i + 2] = xest(b, 2);
+			xest_store[6 * i + 3] = xest(b, 3); xest_store[6 * i + 4] = xest(b, 4); xest_store[6 * i + 5] = xest(b, 5);
+			b++;
+			i++;
+		}
+	}
+
+	/************************************************************************/
+	/*									卡尔曼滤波逆向递推过程	                                  */
+	/************************************************************************/
+	quatEst[nG - 1].UT = utStart;
+	quatEst[nG - 1].q1 = Qest(b, 0); quatEst[nG - 1].q2 = Qest(b, 1);
+	quatEst[nG - 1].q3 = Qest(b, 2); quatEst[nG - 1].q4 = Qest(b, 3);
+	xest_store[6 * (nG - 1) + 0] = xest(b, 0); xest_store[6 * (nG - 1) + 1] = xest(b, 1); xest_store[6 * (nG - 1) + 2] = xest(b, 2);
+	xest_store[6 * (nG - 1) + 3] = xest(b, 3); xest_store[6 * (nG - 1) + 4] = xest(b, 4); xest_store[6 * (nG - 1) + 5] = xest(b, 5);
+	a = nQ - 2;
+	for (int i = nG - 2; i >= 0;)
+	{
+		if (a >= 0 && (BmIm[a][0].UT - utStart) >= (wMeas[i].UT - utStart))
+		{
+			/****************陀螺测量值预测***************/			
+			dt = utStart - BmIm[a][0].UT;
+			utStart = BmIm[a][0].UT;
+			we(b, 0) = -wMeas[i].wx + xest(b, 3);
+			we(b, 1) = -wMeas[i].wy + xest(b, 4);
+			we(b, 2) = -wMeas[i].wz + xest(b, 5);
+			w = sqrt(we(b, 0)*we(b, 0) + we(b, 1)*we(b, 1) + we(b, 2)*we(b, 2));
+			wa << 0, -we(b, 2), we(b, 1), we(b, 2), 0, -we(b, 0), -we(b, 1), we(b, 0), 0;
+
+			//Propagate Covariance
+			fmat << -wa, -eye33, zero33, zero33;
+			gmat << -eye33, zero33, zero33, eye33;
+			phi = eye66 + fmat*dt;
+			gamma = (eye66*dt + fmat*dt*dt / 2)*gmat;
+			p = phi*p*phi.transpose() + gamma*Q*gamma.transpose();
+			//Propagate State
+			qw1 = we(b, 0) / w*sin(0.5*w*dt);
+			qw2 = we(b, 1) / w*sin(0.5*w*dt);
+			qw3 = we(b, 2) / w*sin(0.5*w*dt);
+			qw4 = cos(0.5*w*dt);
+			om << qw4, qw3, -qw2, qw1, -qw3, qw4, qw1, qw2, qw2, -qw1, qw4, qw3, -qw1, -qw2, -qw3, qw4;
+			Qest.row(b - 1) = (om*Qest.row(b).transpose()).transpose();
+			xest.row(b - 1) = xest.row(b);
+			xest(b - 1, 0) = 0; xest(b - 1, 1) = 0; xest(b - 1, 2) = 0;
+			b--;			
+
+			/****************星敏测量值更新***************/
+			double Cbj[9];
+			mBase.quat2matrix(Qest(b, 0), Qest(b, 1), Qest(b, 2), Qest(b, 3), Cbj);//Cbj
+			int num = BmIm[a].size();
+			MatrixXd mH(3 * num, 6), mDetZ(3 * num, 1), k(6, 3 * num);
+			MatrixXd r1 = pow(sig, 2)*MatrixXd::Identity(3 * num, 3 * num);
+			Measurement(BmIm[a], Cbj, mH, mDetZ);
+			k = p*mH.transpose()*(mH*p*mH.transpose() + r1).inverse();//k(6*6)
+			p = (eye66 - k*mH)*p;
+			xest.row(b) = xest.row(b) + (k*mDetZ).transpose();
+			xe = 0.5*xest.row(b).head(3);
+			qe11 = Qest(b, 0) + xe(2)*Qest(b, 1) - xe(1)*Qest(b, 2) + xe(0)*Qest(b, 3);
+			qe22 = -xe(2)*Qest(b, 0) + Qest(b, 1) + xe(0)*Qest(b, 2) + xe(1)*Qest(b, 3);
+			qe33 = xe(1)*Qest(b, 0) - xe(0)*Qest(b, 1) + Qest(b, 2) + xe(2)*Qest(b, 3);
+			qe44 = -xe(0)*Qest(b, 0) - xe(1)*Qest(b, 1) - xe(2)*Qest(b, 2) + Qest(b, 3);
+			tempqe << qe11, qe22, qe33, qe44;
+			tempqe.normalize();
+			Qest.row(b) << tempqe(0), tempqe(1), tempqe(2), tempqe(3);
+			a--;
+		}
+		else
+		{
+			/****************陀螺测量值预测***************/
+			dt = utStart - wMeas[i].UT;
+			utStart = wMeas[i].UT;
+			we(b, 0) = -wMeas[i].wx + xest(b, 3);
+			we(b, 1) = -wMeas[i].wy + xest(b, 4);
+			we(b, 2) = -wMeas[i].wz + xest(b, 5);
+			w = sqrt(we(b, 0)*we(b, 0) + we(b, 1)*we(b, 1) + we(b, 2)*we(b, 2));
+			wa << 0, -we(b, 2), we(b, 1), we(b, 2), 0, -we(b, 0), -we(b, 1), we(b, 0), 0;
+			
+			//Propagate Covariance
+			fmat << -wa, -eye33, zero33, zero33;
+			gmat << -eye33, zero33, zero33, eye33;
+			phi = eye66 + fmat*dt;
+			gamma = (eye66*dt + fmat*dt*dt / 2)*gmat;
+			p = phi*p*phi.transpose() + gamma*Q*gamma.transpose();
+			//Propagate State
+			qw1 = we(b, 0) / w*sin(0.5*w*dt);
+			qw2 = we(b, 1) / w*sin(0.5*w*dt);
+			qw3 = we(b, 2) / w*sin(0.5*w*dt);
+			qw4 = cos(0.5*w*dt);
+			om << qw4, qw3, -qw2, qw1, -qw3, qw4, qw1, qw2, qw2, -qw1, qw4, qw3, -qw1, -qw2, -qw3, qw4;
+			Qest.row(b - 1) = (om*Qest.row(b).transpose()).transpose();
+			xest.row(b - 1) = xest.row(b);
+			xest(b - 1, 0) = 0; xest(b - 1, 1) = 0; xest(b - 1, 2) = 0;
+			
+			quatEst[i].UT = wMeas[i].UT;
+			quatEst[i].q1 = Qest(b - 1, 0), quatEst[i].q2 = Qest(b - 1, 1);
+			quatEst[i].q3 = Qest(b - 1, 2), quatEst[i].q4 = Qest(b - 1, 3);
+
+			//保存xest值
+			xest_store[6 * i + 0] = wMeas[i].UT; xest_store[6 * i + 1] = xest(b, 1); xest_store[6 * i + 2] = xest(b, 2);
+			xest_store[6 * i + 3] = xest(b, 3); xest_store[6 * i + 4] = xest(b, 4); xest_store[6 * i + 5] = xest(b, 5);
+
+			b--;
+			i--;
+		}
+	}
+
+	if (starGyro.isJitter == false)
+	{
+		outputBias(xest_store, nG, "\\BiasEstimate.txt");
+		outputQuat(quatEst, "\\EKFquater.txt");
+	}
+	else
+	{
+		outputQuat(quatEst, "\\EKFJitterquater.txt");
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 //功能：得到测量值，测量协方差
 //输入：光轴在惯性系和本体系矢量BmIm；四元数递推值（Att）
@@ -3043,7 +3304,7 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 //作者：GZC
 //日期：2018.01.09
 //////////////////////////////////////////////////////////////////////////
-void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy)
+void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy,BOOL isBinFilter)
 {
 	attSim GFDM;
 	//首先考虑星敏安装的问题
@@ -3055,23 +3316,47 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy)
 	//根据姿态数据得到初始四元数、光轴矢量、陀螺测量值；
 	GFDM.preAttparam(measGFDM, q0, BmIm, wMeas);	
 	
-	if(mAtt.sJitter[0] != 0)//如果有高频，则将陀螺数据替换
+	if (isBinFilter == false)//单向卡尔曼
 	{
-		starGy.isJitter = false; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
-		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
-		GFDM.compareTureEKF("\\compareEKFtoTrue.txt");
-		starGy.isJitter = true; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
-		wMeas.clear();
-		GFDM.readAttJitterTXT(wMeas);
-		//卡尔曼滤波处理
-		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);
-		GFDM.compareTureEKF("\\compareADStoTrue.txt");
+		if (mAtt.sJitter[0] != 0)//如果有高频，则将陀螺数据替换
+		{
+			starGy.isJitter = false; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
+			GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
+			GFDM.compareTureEKF("\\compareEKFtoTrue.txt");
+			starGy.isJitter = true; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
+			wMeas.clear();
+			GFDM.readAttJitterTXT(wMeas);
+			//卡尔曼滤波处理
+			GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);
+			GFDM.compareTureEKF("\\compareADStoTrue.txt");
+		}
+		else
+		{
+			GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
+			//姿态比较
+			GFDM.compareTureEKF("\\compareEKFtoTrue.txt");
+		}
 	}
-	else
+	else//双向卡尔曼
 	{
-		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
-		//姿态比较
-		GFDM.compareTureEKF("\\compareEKFtoTrue.txt");
+		if (mAtt.sJitter[0] != 0)//如果有高频，则将陀螺数据替换
+		{
+			starGy.isJitter = false; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
+			GFDM.EKFForAndBackStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
+			GFDM.compareTureEKF("\\compareEKFtoTrue.txt");
+			starGy.isJitter = true; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
+			wMeas.clear();
+			GFDM.readAttJitterTXT(wMeas);
+			//卡尔曼滤波处理
+			GFDM.EKFForAndBackStarOpticAxis(BmIm, wMeas, q0);
+			GFDM.compareTureEKF("\\compareADStoTrue.txt");
+		}
+		else
+		{
+			GFDM.EKFForAndBackStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
+															//姿态比较
+			GFDM.compareTureEKF("\\compareEKFtoTrue.txt");
+		}
 	}
 }
 

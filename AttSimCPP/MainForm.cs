@@ -35,6 +35,7 @@ namespace AttSimCPP
         string path,path2;
         public double[] qMeas, dq, bias, berr, dq2, bias2, berr2, qNs, xestAll, xestAll2;
         static int nSim1 = 0, nSim2 = 0;
+        bool isBinFilter;
 
         /// <summary>
         /// 功能：星敏陀螺仿真和姿态确定主程序
@@ -411,6 +412,7 @@ namespace AttSimCPP
             simAtt1.Text = "EKF星敏噪声";
             simAtt1.Show();
         }
+
         /// <summary>
         /// 功能：双向EKF结果和星敏噪声
         /// </summary>
@@ -756,7 +758,15 @@ namespace AttSimCPP
                 return;
             }
             ShowInfo("开始姿态确定...");
-            DLLImport.ExternalFileAttitudeDeter(path, mAtt, starGyro);
+            if (radioButton3.Checked==true)
+            {
+                DLLImport.ExternalFileAttitudeDeter(path, mAtt, starGyro,false);
+            }
+            else if(radioButton4.Checked == true)
+            {
+                DLLImport.ExternalFileAttitudeDeter(path, mAtt, starGyro,true);
+            }
+
             ShowInfo("姿态仿真完毕");
             progressBar1.Value = 100;
         }

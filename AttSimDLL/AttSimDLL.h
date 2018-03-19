@@ -41,7 +41,7 @@ ATTSIMDLL void attitudeDeterActivePushbroomStruct(AttParm mAtt,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
 //读取外部数据（包括主动推扫）然后仿真姿态
 ATTSIMDLL void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy);
-ATTSIMDLL void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy);
+ATTSIMDLL void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy, BOOL isBinFilter);
 
 class attSim
 {
@@ -64,6 +64,7 @@ public:
 	//以下为主动推扫相关函数
 	//////////////////////////////////////////////////////////////////////////
 	void EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);
+	void EKFForAndBackStarOpticAxis(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
 	void simAttparam(vector<Quat>qTrue,attGFDM &attMeas);
 	void simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter);
