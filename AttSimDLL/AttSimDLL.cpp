@@ -2181,6 +2181,10 @@ void attSim::EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm,vector<Gyro>
 	{
 		outputQuat(quatEst, "\\EKFJitterquater.txt");
 	}
+	if (attDat.sSimAtt[0]!=0)
+	{
+		outputQuat(quatEst, "\\ATT_Error.txt");
+	}
 }
 
 void attSim::EKFForAndBackStarOpticAxis(vector<vector<BmImStar>> BmIm, vector<Gyro> wMeas, Quat q0)
@@ -2498,12 +2502,6 @@ void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 	{
 		calcuOmega(qTrueInter2[a], qTrueInter2[a + 1], wTrue[a]);
 	}
-	//////////////////////还差一个姿态稳定度//////////////////////////
-	////添加稳定度
-	//double *stab1 = new double[attDat.nGyro]; double *stab2 = new double[attDat.nGyro]; double *stab3 = new double[attDat.nGyro];
-	//mBase.RandomDistribution(0, attDat.stabW[0] * PI / 180 * dtG, attDat.nGyro, 0, stab1);
-	//mBase.RandomDistribution(0, attDat.stabW[1] * PI / 180 * dtG, attDat.nGyro, 0, stab2);
-	//mBase.RandomDistribution(0, attDat.stabW[2] * PI / 180 * dtG, attDat.nGyro, 0, stab3);
 
 	//根据安装，得到真实的三星敏和3陀螺测量数据
 	attGFDM attTrue;
@@ -2574,9 +2572,9 @@ void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 }
 
 /////////////////////////////////////////////////////////////////////////
-//功能：读取主动推扫仿真数据
+//功能：读取规划姿态数据
 //输入：maneuverData_All.txt
-//输出：姿态角和角速度
+//输出：四元数
 //注意：
 //作者：GZC
 //日期：2018.01.09
@@ -2640,10 +2638,121 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 		qTrueTmp.UT = euler[a].UT;
 		qTrue.push_back(qTrueTmp);
 	}
+	//添加姿态稳定度
+	double dtQ = qTrue[2].UT - qTrue[1].UT;
+	int num = qTrue.size();
+	double *stab1 = new double[num]; double *stab2 = new double[num]; double *stab3 = new double[num];
+	mBase.RandomDistribution(0, attDat.stabW[0] * PI / 180 * dtQ, num, 0, stab1);
+	mBase.RandomDistribution(0, attDat.stabW[1] * PI / 180 * dtQ, num, 0, stab2);
+	mBase.RandomDistribution(0, attDat.stabW[2] * PI / 180 * dtQ, num, 0, stab3);
+
+	Gyro wTrue; vector<Quat>qTrueOri(qTrue);
+	for (int i = 0; i < num-1; i++)
+	{
+		calcuOmega(qTrue[i], qTrue[i+1], wTrue);
+		wTrue.wx += stab1[i];//增加了姿态稳定度
+		wTrue.wy += stab2[i];
+		wTrue.wz += stab3[i];
+		if (i == nGyro - 1) { break; }
+		double ww = sqrt(pow(wTrue.wx, 2) + pow(wTrue.wy, 2) + pow(wTrue.wz, 2));
+		double co = cos(0.5*ww*dtQ);
+		double si = sin(0.5*ww*dtQ);
+		double n1 = wTrue.wx / ww; double n2 = wTrue.wy / ww; double n3 = wTrue.wz / ww;
+		double qw1 = n1*si; double qw2 = n2*si; double qw3 = n3*si; double qw4 = co;
+		Matrix4d om;
+		Vector4d quat1, quat2;
+		quat1 << qTrue[i].q1, qTrue[i].q2, qTrue[i].q3, qTrue[i].q4;
+		om << qw4, qw3, -qw2, qw1, -qw3, qw4, qw1, qw2, qw2, -qw1, qw4, qw3, -qw1, -qw2, -qw3, qw4;
+		quat2 = om*quat1;
+		qTrueOri[i + 1].UT = qTrue[i + 1].UT;
+		qTrueOri[i + 1].q1 = quat2(0), qTrueOri[i + 1].q2 = quat2(1), qTrueOri[i + 1].q3 = quat2(2), qTrueOri[i + 1].q4 = quat2(3);
+	}
+	qTrue.clear();
+	qTrue.assign(qTrueOri.begin(), qTrueOri.end());
+	delete[]stab1, stab2, stab3; stab1 = stab2 = stab3 = NULL;
+
 	outputQuat(qTrue, "\\SateQuat.txt");
 	return true;
 }
 
+/////////////////////////////////////////////////////////////////////////
+//功能：读取仿真姿态数据
+//输入：ATT.txt
+//输出：四元数
+//注意：实际上是资三姿态文件的格式
+//作者：GZC
+//日期：2018.03.20
+//////////////////////////////////////////////////////////////////////////
+bool attSim::readSimAttparam(string pushbroomDat, vector<Quat>&qTrue)
+{	
+	if (pushbroomDat.empty())
+		return false;
+	FILE *fp = fopen(pushbroomDat.c_str(), "r");
+	if (!fp)
+		return false;
+
+	qTrue.clear();
+	int num;
+	Quat att;
+	char c_read[1024];
+	string tmpStr;
+	fgets(c_read, 1024, fp);
+	if (tmpStr.assign(c_read) == "\n")
+	{
+		while (!feof(fp))
+		{
+			if (fgets(c_read, 1024, fp) == NULL)
+				continue;
+			tmpStr.assign(c_read);
+			if (tmpStr.find("groupNumber", 0) != -1)
+			{
+				sscanf(tmpStr.c_str(), "%*s%*s%d", &num);
+				if (num <= 0)
+				{
+					printf("=>zero quaternion!\n");
+					fclose(fp);
+					return false;
+				}
+			}
+
+			if (tmpStr.find("attData", 0) != -1)
+			{
+				while (fgets(c_read, 1024, fp) != NULL)
+				{
+					tmpStr.assign(c_read);
+					if (tmpStr.find("}") != -1)
+						break;
+					if (tmpStr.find("timeCode", 0) != -1)
+						sscanf(tmpStr.c_str(), "%*s%*s%lf", &att.UT);
+					if (tmpStr.find("q1 ", 0) != -1)
+						sscanf(tmpStr.c_str(), "%*s%*s%lf", &att.q1);
+					if (tmpStr.find("q2 ", 0) != -1)
+						sscanf(tmpStr.c_str(), "%*s%*s%lf", &att.q2);
+					if (tmpStr.find("q3 ", 0) != -1)
+						sscanf(tmpStr.c_str(), "%*s%*s%lf", &att.q3);
+					if (tmpStr.find("q4 ", 0) != -1)
+						sscanf(tmpStr.c_str(), "%*s%*s%lf", &att.q4);
+				}
+				//att.Q0 = sqrt(1-att.Q1*att.Q1-att.Q3*att.Q3-att.Q2*att.Q2);
+				qTrue.push_back(att);
+			}
+		}
+	}
+	else
+	{
+		rewind(fp);
+		fscanf(fp, "%d\n", &num);
+		for (int i = 0; i < num; i++)
+		{
+			fscanf(fp, "%lf\t%lf\t%lf\t%lf\t%lf\n", &att.UT, &att.q1, &att.q2, &att.q3, &att.q4);
+			qTrue.push_back(att);
+		}
+	}
+	fclose(fp);
+
+	outputQuat(qTrue, "\\SateQuat.txt");
+	return true;
+}
 /////////////////////////////////////////////////////////////////////////
 //功能：读取高频抖动频谱文件
 //输入：HighFreqSimParam.txt
@@ -3236,7 +3345,7 @@ void attSim::outputQuatGyroTXT(attGFDM attMeas, string out1, string out2)
 	}
 	FILE *fp2 = fopen(gyroPath.c_str(), "w");
 	fprintf(fp2, "%d\n", attMeas.gy11.size());
-	fprintf(fp2, "---时间------陀螺1Wx(°/s)--陀螺1Wy(°/s)--陀螺1Wz(°/s)--陀螺2Wx(°/s)--陀螺2Wy(°/s)--陀螺2Wz(°/s)--陀螺3Wx(°/s)--陀螺3Wy(°/s)--陀螺3Wz(°/s)\n");
+	fprintf(fp2, "---时间----------G11(°/s)------G12(°/s)------G13(°/s)------G21(°/s)------G22(°/s)------G23(°/s)------G31(°/s)------G32(°/s)------G33(°/s)\n");
 	for (int a = 0; a < attMeas.gy11.size(); a++)
 	{
 		fprintf(fp2, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n", attMeas.UT[a], attMeas.gy11[a]/PI*180,
@@ -3279,13 +3388,20 @@ void attSim::outputBias(double *Bias, int num, string name)
 void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 {
 	attSim GFDM;
+	string workPtmp = workpath;
+	GFDM.getAttParam(mAtt, workPtmp, starGy);
 	//首先考虑星敏安装的问题
-	if (mAtt.install[0]!=0)	{		GFDM.getInstallParam(mAtt);	}
-	GFDM.getAttParam(mAtt, workpath, starGy);
-	attGFDM measGFDM;
+	if (mAtt.install[0]!=0)	{		GFDM.getInstallParam(mAtt);	}	
 	vector<Quat>qTure;
-	//根据欧拉角计算四元数
-	GFDM.readAttparam(workpath, qTure);
+	//判断采用何种方式仿真四元数
+	if (mAtt.sSimAtt[0]!=0)	
+	{
+		workPtmp = workPtmp.substr(0,workPtmp.rfind("\\"));
+		GFDM.getAttParam(mAtt, workPtmp, starGy);
+		GFDM.readSimAttparam(mAtt.sSimAtt, qTure); 
+	}//采用仿真姿态
+	else	{		GFDM.readAttparam(workPtmp, qTure);	}//采用规划姿态
+	
 	if (mAtt.sJitter[0]!=0)
 	{
 		//读取高频抖动数据
@@ -3294,6 +3410,7 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 		GFDM.simAttJitterparam(qTure, vecJitter);	//在真实四元数上加高频抖动，并且得到高频角位移数据
 	}
 	//仿真带误差四元数
+	attGFDM measGFDM;
 	GFDM.simAttparam(qTure, measGFDM);
 }
 /////////////////////////////////////////////////////////////////////////
@@ -3307,9 +3424,15 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy,BOOL isBinFilter)
 {
 	attSim GFDM;
+	string workPtmp = workpath;
+	GFDM.getAttParam(mAtt, workPtmp, starGy);
 	//首先考虑星敏安装的问题
 	if (mAtt.install[0] != 0) { GFDM.getInstallParam(mAtt); }
-	GFDM.getAttParam(mAtt, workpath, starGy);
+	if (mAtt.sSimAtt[0] != 0)
+	{
+		workPtmp = workPtmp.substr(0, workPtmp.rfind("\\"));
+		GFDM.getAttParam(mAtt, workPtmp, starGy);
+	}//采用仿真姿态
 	//从文件读取星敏陀螺数据
 	attGFDM measGFDM;vector<vector<BmImStar>>BmIm; vector<Gyro>wMeas; Quat q0;
 	GFDM.getQuatAndGyro(measGFDM);		
@@ -3320,10 +3443,10 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy,
 	{
 		if (mAtt.sJitter[0] != 0)//如果有高频，则将陀螺数据替换
 		{
-			starGy.isJitter = false; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
+			starGy.isJitter = false; GFDM.getAttParam(mAtt, workPtmp, starGy);//主要为了输出常规滤波结果
 			GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
 			GFDM.compareTureEKF("\\compareEKFtoTrue.txt");
-			starGy.isJitter = true; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
+			starGy.isJitter = true; GFDM.getAttParam(mAtt, workPtmp, starGy);//主要为了输出常规滤波结果
 			wMeas.clear();
 			GFDM.readAttJitterTXT(wMeas);
 			//卡尔曼滤波处理
@@ -3341,10 +3464,10 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy,
 	{
 		if (mAtt.sJitter[0] != 0)//如果有高频，则将陀螺数据替换
 		{
-			starGy.isJitter = false; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
+			starGy.isJitter = false; GFDM.getAttParam(mAtt, workPtmp, starGy);//主要为了输出常规滤波结果
 			GFDM.EKFForAndBackStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
 			GFDM.compareTureEKF("\\compareEKFtoTrue.txt");
-			starGy.isJitter = true; GFDM.getAttParam(mAtt, workpath, starGy);//主要为了输出常规滤波结果
+			starGy.isJitter = true; GFDM.getAttParam(mAtt, workPtmp, starGy);//主要为了输出常规滤波结果
 			wMeas.clear();
 			GFDM.readAttJitterTXT(wMeas);
 			//卡尔曼滤波处理

@@ -28,6 +28,8 @@ namespace AttSimCPP
         public string install;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
         public string sJitter;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
+        public string sSimAtt;
     };
     [StructLayout(LayoutKind.Sequential)]
     public struct Quat

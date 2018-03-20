@@ -611,15 +611,16 @@ namespace AttSimCPP
             textBox21.Text = "0.0005";//随机游走
             textBox22.Text = path;
             textBox25.Text = "1000";
-          }
+            textBox12.Text = "0.00005";//稳定度
+        }
         /// <summary>
-        /// 真实数据路径
+        /// 规划姿态路径
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void button12_Click(object sender, EventArgs e)
         {
-            ShowInfo("选择姿轨行时文件路径");
+            ShowInfo("选择规划姿态文件路径");
             OpenFileDialog openDlg = new OpenFileDialog();
             if (openDlg.ShowDialog() == DialogResult.OK)
             {
@@ -627,10 +628,27 @@ namespace AttSimCPP
                 path = localFilePath.Substring(0, localFilePath.LastIndexOf("\\")); ;
                 ShowInfo("成功找到路径：" + path);
                 textBox22.Text = path;
+                textBox11.Text = "";
             }
             else
-                ShowInfo("失败：未设置路径");
+                ShowInfo("未设置路径");
         }
+        //仿真姿态路径
+        private void button17_Click(object sender, EventArgs e)
+        {
+            ShowInfo("选择仿真姿态文件");
+            OpenFileDialog openDlg = new OpenFileDialog();
+            if (openDlg.ShowDialog() == DialogResult.OK)
+            {
+                path = openDlg.FileName.ToString(); //获得文件路径                  
+                ShowInfo("成功找到路径：" + path);
+                textBox11.Text = path;
+                textBox22.Text = "";
+            }
+            else
+                ShowInfo("未设置路径");
+        }
+
         /// <summary>
         /// 真实数据开始仿真
         /// </summary>
@@ -672,17 +690,28 @@ namespace AttSimCPP
             mAtt.ADSfreq = int.Parse(textBox25.Text);
             //星敏安装矩阵
             mAtt.install = textBox23.Text;
+            //仿真姿态文件路径
+            mAtt.sSimAtt = textBox11.Text;
+            //姿态稳定度
+            double[] stable = new double[3];
+            for (int i = 0; i < 3; i++)
+                stable[i] = double.Parse(textBox12.Text);
+            mAtt.stabW = stable;
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 50;
 
-            if (!File.Exists(path + "\\ManeuverData_All.txt"))
+            if (!File.Exists(mAtt.sSimAtt))
             {
-                ShowInfo("没有ManeuverData_All.txt文件");
-                MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
-                return;
+                if (!File.Exists(path + "\\ManeuverData_All.txt"))
+                {
+                    ShowInfo("没有ManeuverData_All.txt文件");
+                    MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
+                    return;
+                }
             }
+           
             ShowInfo("开始姿态仿真，生成星敏四元数和陀螺角速度");
             DLLImport.ExternalFileAttitudeSim(path,mAtt, starGyro);
             progressBar1.Value = 100;
@@ -747,15 +776,20 @@ namespace AttSimCPP
             mAtt.ADSfreq = int.Parse(textBox25.Text);
             //星敏安装矩阵
             mAtt.install = textBox23.Text;
+            //仿真姿态文件路径
+            mAtt.sSimAtt = textBox11.Text;
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 40;
-            if (!File.Exists(path + "\\ManeuverData_All.txt"))
+            if (!File.Exists(mAtt.sSimAtt))
             {
-                ShowInfo("没有ManeuverData_All.txt文件");
-                MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
-                return;
+                if (!File.Exists(path + "\\ManeuverData_All.txt"))
+                {
+                    ShowInfo("没有ManeuverData_All.txt文件");
+                    MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
+                    return;
+                }
             }
             ShowInfo("开始姿态确定...");
             if (radioButton3.Checked==true)
@@ -767,7 +801,7 @@ namespace AttSimCPP
                 DLLImport.ExternalFileAttitudeDeter(path, mAtt, starGyro,true);
             }
 
-            ShowInfo("姿态仿真完毕");
+            ShowInfo("姿态确定完毕");
             progressBar1.Value = 100;
         }
         /// <summary>

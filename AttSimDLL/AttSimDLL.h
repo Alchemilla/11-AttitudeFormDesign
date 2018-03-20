@@ -69,6 +69,7 @@ public:
 	void simAttparam(vector<Quat>qTrue,attGFDM &attMeas);
 	void simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter);
 	bool readAttparam(string pushbroomDat, vector<Quat>&qTrue);
+	bool readSimAttparam(string pushbroomDat, vector<Quat>&qTrue);
 	bool readAttJitterparam(vector<AttJitter>&vecJitter);
 	void readAttJitterTXT(vector<Gyro>&wMeas);
 	void preAttparam(attGFDM attMeas,Quat &q0, vector<vector<BmImStar>>&BmIm, vector<Gyro>&wMeas);

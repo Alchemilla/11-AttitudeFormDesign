@@ -18,7 +18,7 @@ struct AttParm
 	double sArr[9];//陀螺尺度因子和安装偏差
 	double sig_ST, sigu, sigv;//星敏陀螺参数
 	int ADSfreq;
-	char install[512],sJitter[512];
+	char install[512],sJitter[512],sSimAtt[512];
 
 	// 重载操作符=
 	AttParm& operator=(const AttParm &s)
@@ -36,6 +36,7 @@ struct AttParm
 		this->ADSfreq = s.ADSfreq;
 		memcpy(this->install, s.install, sizeof(char) * 512);
 		memcpy(this->sJitter, s.sJitter, sizeof(char) * 512);
+		memcpy(this->sSimAtt, s.sSimAtt, sizeof(char) * 512);
 		return *this;
 	}
 };
