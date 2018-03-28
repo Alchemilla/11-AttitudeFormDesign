@@ -293,7 +293,7 @@ namespace AttSimCPP
             textBox18.ForeColor = Color.Gray;
             ShowInfo("已加载姿态仿真默认参数!");
             if (path == null)
-            {                ShowInfo("请设置仿真文件保存目录！!");            }
+            {                ShowInfo("请设置规划姿态目录，或者仿真姿态文件！!");            }
             else
             {                ShowInfo("已设置仿真文件保存目录：" + path);            }
             if (path == null)
