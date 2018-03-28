@@ -2242,19 +2242,10 @@ void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 //////////////////////////////////////////////////////////////////////////
 void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 {
+	int N2 = 1;//真实数据采样率是高频的倍数
 	//高频角位移采样率
-	int sampleRate = attDat.ADSfreq;
+	int sampleRate = attDat.ADSfreq *N2;
 	double detT = 1. / sampleRate;
-	//int Sample = 0;
-	//for (int a=0;a<vecJitter.size();a++)
-	//{
-	//	int tmpSample2 = vecJitter[a].freq;
-	//	if (tmpSample2>Sample)
-	//	{
-	//		Sample = tmpSample2;
-	//	}
-	//}
-	////double detT = 0.5 / Sample;
 	int nADS = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*sampleRate;
 	double *JitterEuler=new double[3*nADS];
 	memset(JitterEuler, 0, sizeof(double) * 3*nADS);
@@ -2289,7 +2280,10 @@ void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 	for (int a = 0; a < nADS; a++)
 	{
 		calcuOmega(qTrueInter[a], qTrueInter[a + 1], wADS[a]);
-		fprintf(fp1, "%.5f\t%.15f\t%.15f\t%.15f\n", utc[a], wADS[a].wx, wADS[a].wy, wADS[a].wz);
+		if (a%N2 == 0)
+		{
+			fprintf(fp1, "%.5f\t%.15f\t%.15f\t%.15f\n", utc[a], wADS[a].wx, wADS[a].wy, wADS[a].wz);
+		}
 		fprintf(fp2, "%.5f\t%.15f\t%.15f\t%.15f\t%.15f\n", qTrueInter[a].UT,
 			qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4);
 	}
