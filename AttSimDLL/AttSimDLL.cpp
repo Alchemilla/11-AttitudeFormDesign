@@ -2523,50 +2523,81 @@ void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 //////////////////////////////////////////////////////////////////////////
 void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 {
-	int num = 1;
+	double maxFreq = 1;
+	for (int j = 0; j < vecJitter.size(); j++)
+	{
+		if (vecJitter[j].freq > maxFreq) { maxFreq = vecJitter[j].freq; }
+	}
+	double nSample;
+	int num = 2;
+	maxFreq * 10 > attDat.ADSfreq*num ? nSample = maxFreq*10 : nSample = attDat.ADSfreq*num;
 	//高频角位移采样率
-	int sampleRate = attDat.ADSfreq*num;
-	double detT = 1. / sampleRate;
-	int nADS = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*sampleRate;
-	double *JitterEuler=new double[3*nADS];
-	memset(JitterEuler, 0, sizeof(double) * 3*nADS);
+	//int sampleRate = attDat.ADSfreq*num;
+	double detT = 1. / nSample;
+	double detTADS = 1. / attDat.ADSfreq;
+	int nTure = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*nSample;
+	int nADS = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*attDat.ADSfreq;
+	double *JitterEuler=new double[3*nTure];
+	memset(JitterEuler, 0, sizeof(double) * 3*nTure);
+	double *JitterEulerMeas = new double[3 * nTure];
+	memset(JitterEulerMeas, 0, sizeof(double) * 3 * nTure);
 	//计算每一时刻高频抖动量
 	for (int j = 0; j < vecJitter.size(); j++)
 	{
-		for (int a = 0; a < nADS; a++)
+		double *noiseX = new double[nTure]; double *noiseY = new double[nTure]; double *noiseZ = new double[nTure];
+		mBase.RandomDistribution(0, vecJitter[j].eulerX / 3600 / 180 * PI / 20, nTure, 0, noiseX);
+		mBase.RandomDistribution(0, vecJitter[j].eulerY / 3600 / 180 * PI / 20, nTure, 0, noiseY);
+		mBase.RandomDistribution(0, vecJitter[j].eulerZ / 3600 / 180 * PI / 20, nTure, 0, noiseZ);
+		for (int a = 0; a < nTure; a++)
 		{
-			JitterEuler[3 * a] += vecJitter[j].eulerX / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
-			JitterEuler[3 * a+1] += vecJitter[j].eulerY / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
-			JitterEuler[3 * a+2] += vecJitter[j].eulerZ / 3600 / 180 * PI*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			//测量值
+			JitterEulerMeas[3 * a] += (vecJitter[j].eulerX / 3600 / 180 * PI + noiseX[a] )*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEulerMeas[3 * a+1] += (vecJitter[j].eulerY / 3600 / 180 * PI+ noiseY[a])*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEulerMeas[3 * a+2] += (vecJitter[j].eulerZ / 3600 / 180 * PI+ noiseZ[a] )*cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			//真值
+			JitterEuler[3 * a] += vecJitter[j].eulerX / 3600 / 180 * PI *cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a + 1] += vecJitter[j].eulerY / 3600 / 180 * PI *cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
+			JitterEuler[3 * a + 2] += vecJitter[j].eulerZ / 3600 / 180 * PI *cos(vecJitter[j].phase / 180 * PI + 2 * PI*vecJitter[j].freq*detT*a);
 		}
+		delete noiseX, noiseY, noiseZ; noiseX = noiseY = noiseZ = NULL;
 	}
-	vector<double> utc(nADS+1); vector<Quat>qTrueInter; vector<Gyro> wADS(nADS);
-	for (int a = 0; a < nADS + 1; a++)//仿真nADS个角位移真实数据
+	vector<double> utc(nTure+1); vector<double> utcADS(nADS + 1);
+	vector<Quat>qTrueInter; vector<Gyro> wADS(nTure);
+	for (int a = 0; a < nTure + 1; a++)//仿真nTure个真实数据
 	{		utc[a] = qTrue[0].UT + detT*a;	}
+	for (int a = 0; a < nADS + 1; a++)//仿真nADS个角位移数据
+	{		utcADS[a] = qTrue[0].UT + detTADS*a;	}
 	mBase.QuatInterpolationVector(qTrue, utc, qTrueInter);//内插得到真实四元数
-	for (int a=0;a<nADS + 1;a++)//为四元数添加高频抖动
+	vector<Quat>qMeasInter(qTrueInter); vector<Quat>qMeasInter2(nADS + 1);
+	for (int a=0;a<nTure + 1;a++)//为四元数添加高频抖动
 	{
 		double rMeas[9],rJitter[9],rTure[9];
 		mBase.quat2matrix(qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4, rMeas);
+		//真实qTureInter
 		mBase.Eulor2Matrix(JitterEuler[3 * a], JitterEuler[3 * a + 1], JitterEuler[3 * a + 2], 123, rJitter);
 		mBase.Multi(rJitter, rMeas, rTure, 3, 3, 3);
 		mBase.matrix2quat(rTure, qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4);
+		//误差
+		mBase.Eulor2Matrix(JitterEulerMeas[3 * a], JitterEulerMeas[3 * a + 1], JitterEulerMeas[3 * a + 2], 123, rJitter);
+		mBase.Multi(rJitter, rMeas, rTure, 3, 3, 3);
+		mBase.matrix2quat(rTure, qMeasInter[a].q1, qMeasInter[a].q2, qMeasInter[a].q3, qMeasInter[a].q4);
 	}
+	mBase.QuatInterpolationVector(qMeasInter, utcADS, qMeasInter2);//内插得到真实四元数
 	string adsPath = path + "\\ADS.txt";//角位移
 	string qTruePath = path + "\\SateQuat.txt";//真实姿态
 	FILE *fp1 = fopen(adsPath.c_str(), "w");
 	fprintf(fp1, "%d\n", nADS);
 	fprintf(fp1, "---时间---------角位移x(°/s)--------角位移y(°/s)--------角位移z(°/s)\n");
-	FILE *fp2 = fopen(qTruePath.c_str(), "w");
-	fprintf(fp2, "%d\n", nADS);
-	fprintf(fp2, "---时间---------q1----------q2----------q3----------qs\n");
 	for (int a = 0; a < nADS; a++)
 	{
-		calcuOmega(qTrueInter[a], qTrueInter[a + 1], wADS[a]);
-		if (a%num==0)
-		{
-			fprintf(fp1, "%.5f\t%.15f\t%.15f\t%.15f\n", utc[a], wADS[a].wx / PI * 180, wADS[a].wy / PI * 180, wADS[a].wz / PI * 180);
-		}
+		calcuOmega(qMeasInter2[a], qMeasInter2[a + 1], wADS[a]);
+		fprintf(fp1, "%.5f\t%.15f\t%.15f\t%.15f\n", utcADS[a], wADS[a].wx / PI * 180, wADS[a].wy / PI * 180, wADS[a].wz / PI * 180);
+	}
+	FILE *fp2 = fopen(qTruePath.c_str(), "w");
+	fprintf(fp2, "%d\n", nTure);
+	fprintf(fp2, "---时间---------q1----------q2----------q3----------qs\n");
+	for (int a = 0; a < nTure; a++)
+	{
 		fprintf(fp2, "%.5f\t%.15f\t%.15f\t%.15f\t%.15f\n", qTrueInter[a].UT,
 			qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4);
 	}
