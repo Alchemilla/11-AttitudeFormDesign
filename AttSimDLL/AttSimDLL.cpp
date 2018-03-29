@@ -2183,7 +2183,7 @@ void attSim::EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm,vector<Gyro>
 	}
 	if (attDat.sSimAtt[0]!=0)
 	{
-		outputQuat(quatEst, "\\ATT_Error.txt");
+		outputQuatZY3(quatEst, "\\ATT_Error.txt");
 	}
 }
 
@@ -2523,8 +2523,9 @@ void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 //////////////////////////////////////////////////////////////////////////
 void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 {
+	int num = 1;
 	//高频角位移采样率
-	int sampleRate = attDat.ADSfreq;
+	int sampleRate = attDat.ADSfreq*num;
 	double detT = 1. / sampleRate;
 	int nADS = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*sampleRate;
 	double *JitterEuler=new double[3*nADS];
@@ -2562,7 +2563,10 @@ void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 	for (int a = 0; a < nADS; a++)
 	{
 		calcuOmega(qTrueInter[a], qTrueInter[a + 1], wADS[a]);
-		fprintf(fp1, "%.5f\t%.15f\t%.15f\t%.15f\n", utc[a], wADS[a].wx / PI * 180, wADS[a].wy / PI * 180, wADS[a].wz / PI * 180);
+		if (a%num==0)
+		{
+			fprintf(fp1, "%.5f\t%.15f\t%.15f\t%.15f\n", utc[a], wADS[a].wx / PI * 180, wADS[a].wy / PI * 180, wADS[a].wz / PI * 180);
+		}
 		fprintf(fp2, "%.5f\t%.15f\t%.15f\t%.15f\t%.15f\n", qTrueInter[a].UT,
 			qTrueInter[a].q1, qTrueInter[a].q2, qTrueInter[a].q3, qTrueInter[a].q4);
 	}
@@ -3365,6 +3369,44 @@ void attSim::outputQuat(vector<Quat> qOut, string name)
 		fprintf(fp, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\n", qOut[a].UT, qOut[a].q1, qOut[a].q2, qOut[a].q3, qOut[a].q4);
 	}
 	fclose(fp);
+}
+void attSim::outputQuatZY3(vector<Quat> qOut, string name)
+{
+	string Cbj = path + name;
+	FILE *fp = fopen(Cbj.c_str(), "w");
+	int num = qOut.size();
+	if (fp != NULL)
+	{
+		//读取个数
+		fprintf(fp, "\n  ##att parameter: \n");
+		fprintf(fp, "att_roll_fixed_error = 0.00000000 ;\n");
+		fprintf(fp, "att_pitch_fixed_error = 0.00000000 ;\n");
+		fprintf(fp, "att_yaw_fixed_error = 0.00000000 ;\n");
+		fprintf(fp, "AttMode = 0 ;\n");
+		//fprintf(fp,"AttMode = J2000 ;\n");
+		fprintf(fp, "groupNumber = %d ;\n", num);
+
+		for (long i = 0; i < num; i++)
+		{
+
+			fprintf(fp, "attData_%.2d = \n{\n", i + 1);
+			fprintf(fp, "    timeCode = %.10lf ;\n", qOut[i].UT);
+			fprintf(fp, "    dateTime = \"%.4d %.2d %.2d %.2d:%.2d:%9.6f\" ;\n", 2017, 9, 6, 16, 54, 49.25);
+			fprintf(fp, "    eulor1 = %10.8lf ;\n", 0);
+			fprintf(fp, "    eulor2 = %10.8lf ;\n", 0);
+			fprintf(fp, "    eulor3 = %10.8lf ;\n", 0);
+			fprintf(fp, "    roll_velocity = %10.8lf ;\n", 0.0);
+			fprintf(fp, "    pitch_velocity = %10.8lf ;\n", 0.0);
+			fprintf(fp, "    yaw_velocity = %10.8lf ;\n", 0.0);
+			fprintf(fp, "    q1 = %10.8lf ;\n", qOut[i].q1);
+			fprintf(fp, "    q2 = %10.8lf ;\n", qOut[i].q2);
+			fprintf(fp, "    q3 = %10.8lf ;\n", qOut[i].q3);
+			fprintf(fp, "    q4 = %10.8lf ;\n", qOut[i].q4);
+			fprintf(fp, "}\n");
+		}
+		fclose(fp);
+		fp = NULL;
+	}
 }
 void attSim::outputBias(double *Bias, int num, string name)
 {

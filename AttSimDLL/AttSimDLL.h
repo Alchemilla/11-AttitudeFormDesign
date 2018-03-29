@@ -90,7 +90,8 @@ public:
 	void compareTureEKF(string outName);
 	//各种输出函数
 	void outputQuatGyroTXT(attGFDM attMeas, string out1, string out2);
-	void outputQuat(vector<Quat>qOut,string name);
+	void outputQuat(vector<Quat>qOut, string name);
+	void outputQuatZY3(vector<Quat>qOut, string name);
 	void outputBias(double *Bias, int num, string name);
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量
