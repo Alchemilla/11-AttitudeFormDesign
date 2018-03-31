@@ -415,6 +415,7 @@ void BaseFunc::QuatInterpolation(Quat *Att, int AttNum, double *UT, int interNum
 
 void BaseFunc::QuatInterpolationVector(vector<Quat>Att, vector<double>UT, vector<Quat>&AttInter)
 {
+	AttInter.clear();
 	int AttNum = Att.size();
 	Quat *Att1 = new Quat[AttNum];
 	for (int a=0;a<AttNum;a++)
