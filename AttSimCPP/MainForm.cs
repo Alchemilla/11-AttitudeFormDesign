@@ -299,7 +299,7 @@ namespace AttSimCPP
             if (path == null)
             { button1.Enabled = false; button8.Enabled = false; button11.Enabled = false; }
             else
-            { button1.Enabled = true; button8.Enabled = false; button11.Enabled = false; }
+            { button1.Enabled = true; button8.Enabled = true; button11.Enabled = false; }
             button3.Enabled = false;
             button4.Enabled = false;
             button5.Enabled = false;
@@ -341,7 +341,7 @@ namespace AttSimCPP
                 path = localFilePath.Substring(0, localFilePath.LastIndexOf("\\")); ;
                 ShowInfo("成功设置文件保存路径："+path);
                 button1.Enabled = true;
-                button8.Enabled = false;
+                button8.Enabled = true;
                 button11.Enabled = false;
             }            
             else
