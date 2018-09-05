@@ -2674,20 +2674,20 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 		qTrue.push_back(qTrueTmp);
 	}
 	//添加姿态稳定度
-	double dtQ = qTrue[2].UT - qTrue[1].UT;
 	int num = qTrue.size();
 	double *stab1 = new double[num]; double *stab2 = new double[num]; double *stab3 = new double[num];
-	mBase.RandomDistribution(0, attDat.stabW[0] * PI / 180 * dtQ, num, 0, stab1);
-	mBase.RandomDistribution(0, attDat.stabW[1] * PI / 180 * dtQ, num, 0, stab2);
-	mBase.RandomDistribution(0, attDat.stabW[2] * PI / 180 * dtQ, num, 0, stab3);
+	mBase.RandomDistribution(0, attDat.stabW[0] * PI / 180, num, 0, stab1);
+	mBase.RandomDistribution(0, attDat.stabW[1] * PI / 180, num, 0, stab2);
+	mBase.RandomDistribution(0, attDat.stabW[2] * PI / 180, num, 0, stab3);
 
 	Gyro wTrue; vector<Quat>qTrueOri(qTrue);
 	for (int i = 0; i < num-1; i++)
 	{
-		calcuOmega(qTrue[i], qTrue[i+1], wTrue);
-		wTrue.wx += stab1[i];//增加了姿态稳定度
-		wTrue.wy += stab2[i];
-		wTrue.wz += stab3[i];
+		calcuOmega(qTrue[i], qTrue[i + 1], wTrue);
+		double dtQ = qTrue[i + 1].UT - qTrue[i].UT;
+		wTrue.wx += stab1[i] * dtQ;//增加了姿态稳定度
+		wTrue.wy += stab2[i] * dtQ;;
+		wTrue.wz += stab3[i] * dtQ;;
 		if (i == nGyro - 1) { break; }
 		double ww = sqrt(pow(wTrue.wx, 2) + pow(wTrue.wy, 2) + pow(wTrue.wz, 2));
 		double co = cos(0.5*ww*dtQ);
