@@ -2479,7 +2479,7 @@ void attSim::Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, Matri
 //输出：指定星敏陀螺的测量输出值
 //注意：只仿真需要的测量值
 //作者：GZC
-//日期：2018.01.10
+//日期：2018.01.10  更新2018.09.05
 //////////////////////////////////////////////////////////////////////////
 void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 {
@@ -2673,40 +2673,7 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 		qTrueTmp.UT = euler[a].UT;
 		qTrue.push_back(qTrueTmp);
 	}
-	//添加姿态稳定度
-	int num = qTrue.size();
-	double *stab1 = new double[num]; double *stab2 = new double[num]; double *stab3 = new double[num];
-	mBase.RandomDistribution(0, attDat.stabW[0] * PI / 180, num, 0, stab1);
-	mBase.RandomDistribution(0, attDat.stabW[1] * PI / 180, num, 0, stab2);
-	mBase.RandomDistribution(0, attDat.stabW[2] * PI / 180, num, 0, stab3);
-
-	Gyro wTrue; vector<Quat>qTrueOri(qTrue);
-	for (int i = 0; i < num-1; i++)
-	{
-		calcuOmega(qTrue[i], qTrue[i + 1], wTrue);
-		double dtQ = qTrue[i + 1].UT - qTrue[i].UT;
-		wTrue.wx += stab1[i] * dtQ;//增加了姿态稳定度
-		wTrue.wy += stab2[i] * dtQ;;
-		wTrue.wz += stab3[i] * dtQ;;
-		if (i == nGyro - 1) { break; }
-		double ww = sqrt(pow(wTrue.wx, 2) + pow(wTrue.wy, 2) + pow(wTrue.wz, 2));
-		double co = cos(0.5*ww*dtQ);
-		double si = sin(0.5*ww*dtQ);
-		double n1 = wTrue.wx / ww; double n2 = wTrue.wy / ww; double n3 = wTrue.wz / ww;
-		double qw1 = n1*si; double qw2 = n2*si; double qw3 = n3*si; double qw4 = co;
-		Matrix4d om;
-		Vector4d quat1, quat2;
-		quat1 << qTrue[i].q1, qTrue[i].q2, qTrue[i].q3, qTrue[i].q4;
-		om << qw4, qw3, -qw2, qw1, -qw3, qw4, qw1, qw2, qw2, -qw1, qw4, qw3, -qw1, -qw2, -qw3, qw4;
-		quat2 = om*quat1;
-		qTrueOri[i + 1].UT = qTrue[i + 1].UT;
-		qTrueOri[i + 1].q1 = quat2(0), qTrueOri[i + 1].q2 = quat2(1), qTrueOri[i + 1].q3 = quat2(2), qTrueOri[i + 1].q4 = quat2(3);
-	}
-	qTrue.clear();
-	qTrue.assign(qTrueOri.begin(), qTrueOri.end());
-	delete[]stab1, stab2, stab3; stab1 = stab2 = stab3 = NULL;
-
-	outputQuat(qTrue, "\\SateQuat.txt");
+	//addAttStable(qTrue);
 	return true;
 }
 
@@ -3284,6 +3251,51 @@ double attSim::triGyroErrorModel(double sig)
 double attSim::fiberGyroErrorModel(double sig)
 {
 	return abs(0.0003*sig);
+}
+
+//////////////////////////////////////////////////////////////////////////
+//功能：添加姿态稳定度
+//输入：标称四元数
+//输出：带稳定度的四元数
+//注意：稳定度概念
+//作者：GZC
+//日期：2018.09.05
+//////////////////////////////////////////////////////////////////////////
+void attSim::addAttStable(vector<Quat>& qTrue)
+{
+	//添加姿态稳定度
+	int num = qTrue.size();
+	double *stab1 = new double[num]; double *stab2 = new double[num]; double *stab3 = new double[num];
+	mBase.RandomDistribution(0, attDat.stabW[0] * PI / 180, num, 0, stab1);
+	mBase.RandomDistribution(0, attDat.stabW[1] * PI / 180, num, 0, stab2);
+	mBase.RandomDistribution(0, attDat.stabW[2] * PI / 180, num, 0, stab3);
+
+	Gyro wTrue; vector<Quat>qTrueOri(qTrue);
+	for (int i = 0; i < num - 1; i++)
+	{
+		calcuOmega(qTrue[i], qTrue[i + 1], wTrue);
+		double dtQ = qTrue[i + 1].UT - qTrue[i].UT;
+		wTrue.wx += stab1[i] * dtQ;//增加了姿态稳定度
+		wTrue.wy += stab2[i] * dtQ;;
+		wTrue.wz += stab3[i] * dtQ;;
+		if (i == nGyro - 1) { break; }
+		double ww = sqrt(pow(wTrue.wx, 2) + pow(wTrue.wy, 2) + pow(wTrue.wz, 2));
+		double co = cos(0.5*ww*dtQ);
+		double si = sin(0.5*ww*dtQ);
+		double n1 = wTrue.wx / ww; double n2 = wTrue.wy / ww; double n3 = wTrue.wz / ww;
+		double qw1 = n1*si; double qw2 = n2*si; double qw3 = n3*si; double qw4 = co;
+		Matrix4d om;
+		Vector4d quat1, quat2;
+		quat1 << qTrue[i].q1, qTrue[i].q2, qTrue[i].q3, qTrue[i].q4;
+		om << qw4, qw3, -qw2, qw1, -qw3, qw4, qw1, qw2, qw2, -qw1, qw4, qw3, -qw1, -qw2, -qw3, qw4;
+		quat2 = om*quat1;
+		qTrueOri[i + 1].UT = qTrue[i + 1].UT;
+		qTrueOri[i + 1].q1 = quat2(0), qTrueOri[i + 1].q2 = quat2(1), qTrueOri[i + 1].q3 = quat2(2), qTrueOri[i + 1].q4 = quat2(3);
+	}
+	qTrue.clear();
+	qTrue.assign(qTrueOri.begin(), qTrueOri.end());
+	delete[]stab1, stab2, stab3; stab1 = stab2 = stab3 = NULL;
+	outputQuat(qTrue, "\\SateQuat.txt");
 }
 
 void attSim::compareTureEKF(string outName)

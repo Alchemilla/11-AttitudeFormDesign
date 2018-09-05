@@ -86,6 +86,8 @@ public:
 	double starErrorModel(double sig);
 	double triGyroErrorModel(double sig);
 	double fiberGyroErrorModel(double sig);
+	//增加姿态稳定度函数
+	void addAttStable(vector<Quat>&qTrue);
 	//比较函数
 	void compareTureEKF(string outName);
 	//各种输出函数
