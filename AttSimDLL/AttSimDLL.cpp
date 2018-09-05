@@ -2483,34 +2483,71 @@ void attSim::Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, Matri
 //////////////////////////////////////////////////////////////////////////
 void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 {
-	//首先仿真真实星敏和陀螺数据
+	//////////////////////////////////////////////////////////////////////////
+	//1---先10倍内插得到标称姿态数据
+	//////////////////////////////////////////////////////////////////////////
+	int nQuatTrue,freq;
+	if (attDat.freqQ<=attDat.freqG)
+	{
+		nQuatTrue = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*attDat.freqG * 10;
+		freq = attDat.freqG * 10;
+	}
+	else
+	{
+		nQuatTrue = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*attDat.freqQ * 10;
+		freq = attDat.freqQ * 10;
+	}
+	vector<Quat>qTrueInter(nQuatTrue); 
+	vector<double> utc(nQuatTrue);
+	for (int a = 0; a < nQuatTrue; a++)//仿真nQuatTrue个星敏标称数据
+	{
+		utc[a] = qTrue[0].UT + 1. / freq*a;
+	}
+	mBase.QuatInterpolationVector(qTrue, utc, qTrueInter);//内插得到标称四元数
+
+	//////////////////////////////////////////////////////////////////////////
+	//2---添加姿态稳定度
+	//////////////////////////////////////////////////////////////////////////
+	addAttStable(qTrueInter);//添加稳定度得到真实四元数
+	vector<Gyro> wTrue(nQuatTrue-1);
+	for (int a = 0; a < nQuatTrue-1; a++)
+	{
+		calcuOmega(qTrueInter[a], qTrueInter[a + 1], wTrue[a]);//计算得到真实陀螺角速度
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	//3---仿真真实数据；根据安装，得到真实的三星敏和3陀螺测量数据
+	//////////////////////////////////////////////////////////////////////////
+	attGFDM attTrue;
+	transCrj2StarGyro(qTrueInter, wTrue, attTrue, false);
+	outputQuatGyroTXT(attTrue, "\\STSQuat.txt", "\\Gyro.txt");//输出真实星敏四元数和陀螺角速度
+
+	//////////////////////////////////////////////////////////////////////////
+	//4---仿真测量数据；根据安装，得到带误差的三星敏和3陀螺测量数据
+	//////////////////////////////////////////////////////////////////////////
 	attDat.nQuat = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*attDat.freqQ;
 	attDat.nGyro = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT)*attDat.freqG;
-	vector<double> utc1(attDat.nQuat); vector<Quat>qTrueInter1, qTrueInter2;
-	vector<double> utc2(attDat.nGyro + 1); vector<Gyro> wTrue(attDat.nGyro);
+	vector<double> utc1(attDat.nQuat); 
+	vector<Quat>qTrueInter1, qTrueInter2;
+	vector<double> utc2(attDat.nGyro + 1);
+	vector<Gyro>wMeas(attDat.nGyro);
 	for (int a = 0; a < attDat.nQuat; a++)//仿真nQuat个星敏真实数据
 	{
 		utc1[a] = qTrue[0].UT + 1. / attDat.freqQ*a;
 	}
-	mBase.QuatInterpolationVector(qTrue, utc1, qTrueInter1);//内插得到真实四元数
+	mBase.QuatInterpolationVector(qTrueInter, utc1, qTrueInter1);//内插得到星敏测量个数四元数
 	for (int a = 0; a < attDat.nGyro + 1; a++)//仿真nGyro个陀螺真实数据
 	{
 		utc2[a] = qTrue[0].UT + 1. / attDat.freqG*a;
 	}
-	mBase.QuatInterpolationVector(qTrue, utc2, qTrueInter2);//内插得到真实四元数
+	mBase.QuatInterpolationVector(qTrueInter, utc2, qTrueInter2);//内插得到陀螺测量个数真实四元数
 	for (int a = 0; a < attDat.nGyro; a++)
 	{
-		calcuOmega(qTrueInter2[a], qTrueInter2[a + 1], wTrue[a]);
+		calcuOmega(qTrueInter2[a], qTrueInter2[a + 1], wMeas[a]);
 	}
-
-	//根据安装，得到真实的三星敏和3陀螺测量数据
-	attGFDM attTrue;
-	transCrj2StarGyro(qTrueInter1, wTrue, attTrue, false);
-	outputQuatGyroTXT(attTrue, "\\STSQuat.txt", "\\Gyro.txt");//输出真实星敏四元数和陀螺角速度
-
-	//根据安装，得到带误差的三星敏和3陀螺测量数据
-	transCrj2StarGyro(qTrueInter1, wTrue, attMeas, true);
+	transCrj2StarGyro(qTrueInter1, wMeas, attMeas, true);
 	outputQuatGyroTXT(attMeas, "\\STSQuatErr.txt", "\\GyroErr.txt");//输出带误差星敏四元数和陀螺角速度
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2673,7 +2710,7 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 		qTrueTmp.UT = euler[a].UT;
 		qTrue.push_back(qTrueTmp);
 	}
-	//addAttStable(qTrue);
+	outputQuat(qTrue, "\\SateQuat.txt");
 	return true;
 }
 
@@ -3182,13 +3219,13 @@ void attSim::addErrorForQuatActive(vector<Quat>&qSim)
 	double sig_tracker = 1, vel, sig_trackerFact;
 	double *noise = new double[qSim.size()];
 	mBase.RandomDistribution(0, sig_tracker / 3, qSim.size(), 0, noise);
-	Gyro vOmega;
+	Gyro vOmega; 
 	vector<Quat>qMeas(qSim.size());
 	for (int a = 0; a < qSim.size() - 1; a++)
 	{
 		calcuOmega(qSim[a], qSim[a + 1], vOmega);
 		vel = sqrt(pow(vOmega.wx / PI * 180, 2) + pow(vOmega.wy / PI * 180, 2) + pow(vOmega.wz / PI * 180, 2));
-		sig_trackerFact = starErrorModel(vel);
+		sig_trackerFact = starErrorModel(vel)*attDat.sig_ST;//和实际sigma关联起来的公式
 		noise[a] *= 0.5 / 3600 * PI / 180 * sig_trackerFact;
 		Quat q2;
 		q2.q1 = noise[a]; q2.q2 = noise[a]; q2.q3 = noise[a], q2.q4 = 1;
@@ -3295,7 +3332,6 @@ void attSim::addAttStable(vector<Quat>& qTrue)
 	qTrue.clear();
 	qTrue.assign(qTrueOri.begin(), qTrueOri.end());
 	delete[]stab1, stab2, stab3; stab1 = stab2 = stab3 = NULL;
-	outputQuat(qTrue, "\\SateQuat.txt");
 }
 
 void attSim::compareTureEKF(string outName)
