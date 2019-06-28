@@ -3112,8 +3112,8 @@ void attSim::outputQuat(vector<Quat> qOut, string name)
 void attSim::outputQuat2(vector<Quat> qOut, string name)
 {
 	string Cbj = path + name;
-	FILE *fp = fopen(Cbj.c_str(), "w");
 	string timePath = attDat.quatPath;
+	FILE *fp = fopen(Cbj.c_str(), "w");
 	FILE *fp2 = fopen(timePath.c_str(), "r");
 	fscanf(fp2, "%d\t%d\t%d\t%d\t%d\t%lf\n", &readYMD.year, &readYMD.mon, &readYMD.day,
 		&readYMD.hour, &readYMD.min, &readYMD.sec);
@@ -3123,7 +3123,7 @@ void attSim::outputQuat2(vector<Quat> qOut, string name)
 	{
 		fprintf(fp, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\n", qOut[a].UT, qOut[a].q1, qOut[a].q2, qOut[a].q3, qOut[a].q4);
 	}
-	fclose(fp); 
+	fclose(fp);
 	fclose(fp2);
 }
 void attSim::outputBias(double *Bias, int num, string name)
