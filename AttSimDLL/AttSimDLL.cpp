@@ -2152,12 +2152,13 @@ void attSim::EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm,vector<Gyro>
 	}
 	if (starGyro.isJitter==false)
 	{
-		outputBias(xest_store, nG, "\\BiasEstimate.txt");
+		//outputBias(xest_store, nG, "\\BiasEstimate.txt");
 		outputQuat(quatEst, "\\EKFquater.txt");
 	}
 	else
 	{
 		outputQuat(quatEst, "\\EKFJitterquater.txt");
+		outputQuat2(quatEst, "\\trvqbi_ctrl_file_High_Freq.txt");
 	}
 }
 
@@ -2248,7 +2249,7 @@ void attSim::simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter)
 		if (vecJitter[j].freq > maxFreq) { maxFreq = vecJitter[j].freq; }
 	}
 	double nSample;
-	int num = 2;
+	int num = 1;
 	maxFreq * 10 > attDat.ADSfreq*num ? nSample = maxFreq * 10 : nSample = attDat.ADSfreq*num;
 	//高频角位移采样率
 	//int sampleRate = attDat.ADSfreq*num;
@@ -2407,17 +2408,26 @@ bool attSim::readAttparam(string pushbroomDat, vector<Quat>&qTrue)
 //输出：姿态角和角速度
 //注意：
 //作者：GZC
-//日期：2018.03.12
+//日期：2019.06.28
 //////////////////////////////////////////////////////////////////////////
 bool attSim::readAttparam2(string quatPath, vector<Quat>&qTrue)
 {
 	FILE *fp = fopen(quatPath.c_str(), "r");
 	if (!fp) { printf("文件不存在！\n"); return false; }
-	int num; Quat tmp;
-	fscanf(fp, "%d\n", &num);
-	for (int a = 0; a < num; a++)
+	int num = 0; Quat tmp;
+	while (!feof(fp))
 	{
-		fscanf(fp, "%lf\t%lf\t%lf\t%lf\t%lf\n", &tmp.UT, &tmp.q1, &tmp.q2, &tmp.q3, &tmp.q4);
+		if('\n'==fgetc(fp))
+		{
+			num++;
+		}
+	}
+	rewind(fp);//回到开头
+	fscanf(fp, "%d\t%d\t%d\t%d\t%d\t%lf\n", &readYMD.year, &readYMD.mon, &readYMD.day,
+		&readYMD.hour, &readYMD.min, &readYMD.sec);
+	for (int a = 0; a < num-1; a++)
+	{
+		fscanf(fp, "%lf\t%*lf\t%*lf\t%*lf\t%*lf\t%*lf\t%*lf\t%lf\t%lf\t%lf\t%lf\n", &tmp.UT, &tmp.q1, &tmp.q2, &tmp.q3, &tmp.q4);
 		qTrue.push_back(tmp);
 	}
 	fclose(fp);
@@ -2921,7 +2931,7 @@ void attSim::compareTureEKF(string outName)
 	string strpath, strpath1;
 	if (starGyro.isJitter==false)
 	{
-		strpath1 = path + "\\EKFquater.txt";	strpath = path + "\\ATT.txt";
+		strpath1 = path + "\\EKFquater.txt";	strpath = path + "\\Attitude.txt";
 	}
 	else
 	{
@@ -2945,6 +2955,7 @@ void attSim::compareTureEKF(string outName)
 		fscanf(fpTrue, "%lf\t%lf\t%lf\t%lf\t%lf\n", &qTrue[a].UT, &qTrue[a].q1, &qTrue[a].q2, &qTrue[a].q3, &qTrue[a].q4);
 		UT[a] = qTrue[a].UT;
 	}
+	//应该是真实数据按照测量数据的频率比较
 	mBase.QuatInterpolation(qEKF, num, UT, num2, qEKFInter);
 	fclose(fpEKF), fclose(fpTrue);
 
@@ -2983,6 +2994,81 @@ void attSim::compareTureEKF(string outName)
 	fclose(fp);
 	delete[] UT; UT = NULL;
 	delete[] dq3, qEKF, qTrue, qEKFInter; dq3 = qEKF = qEKFInter = qTrue = NULL;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//功能：输出滤波和真实数据的比较结果
+//作者：GZC
+//日期：2019.06.28
+//////////////////////////////////////////////////////////////////////////
+void attSim::compareTureEKF2(string outName)
+{
+	string strpath, strpath1;
+	if (starGyro.isJitter == false)
+	{
+		strpath1 = path + "\\EKFquater.txt";	strpath = path + "\\Attitude.txt";
+	}
+	else
+	{
+		strpath1 = path + "\\EKFJitterquater.txt"; strpath = path + "\\Attitude.txt";
+	}
+	FILE *fpTrue = fopen(strpath.c_str(), "r");
+	FILE *fpEKF = fopen(strpath1.c_str(), "r");
+	int num, num2;
+	fscanf(fpEKF, "%d\n", &num);
+	Quat *qEKF = new Quat[num];
+	double *UT = new double[num];
+	for (int a = 0; a < num; a++)
+	{
+		fscanf(fpEKF, "%lf\t%lf\t%lf\t%lf\t%lf\n", &qEKF[a].UT, &qEKF[a].q1, &qEKF[a].q2, &qEKF[a].q3, &qEKF[a].q4);
+		UT[a] = qEKF[a].UT;
+	}
+	fscanf(fpTrue, "%d\n", &num2);
+	Quat *qTrue = new Quat[num2];
+	for (int a = 0; a < num2; a++)
+	{
+		fscanf(fpTrue, "%lf\t%lf\t%lf\t%lf\t%lf\n", &qTrue[a].UT, &qTrue[a].q1, &qTrue[a].q2, &qTrue[a].q3, &qTrue[a].q4);
+	}
+	//应该是真实数据按照测量数据的频率比较
+	Quat *qTrueInter = new Quat[num];
+	mBase.QuatInterpolation(qTrue, num2, UT, num, qTrueInter);
+	fclose(fpEKF), fclose(fpTrue);
+
+	//添加RMS指标(正确做法,2017.11.02)
+	double rmsQ1, rmsQ2, rmsQ3;
+	rmsQ1 = rmsQ2 = rmsQ3 = 0;
+	double aveQ1, aveQ2, aveQ3;
+	aveQ1 = aveQ2 = aveQ3 = 0;
+	Quat *dq3 = new Quat[num];
+
+	string strpath2 = path + outName;
+	FILE *fp = fopen(strpath2.c_str(), "w");
+	//fprintf(fp, "%d\n", num2);
+	for (int i = 0; i < num; i++)
+	{
+		qTrueInter[i].q4 = -qTrueInter[i].q4;
+		//mBase.quatMult(qTrueI[i], qEKF[i], dq3[i]);
+		mBase.quatMult(qEKF[i], qTrueInter[i], dq3[i]);
+		dq3[i].q1 = dq3[i].q1 * 2 / PI * 180 * 3600;
+		dq3[i].q2 = dq3[i].q2 * 2 / PI * 180 * 3600;
+		dq3[i].q3 = dq3[i].q3 * 2 / PI * 180 * 3600;
+		fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n",
+			qEKF[i].UT, qEKF[i].q1, qEKF[i].q2, qEKF[i].q3, qEKF[i].q4,
+			qTrueInter[i].q1, qTrueInter[i].q2, qTrueInter[i].q3, qTrueInter[i].q4, dq3[i].q1, dq3[i].q2, dq3[i].q3);
+		aveQ1 += dq3[i].q1 / num2; aveQ2 += dq3[i].q2 / num2; aveQ3 += dq3[i].q3 / num2;
+	}
+	for (int i = 0; i < num; i++)
+	{
+		rmsQ1 += pow(dq3[i].q1 - aveQ1, 2);
+		rmsQ2 += pow(dq3[i].q2 - aveQ2, 2);
+		rmsQ3 += pow(dq3[i].q3 - aveQ3, 2);
+	}
+	rmsQ1 = sqrt(rmsQ1 / (num2 - 1)); rmsQ2 = sqrt(rmsQ2 / (num2 - 1)); rmsQ3 = sqrt(rmsQ3 / (num2 - 1));
+	double rmsAll = sqrt(rmsQ1*rmsQ1 + rmsQ2 * rmsQ2 + rmsQ3 * rmsQ3);
+	//fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\n", rmsQ1, rmsQ2, rmsQ3, rmsAll);
+	fclose(fp);
+	delete[] UT; UT = NULL;
+	delete[] dq3, qEKF, qTrue, qTrueInter; dq3 = qEKF = qTrueInter = qTrue = NULL;
 }
 //////////////////////////////////////////////////////////////////////////
 //功能：输出星敏和陀螺数据
@@ -3023,6 +3109,22 @@ void attSim::outputQuat(vector<Quat> qOut, string name)
 	}
 	fclose(fp);
 }
+void attSim::outputQuat2(vector<Quat> qOut, string name)
+{
+	string Cbj = path + name;
+	FILE *fp = fopen(Cbj.c_str(), "w");
+	string timePath = attDat.quatPath;
+	FILE *fp2 = fopen(timePath.c_str(), "r");
+	fscanf(fp2, "%d\t%d\t%d\t%d\t%d\t%lf\n", &readYMD.year, &readYMD.mon, &readYMD.day,
+		&readYMD.hour, &readYMD.min, &readYMD.sec);
+	fprintf(fp, "%04d\t%02d\t%02d\t%02d\t%02d\t%.9f\n",readYMD.year,readYMD.mon,
+		readYMD.day, readYMD.hour, readYMD.min, readYMD.sec);
+	for (int a = 0; a < qOut.size(); a++)
+	{
+		fprintf(fp, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\n", qOut[a].UT, qOut[a].q1, qOut[a].q2, qOut[a].q3, qOut[a].q4);
+	}
+	fclose(fp);
+}
 void attSim::outputBias(double *Bias, int num, string name)
 {
 	string biasEst = path + name;
@@ -3053,7 +3155,7 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 	{		//根据欧拉角计算四元数
 		GFDM.readAttparam(workpath, qTure);	}
 	else
-	{		//直接从ATT.txt中读取姿态
+	{		//直接从trvqbi_ctrl_file.txt中读取姿态
 		GFDM.readAttparam2(mAtt.quatPath, qTure);	}
 	if (mAtt.JitterPath[0]!=0)//高频文件存在时
 	{

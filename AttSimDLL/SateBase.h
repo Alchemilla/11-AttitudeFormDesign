@@ -112,4 +112,10 @@ struct AttJitter
 {
 	double freq, phase, eulerX, eulerY, eulerZ;//频率，相位，欧拉角X,Y,Z  
 };
+struct YMD
+{
+	int year, mon, day;
+	int hour, min;
+	double sec;
+};
 #endif

@@ -19,6 +19,11 @@ namespace AttSimCPP
             InitializeComponent();
             if (args.Length == 2)
             { path = args[1]; }
+            else if (args.Length == 3)
+            {
+                path = args[1]; path2 = args[2];
+                isJitterIndex = true;
+            }
         }
         public AttParm mAtt;
         public isStarGyro starGyro;
@@ -327,6 +332,7 @@ namespace AttSimCPP
             ShowInfo("欢迎来到姿态确定仿真程序！");
             SetDefaultText();
             SetTabPage3Default();
+            tabPage1.Parent = null;//不显示多余的页面
         }
         /// <summary>
         /// 功能：设置保存目录
@@ -603,11 +609,12 @@ namespace AttSimCPP
         private void SetTabPage3Default()
         {
             checkBox1.Checked = checkBox2.Checked =  true;
-            textBox15.Text = "4";//星敏测量频率
-            textBox17.Text = "8";//陀螺测量频率            
+            textBox15.Text = "5";//星敏测量频率
+            textBox17.Text = "10";//陀螺测量频率            
             textBox20.Text = "0.0005";//常值漂移
             textBox21.Text = "0.00005";//随机游走
-            textBox22.Text = path;
+            textBox13.Text = path;
+            textBox24.Text = path2;
             textBox25.Text = "1000";//角位移测量频率
             textBox11.Text = "0.003";//角位移-随机
             textBox12.Text = "0.05";//角位移-漂移
@@ -626,7 +633,7 @@ namespace AttSimCPP
                 string localFilePath = openDlg.FileName.ToString(); //获得文件路径 
                 path = localFilePath.Substring(0, localFilePath.LastIndexOf("\\")); ;
                 ShowInfo("成功找到路径：" + path);
-                textBox22.Text = path;
+                //textBox22.Text = path;
                 //textBox13.Clear();
             }
             else
@@ -670,6 +677,8 @@ namespace AttSimCPP
             mAtt.install = textBox23.Text;
             //高频参数路径
             mAtt.JitterPath = textBox24.Text;
+            //原始数据位置
+            mAtt.quatPath = textBox13.Text;
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
@@ -677,13 +686,10 @@ namespace AttSimCPP
 
             if (!File.Exists(mAtt.quatPath))
             {
-                ShowInfo("没有ATT.txt文件");
-                if (!File.Exists(path + "\\ManeuverData_All.txt"))
-                {
-                    ShowInfo("没有ManeuverData_All.txt文件");
-                    MessageBox.Show("请设置包含ManeuverData_All.txt路径；或者 ATT.txt", "警告", MessageBoxButtons.OK);
-                    return;
-                }
+                ShowInfo("没有姿态文件");
+                MessageBox.Show("请设置包含trvqbi_ctrl_file.txt路径", "警告", MessageBoxButtons.OK);
+                progressBar1.Value = 0;
+                return;
             }
             else { path = mAtt.quatPath.Substring(0, mAtt.quatPath.LastIndexOf("\\")); }
             ShowInfo("开始姿态仿真，生成星敏四元数和陀螺角速度");
@@ -747,19 +753,17 @@ namespace AttSimCPP
             mAtt.install = textBox23.Text;
             //高频参数路径
             mAtt.JitterPath = textBox24.Text;
+            //原始数据位置
+            mAtt.quatPath = textBox13.Text;
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 40;
             if (!File.Exists(mAtt.quatPath))
             {
-                ShowInfo("没有ATT.txt文件");
-                if (!File.Exists(path + "\\ManeuverData_All.txt"))
-                {
-                    ShowInfo("没有ManeuverData_All.txt文件");
-                    MessageBox.Show("请设置包含ManeuverData_All.txt路径；或者 ATT.txt", "警告", MessageBoxButtons.OK);
-                    return;
-                }
+                ShowInfo("没有姿态文件");
+                MessageBox.Show("请设置包含trvqbi_ctrl_file.txt路径", "警告", MessageBoxButtons.OK);
+                return;
             }
             else { path = mAtt.quatPath.Substring(0, mAtt.quatPath.LastIndexOf("\\")); }
             ShowInfo("开始姿态确定...");
@@ -800,8 +804,7 @@ namespace AttSimCPP
             {
                 string QuatFilePath = openDlg.FileName.ToString(); //获得文件路径 
                 ShowInfo("成功找到路径：" + QuatFilePath);
-                textBox13.Text = QuatFilePath;
-                mAtt.quatPath = QuatFilePath;
+                textBox13.Text = QuatFilePath;                
             }
             else
                 ShowInfo("失败：未设置原始四元数路径");

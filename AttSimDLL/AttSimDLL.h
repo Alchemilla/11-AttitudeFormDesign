@@ -86,15 +86,17 @@ public:
 	double triGyroErrorModel(double sig);
 	double fiberGyroErrorModel(double sig);
 	//比较函数
+	void compareTureEKF2(string outName);
 	void compareTureEKF(string outName);
 	//各种输出函数
 	void outputQuatGyroTXT(attGFDM attMeas, string out1, string out2);
 	void outputQuat(vector<Quat>qOut,string name);
+	void outputQuat2(vector<Quat>qOut, string name);
 	void outputBias(double *Bias, int num, string name);
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量
 	AttParm attDat;	isStarGyro starGyro;
-	string path;
+	string path;	YMD readYMD;
 	static double starAali[9], starBali[9], starCali[9];//星敏安装
 	static double G11[3], G12[3], G13[3], G21[3], G22[3], G23[3], G31[3], G32[3], G33[3];//陀螺安装
 };
