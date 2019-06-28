@@ -3123,7 +3123,7 @@ void attSim::outputQuat2(vector<Quat> qOut, string name)
 	{
 		fprintf(fp, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\n", qOut[a].UT, qOut[a].q1, qOut[a].q2, qOut[a].q3, qOut[a].q4);
 	}
-	fclose(fp);
+	fclose(fp); fclose(fp2);
 }
 void attSim::outputBias(double *Bias, int num, string name)
 {
