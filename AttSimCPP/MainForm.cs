@@ -598,20 +598,24 @@ namespace AttSimCPP
             DLLImport.ExternalData(path,mAtt);
         }
 
-
+        /// <summary>
+        /// 设置姿态确定默认参数
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SetTabPage3Default()
         {
             checkBox1.Checked = checkBox2.Checked = checkBox4.Checked = 
                 checkBox5.Checked = checkBox6.Checked = true;
-            textBox15.Text = "4";//星敏测量频率
-            textBox17.Text = "8";//陀螺测量频率
+            textBox15.Text = "10";//星敏测量频率
+            textBox17.Text = "100";//陀螺测量频率
             textBox16.Text = "1";//星敏噪声
-            textBox19.Text = "0.006";//陀螺噪声
+            textBox19.Text = "0.06";//陀螺噪声
             textBox20.Text = "3";//常值漂移
-            textBox21.Text = "0.0005";//随机游走
+            textBox21.Text = "0.005";//随机游走
             textBox22.Text = path;
             textBox25.Text = "1000";
-            textBox12.Text = "0.00005";//稳定度
+            textBox12.Text = "0.000005";//稳定度
         }
         /// <summary>
         /// 规划姿态路径

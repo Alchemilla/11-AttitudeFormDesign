@@ -3227,6 +3227,7 @@ void attSim::addErrorForQuatActive(vector<Quat>&qSim)
 		vel = sqrt(pow(vOmega.wx / PI * 180, 2) + pow(vOmega.wy / PI * 180, 2) + pow(vOmega.wz / PI * 180, 2));
 		sig_trackerFact = starErrorModel(vel)*attDat.sig_ST;//和实际sigma关联起来的公式
 		noise[a] *= 0.5 / 3600 * PI / 180 * sig_trackerFact;
+		//noise[a] *= 0.5 / 3600 * PI / 180 * attDat.sig_ST;//不与速度关联
 		Quat q2;
 		q2.q1 = noise[a]; q2.q2 = noise[a]; q2.q3 = noise[a], q2.q4 = 1;
 		mBase.quatMult(qSim[a], q2, qMeas[a]);
@@ -3378,7 +3379,7 @@ void attSim::compareTureEKF(string outName)
 
 	string strpath2 = path + outName;
 	FILE *fp = fopen(strpath2.c_str(), "w");
-	fprintf(fp, "------时间----------真实q1-------真实q2-------真实q3-------真实qs------估计q1-------估计q2-------估计q3-------估计qs------x轴误差(″)---y轴误差(″)---z轴误差(″)\n");
+	fprintf(fp, "------时间----------真实q1-------真实q2-------真实q3-------真实qs------估计q1-------估计q2-------估计q3-------估计qs------x轴误差(″)---y轴误差(″)---z轴误差(″)---总误差(″)\n");
 	for (int i = 0; i < num2; i++)
 	{
 		qEKFInter[i].q4 = -qEKFInter[i].q4;
@@ -3387,9 +3388,10 @@ void attSim::compareTureEKF(string outName)
 		dq3[i].q1 = dq3[i].q1 * 2 / PI * 180 * 3600;
 		dq3[i].q2 = dq3[i].q2 * 2 / PI * 180 * 3600;
 		dq3[i].q3 = dq3[i].q3 * 2 / PI * 180 * 3600;
-		fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n",
+		double totalErr = sqrt(dq3[i].q1*dq3[i].q1 + dq3[i].q2*dq3[i].q2 + dq3[i].q3*dq3[i].q3);
+		fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n",
 			qTrue[i].UT, qTrue[i].q1, qTrue[i].q2, qTrue[i].q3, qTrue[i].q4,
-			qEKFInter[i].q1, qEKFInter[i].q2, qEKFInter[i].q3, qEKFInter[i].q4, dq3[i].q1, dq3[i].q2, dq3[i].q3);
+			qEKFInter[i].q1, qEKFInter[i].q2, qEKFInter[i].q3, qEKFInter[i].q4, dq3[i].q1, dq3[i].q2, dq3[i].q3,totalErr);
 		aveQ1 += dq3[i].q1 / num2; aveQ2 += dq3[i].q2 / num2; aveQ3 += dq3[i].q3 / num2;
 	}
 	for (int i = 0; i < num2; i++)
@@ -3492,9 +3494,10 @@ void attSim::outputBias(double *Bias, int num, string name)
 	string biasEst = path + name;
 	FILE *fp = fopen(biasEst.c_str(), "w");
 	fprintf(fp, "---时间--------------b1----------------b2------------------b3\n");
-	for (int a = 0; a < num; a++)
+	for (int a = 0; a < num-1; a++)
 	{
-		fprintf(fp, "%.3f\t%.15f\t%.15f\t%.15f\n", Bias[6 * a], Bias[6 * a + 3], Bias[6 * a + 4], Bias[6 * a + 5]);
+		double tmp = 1 / PI * 180 * 3600 / (Bias[6 * a + 6] - Bias[6 * a]);
+		fprintf(fp, "%.3f\t%.15f\t%.15f\t%.15f\n", Bias[6 * a], Bias[6 * a + 3]*tmp, Bias[6 * a + 4] * tmp, Bias[6 * a + 5] * tmp);
 	}
 	fclose(fp);
 }
@@ -3593,13 +3596,13 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy,
 			GFDM.readAttJitterTXT(wMeas);
 			//卡尔曼滤波处理
 			GFDM.EKFForAndBackStarOpticAxis(BmIm, wMeas, q0);
-			GFDM.compareTureEKF("\\compareADStoTrue.txt");
+			GFDM.compareTureEKF("\\compareBinADStoTrue.txt");
 		}
 		else
 		{
 			GFDM.EKFForAndBackStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果
-															//姿态比较
-			GFDM.compareTureEKF("\\compareEKFtoTrue.txt");
+			//姿态比较
+			GFDM.compareTureEKF("\\compareBinEKFtoTrue.txt");
 		}
 	}
 }
