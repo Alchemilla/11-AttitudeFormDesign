@@ -1333,9 +1333,9 @@ void attSim::simQuatAndGyro15State(Quat *&qTrue, Quat *&qMeas, Gyro *&wTrue, Gyr
 	for (int i = 0; i < nGyro; i++)
 	{
 		wTrue[i].UT = i*dtG;
-		wTrue[i].wx = 0.1*PI / 180 * sin(-0.0026 * dtG*i) + stab1[i];//增加了姿态稳定度
-		wTrue[i].wy = 0.1*PI / 180 * sin(-0.0632 * dtG*i) + stab2[i];
-		wTrue[i].wz = 0.1*PI / 180 * cos(0.0032 * dtG*i) + stab2[i];
+		wTrue[i].wx = quatCoef*PI / 180 * sin(-0.0026 * dtG*i) + stab1[i];//增加了姿态稳定度
+		wTrue[i].wy = quatCoef *PI / 180 * sin(-0.0632 * dtG*i) + stab2[i];
+		wTrue[i].wz = quatCoef *PI / 180 * cos(0.0032 * dtG*i) + stab2[i];
 		MatrixXd wScaleAli(3, 1), wTrueTmp(3, 1);
 		wTrueTmp << wTrue[i].wx, wTrue[i].wy, wTrue[i].wz;
 		wScaleAli = (eye33 + sArr)*wTrueTmp;
@@ -3119,9 +3119,6 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy)
 void attitudeSimulationStruct(AttParm mAtt, char * workpath,
 	double *qTrueC, double *qMeasC, double *wTrueC, double *wMeasC, double * qNoise)
 {
-	attSim ZY3;
-	ZY3.getAttParam(mAtt, workpath);
-	int nQuat = mAtt.nQuat; int nGyro = mAtt.nGyro;
 	//设置随机初始四元数
 	if (mAtt.qInitial[0] == 0.5)//如果用默认参数的，四元数则为随机
 	{
@@ -3131,7 +3128,17 @@ void attitudeSimulationStruct(AttParm mAtt, char * workpath,
 		mAtt.qInitial[0] = qRand[0] / qAll; mAtt.qInitial[1] = qRand[1] / qAll;
 		mAtt.qInitial[2] = qRand[2] / qAll; mAtt.qInitial[3] = qRand[3] / qAll;
 	}
-
+	attSim ZY3;
+	ZY3.getAttParam(mAtt, workpath);
+	int nQuat = mAtt.nQuat; int nGyro = mAtt.nGyro;
+	if (mAtt.isActive==true)
+	{
+		ZY3.quatCoef = 1;//主动推扫
+	}
+	else
+	{
+		ZY3.quatCoef = 0.1;
+	}
 	//四元数在Matrix矩阵中顺序为1234, qTrue(0,0)对应1,qTrue(0,3)对应4，为标量
 	Quat *qTrue = new Quat[nQuat]; Quat *qMeas = new Quat[nQuat];
 	Gyro *wTrue = new Gyro[nGyro]; Gyro *wMeas = new Gyro[nGyro];

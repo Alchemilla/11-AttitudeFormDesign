@@ -19,6 +19,7 @@ struct AttParm
 	double sig_ST, sigu, sigv;//星敏陀螺参数
 	int ADSfreq;
 	char install[512],quatPath[512], JitterPath[512];
+	bool isActive;//是否主动推扫
 
 	// 重载操作符=
 	AttParm& operator=(const AttParm &s)
@@ -37,6 +38,7 @@ struct AttParm
 		memcpy(this->install, s.install, sizeof(char) * 512);
 		memcpy(this->quatPath, s.quatPath, sizeof(char) * 512);
 		memcpy(this->JitterPath, s.JitterPath, sizeof(char) * 512);
+		this->isActive = s.isActive;
 		return *this;
 	}
 };

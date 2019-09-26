@@ -30,6 +30,7 @@ namespace AttSimCPP
         public string quatPath;//原始四元数路径
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
         public string JitterPath;//高频文件路径
+        public bool isActive;//是否主动推扫
     };
     [StructLayout(LayoutKind.Sequential)]
     public struct Quat

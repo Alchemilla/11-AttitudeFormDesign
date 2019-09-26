@@ -91,6 +91,7 @@ public:
 	void outputQuatGyroTXT(attGFDM attMeas, string out1, string out2);
 	void outputQuat(vector<Quat>qOut,string name);
 	void outputBias(double *Bias, int num, string name);
+	double quatCoef;
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量
 	AttParm attDat;	isStarGyro starGyro;

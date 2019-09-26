@@ -19,6 +19,7 @@ namespace AttSimCPP
             InitializeComponent();
             if (args.Length == 2)
             { path = args[1]; }
+            tabPage3.Parent = null;//隐藏接口窗口
         }
         public AttParm mAtt;
         public isStarGyro starGyro;
@@ -168,7 +169,9 @@ namespace AttSimCPP
             progressBar1.Maximum = 100;
             progressBar1.Value = 10;
             ShowInfo("根据不同频率星敏陀螺测量数据仿真");
-            
+
+            mAtt.isActive = false;
+
             //获取星敏陀螺频率和总时长
             mAtt.freqQ = Convert.ToInt32(textBox8.Text);//string转数值的第1种转换方式
             mAtt.freqG = Convert.ToInt32(textBox9.Text);
@@ -218,7 +221,7 @@ namespace AttSimCPP
             //sigu = Math.Sqrt(sigu) * 1e-9;
 
             //陀螺噪声
-            mAtt.sigv = double.Parse(textBox7.Text) * 1e-5;
+            mAtt.sigv = double.Parse(textBox7.Text) * 1e-6;
             //sigv = Math.Sqrt(sigv) * 1e-5;
 
             //陀螺尺度和安装
@@ -271,25 +274,25 @@ namespace AttSimCPP
         {
             textBox1.Text = "5,5,5";//稳定度（°/s)
             textBox1.ForeColor = Color.Gray;
-            textBox2.Text = "500";
+            textBox2.Text = "50";
             textBox2.ForeColor = Color.Gray;
             textBox3.Text = "0.5,0.5,0.5,0.5";
             textBox3.ForeColor = Color.Gray;
-            textBox4.Text = "8";
+            textBox4.Text = "5";
             textBox4.ForeColor = Color.Gray;
-            textBox5.Text = "0.5,0.1,-0.1";
+            textBox5.Text = "0.01,0.01,-0.01";
             textBox5.ForeColor = Color.Gray;
             textBox6.Text = "1";
             textBox6.ForeColor = Color.Gray;
-            textBox7.Text = "0.1";
+            textBox7.Text = "1";
             textBox7.ForeColor = Color.Gray;
             textBox8.Text = "4";
             textBox8.ForeColor = Color.Gray;
-            textBox9.Text = "10";
+            textBox9.Text = "200";
             textBox9.ForeColor = Color.Gray;
             textBox10.Text = "0,0,0,0,0,0,0,0,0";
             textBox10.Enabled = false;
-            textBox18.Text = "10,10";
+            textBox18.Text = "5,5";
             textBox18.ForeColor = Color.Gray;
             ShowInfo("已加载姿态仿真默认参数!");
             if (path == null)
@@ -469,6 +472,8 @@ namespace AttSimCPP
             progressBar1.Value = 10;
             ShowInfo("根据不同频率星敏陀螺测量数据仿真");
 
+            mAtt.isActive = true;
+
             //获取星敏陀螺频率和总时长
             mAtt.totalT = int.Parse(textBox2.Text);                   //string转数值的第2种转换方式
             mAtt.freqQ = Convert.ToInt32(textBox8.Text);
@@ -510,7 +515,7 @@ namespace AttSimCPP
             string[] strW = textBox5.Text.Split(',');
             double[] wBias = new double[3];
             for (int i = 0; i < 3; i++)
-                wBias[i] = double.Parse(strW[i]);
+                wBias[i] = double.Parse(strW[i])*20;//假设主动推扫漂移更大
             mAtt.wBiasA = wBias;
 
             //漂移噪声
@@ -518,7 +523,7 @@ namespace AttSimCPP
             //sigu = Math.Sqrt(sigu) * 1e-10;
 
             //陀螺噪声
-            mAtt.sigv = double.Parse(textBox7.Text) * 1e-5;
+            mAtt.sigv = double.Parse(textBox7.Text) * 1e-5*3;//假设主动推扫噪声更大
             //sigv = Math.Sqrt(sigv) * 1e-7;
 
             //陀螺尺度和安装
@@ -540,7 +545,7 @@ namespace AttSimCPP
             progressBar1.Value = 20;
             ShowInfo("开始单向卡尔曼滤波...");
             DLLImport.attitudeSimulationStruct(mAtt, path, qTrueC, qMeasC, wTrueC, wMeasC, qNoise);
-            progressBar1.Value = 40;
+            progressBar1.Value = 50;
 
             double[] dqOut = new double[3 * mAtt.nQuat];
             double[] xest_store = new double[15 * mAtt.nGyro];
@@ -548,24 +553,24 @@ namespace AttSimCPP
                 qTrueC, qMeasC, 0, wTrueC, wMeasC, dqOut, xest_store);
             dq = dqOut; qNs = qNoise; xestAll = xest_store; qMeas = qMeasC;
 
-            dqOut = new double[3 * mAtt.nQuat];
-            xest_store = new double[15 * mAtt.nGyro];
-            progressBar1.Value = 70;
-            ShowInfo("开始双向卡尔曼滤波...");
-            DLLImport.attitudeDeterActivePushbroomStruct(mAtt, BeforeAfterT, path,
-               qTrueC, qMeasC, 1, wTrueC, wMeasC, dqOut, xest_store);
-            dq2 = dqOut; xestAll2 = xest_store;
+            //dqOut = new double[3 * mAtt.nQuat];
+            //xest_store = new double[15 * mAtt.nGyro];
+            //progressBar1.Value = 70;
+            //ShowInfo("开始双向卡尔曼滤波...");
+            //DLLImport.attitudeDeterActivePushbroomStruct(mAtt, BeforeAfterT, path,
+            //   qTrueC, qMeasC, 1, wTrueC, wMeasC, dqOut, xest_store);
+            //dq2 = dqOut; xestAll2 = xest_store;
             dqOut = null; qNoise = null; xest_store = null;
 
             progressBar1.Value = 100;
             ShowInfo("仿真完成！");
-            button3.Enabled = true;
-            button4.Enabled = true;
-            button5.Enabled = true;
+            button3.Enabled = false;
+            button4.Enabled = false;
+            button5.Enabled = false;
             button6.Enabled = true;
             button7.Enabled = true;
             button9.Enabled = true;
-            button10.Enabled = true;
+            button10.Enabled = false;
         }        
         /// <summary>
         /// 功能：将外部程序仿真的姿态转换为陀螺角速度
