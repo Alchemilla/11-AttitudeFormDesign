@@ -69,6 +69,61 @@ bool ExtData::ReadAttAndTransToOmega(string sworkpath,AttParm gyroParm)
 }
 
 //////////////////////////////////////////////////////////////////////////
+//功能：读取资三01星姿态并转换为陀螺角速度
+//输入：sAtt，ZY3-01姿态数据
+//输出：姿态vector
+//注意：NULL
+//作者：GZC
+//日期：2017.09.06
+//更新：2020.09.25
+//////////////////////////////////////////////////////////////////////////
+bool ExtData::ReadAttAndTransToOmega2(string sworkpath, AttParm gyroParm,vector<Quat>&qTrue,vector<Gyro>&wTrue)
+{
+	sAtt = sworkpath + "\\ATT.txt";
+	sGyroReal = sworkpath + "\\Gyro.txt";
+	ReadZY3AttData();
+	TransToOmegaTrue();
+	qTrue.assign(arr_att.begin(), arr_att.end());
+	wTrue.assign(wMeas.begin(),wMeas.end());
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//功能：读取资三01星姿态并转换为陀螺角速度
+//输入：sAtt，ZY3-01姿态数据
+//输出：姿态vector
+//注意：NULL
+//作者：GZC
+//日期：2017.09.06
+//更新：2020.09.25
+//////////////////////////////////////////////////////////////////////////
+double totalTime(char* sworkpath)
+{
+	ExtData laser;
+	laser.sAtt = (string)sworkpath + "\\ATT.txt";
+	laser.ReadZY3AttData();
+	double end = laser.arr_att[laser.arr_att.size()-1].UT;
+	double begin = laser.arr_att[0].UT;
+	return end - begin;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//功能：写资三01星姿态
+//输入：sAtt，ZY3-01姿态数据
+//输出：姿态vector
+//注意：NULL
+//作者：GZC
+//日期：2020.09.25
+//////////////////////////////////////////////////////////////////////////
+void writeData(char* sworkpath)
+{
+	ExtData laser;
+	laser.sAtt = (string)sworkpath + "\\15StateCompareBidEKFAndQuat.txt";//滤波后姿态
+	laser.sAttErr = (string)sworkpath + "\\ATT_Error.txt";//文件路径
+	laser.WriteZY3AttData();
+}
+
+//////////////////////////////////////////////////////////////////////////
 //功能：读取资三01星姿态txt数据
 //输入：sAtt，ZY3-01姿态数据
 //输出：姿态vector
@@ -130,6 +185,45 @@ bool ExtData::ReadZY3AttData()
 
 	fclose(fp);
 	return true;
+}
+//////////////////////////////////////////////////////////////////////////
+//功能：读取资三01星姿态txt数据
+//输入：sAtt，ZY3-01姿态数据
+//输出：姿态vector
+//注意：NULL
+//作者：by JYH
+//日期：2016.12.06
+//////////////////////////////////////////////////////////////////////////
+bool ExtData::WriteZY3AttData()
+{
+	if (sAtt.empty())
+		return false;
+	FILE* fp = fopen(sAtt.c_str(), "r");
+	if (!fp)
+		return false;
+
+	int num;
+	fscanf(fp,"%d\n",&num);
+	vector<Quat>ekfatt(num);
+	for (int i = 0; i < num; i++)
+	{
+		fscanf(fp, "%lf\t%*lf\t%*lf\t%*lf\t%*lf\t%lf\t%lf\t%lf\t%lf\t%*lf\t%*lf\t%*lf\n", 
+			&ekfatt[i].UT, &ekfatt[i].q1, &ekfatt[i].q2, &ekfatt[i].q3, &ekfatt[i].q4);
+	}
+	
+	fp = fopen(sAttErr.c_str(), "w");
+	if (!fp)
+		return false;
+
+	fprintf(fp,"groupNumber = %d ;\n",num);
+	for (int i=0; i < num; i++)
+	{
+		fprintf(fp, "attData\n{\n");
+		fprintf(fp, "timeCode = %lf\n", ekfatt[i].UT);
+		fprintf(fp, "q1 = %.9lf\nq2 = %.9lf\nq3 = %.9lf\nq4 = %.9lf\n", ekfatt[i].q1, ekfatt[i].q2, ekfatt[i].q3, ekfatt[i].q4);
+		fprintf(fp, "}\n");
+	}
+	fclose(fp);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -208,3 +302,56 @@ void ExtData::TransToOmega()
 	fclose(fp);
 }
 
+//////////////////////////////////////////////////////////////////////////
+//功能：将四元数转换为角速度，只需要角速度真值
+//输入：姿态vector
+//输出：陀螺角速度vector和Gyro.txt文件
+//注意：NULL
+//作者：by GZC
+//日期：2017.09.06  
+//更新：2020.09.25
+//////////////////////////////////////////////////////////////////////////
+void ExtData::TransToOmegaTrue()
+{
+	double Rbody2wgs84L[9], Rbody2wgs84R[9], Res[9];
+	int n= (arr_att[arr_att.size() - 1].UT - arr_att[0].UT) *m_AttParm.freqG+1;
+	double dtG = 1. / m_AttParm.freqG;
+	vector<double>ut(n);
+	for (int i = 0; i < n; i++)
+	{
+		ut[i] = arr_att[0].UT + i *dtG;
+	}
+	vector<Quat>qInter(n);
+	m_base.QuatInterpolationVector(arr_att, ut, qInter);
+
+	Gyro omega;
+	for (int i = 0; i < n-1; i++)
+	{
+
+		Quat attL = qInter[i];
+		m_base.quat2matrix(attL.q1, attL.q2, attL.q3, attL.q4, Rbody2wgs84L);
+		m_base.invers_matrix(Rbody2wgs84L, 3);
+		Quat attR = qInter[i + 1];
+		m_base.quat2matrix(attR.q1, attR.q2, attR.q3, attR.q4, Rbody2wgs84R);
+
+		double dt = attR.UT - attL.UT;
+		double om1[3];
+		m_base.Multi(Rbody2wgs84R, Rbody2wgs84L, Res, 3, 3, 3);//先转左边，再转右边
+
+		omega.UT = attL.UT;
+		omega.wx = (Res[5] - Res[7]) / 2 / dt;
+		omega.wy = (Res[6] - Res[2]) / 2 / dt;
+		omega.wz = (Res[1] - Res[3]) / 2 / dt;
+		wMeas.push_back(omega);
+	}
+	wMeas.push_back(omega);//最后一个陀螺数据和前一个一样
+	wMeas[wMeas.size() - 1].UT = qInter[n - 1].UT;
+
+	FILE* fp = fopen(sGyroReal.c_str(), "w");
+	fprintf(fp, "%d\n", wMeas.size());
+	for (int i = 0; i < n; i++)
+	{
+		fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\n", wMeas[i].UT, wMeas[i].wx, wMeas[i].wy, wMeas[i].wz);
+	}
+	fclose(fp);
+}

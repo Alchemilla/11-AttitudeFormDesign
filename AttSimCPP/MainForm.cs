@@ -17,6 +17,7 @@ namespace AttSimCPP
         public MainForm(string[] args)
         {
             InitializeComponent();
+            tabPage3.Parent=null;//隐藏第一个tab
             if (args.Length == 2)
             { path = args[1]; }
         }
@@ -158,11 +159,11 @@ namespace AttSimCPP
                 MessageBox.Show("请设置仿真文件保存路径", "警告", MessageBoxButtons.OK);
                 return;
             }
-            if (nSim1 == 0)
-            {
-                button1.Text = "姿态重新仿真";
-                nSim1++;
-            }
+            //if (nSim1 == 0)
+            //{
+            //    button1.Text = "姿态重新仿真";
+            //    nSim1++;
+            //}
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
@@ -228,12 +229,16 @@ namespace AttSimCPP
                 sArr[i] = double.Parse(strSarr[i]) * 1e-6;
             mAtt.sArr = sArr;
 
+            double totaltime= DLLImport.totalTime(path);
+            mAtt.nQuat = (int)(mAtt.freqQ * totaltime+1);//四元数个数
+            mAtt.nGyro = (int)(mAtt.freqG * totaltime+1);//陀螺个数，一般较四元数多
+
             double[] qTrueC = new double[5 * mAtt.nQuat]; double[] qMeasC = new double[5 * mAtt.nQuat];
             double[] wTrueC = new double[4 * mAtt.nGyro]; double[] wMeasC = new double[4 * mAtt.nGyro];
             double[] qNoise = new double[3 * mAtt.nQuat];
             progressBar1.Value = 20;
             ShowInfo("开始单向卡尔曼滤波...");
-            DLLImport.attitudeSimulationStruct(mAtt, path, qTrueC, qMeasC, wTrueC, wMeasC, qNoise);
+            DLLImport.attitudeSimulationStructForLaser(mAtt, path, qTrueC, qMeasC, wTrueC, wMeasC, qNoise);
                     
             progressBar1.Value = 40;
 
@@ -251,6 +256,9 @@ namespace AttSimCPP
                qTrueC, qMeasC, 1, wTrueC, wMeasC, dqOut, xest_store);
             dq2 = dqOut; xestAll2 = xest_store;
             dqOut = null; qNoise = null; xest_store = null;
+
+            ShowInfo("输出滤波结果");
+            DLLImport.writeData(path);
 
             progressBar1.Value = 100;
             ShowInfo("仿真完成！");
@@ -333,19 +341,19 @@ namespace AttSimCPP
         /// </summary>
         private void button2_Click(object sender, EventArgs e)
         {
-            ShowInfo("设置输出文件保存目录");
+            ShowInfo("设置姿态数据文件目录");
             SaveFileDialog saveDlg = new SaveFileDialog();
             if (saveDlg.ShowDialog()==DialogResult.OK)
             {
                 string localFilePath = saveDlg.FileName.ToString(); //获得文件路径 
                 path = localFilePath.Substring(0, localFilePath.LastIndexOf("\\")); ;
-                ShowInfo("成功设置文件保存路径："+path);
+                ShowInfo("成功设置姿态数据文件路径：" + path);
                 button1.Enabled = true;
                 button8.Enabled = true;
                 button11.Enabled = true;
             }            
             else
-                ShowInfo("失败未设置文件保存路径");
+                ShowInfo("失败，未设置姿态数据文件路径");
         }
         /// <summary>
         /// 功能：两种滤波结果对比

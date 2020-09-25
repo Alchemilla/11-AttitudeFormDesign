@@ -79,9 +79,14 @@ namespace AttSimCPP
     double[] qInitial, double sig_ST, double[] wBiasA, double[] stabW,
     double sigu, double sigv, double[] sArr, string path,
     double[] qTrueC, double[] qMeasC, double[] wTrueC, double[] wMeasC, double[] qNoise);
+
         [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void attitudeSimulationStruct(AttParm mAtt, string path,
     double[] qTrueC, double[] qMeasC, double[] wTrueC, double[] wMeasC, double[] qNoise);
+
+        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void attitudeSimulationStructForLaser(AttParm mAtt, string path,
+double[] qTrueC, double[] qMeasC, double[] wTrueC, double[] wMeasC, double[] qNoise);
         /// <summary>
         /// 纯姿态确定
         /// </summary>
@@ -133,6 +138,19 @@ namespace AttSimCPP
         /// <param name="path"></param>
         [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void ExternalData(string path, AttParm mAtt);
+        /// <summary>
+        ///读取数据时长
+        /// </summary>
+        /// <param name="path"></param>
+        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern double totalTime(string path);
+
+        /// <summary>
+        ///读取数据时长
+        /// </summary>
+        /// <param name="path"></param>
+        [DllImport("AttSimDLL.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern double writeData(string path);
         /// <summary>
         /// 导入外部数据（包括主动推扫）进行姿态仿真
         /// </summary>

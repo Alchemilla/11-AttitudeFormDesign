@@ -1411,6 +1411,34 @@ void attSim::compareTrueNoise(Quat *qTrue, Quat *qMeas, double *qNoise)
 	fclose(fpNoise);
 }
 //////////////////////////////////////////////////////////////////////////
+//功能：输出真实四元数和带误差四元数残差
+//输入：文件输出路径path，真实四元数qTrue，带误差四元数qNoi；
+//输出：对比txt
+//注意：
+//作者：GZC
+//日期：2020.09.25
+//////////////////////////////////////////////////////////////////////////
+void attSim::compareTrueNoiseVec(vector<Quat> qTrue, vector<Quat> qMeas, double* qNoise)
+{
+	string path1 = path;
+	string strpath1 = path1 + "\\compareTrueNoise.txt";
+	FILE* fpNoise = fopen(strpath1.c_str(), "w");
+	fprintf(fpNoise, "%d\n", nQuat);
+	for (int i = 0; i < nQuat; i++)
+	{
+		Quat qN;
+		qTrue[i].q4 = -qTrue[i].q4;
+		mBase.quatMult(qTrue[i], qMeas[i], qN);
+		qNoise[3 * i + 0] = qN.q1 * 2 / PI * 180 * 3600;
+		qNoise[3 * i + 1] = qN.q2 * 2 / PI * 180 * 3600;
+		qNoise[3 * i + 2] = qN.q3 * 2 / PI * 180 * 3600;
+		fprintf(fpNoise, "%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n",
+			qTrue[i].UT, qTrue[i].q1, qTrue[i].q2, qTrue[i].q3, qTrue[i].q4,
+			qMeas[i].q1, qMeas[i].q2, qMeas[i].q3, qMeas[i].q4, qNoise[3 * i], qNoise[3 * i + 1], qNoise[3 * i + 2]);
+	}
+	fclose(fpNoise);
+}
+//////////////////////////////////////////////////////////////////////////
 //功能：输出仿真四元数和残差
 //输入：文件输出路径path，真实四元数qTrue，估计四元数qEst；
 //输出：四元数残差dqOut，其他状态估计值xest_store
@@ -2808,6 +2836,49 @@ void attSim::addErrorForQuat(vector<Quat>&qSim)
 	qSim.clear(); qSim.assign(qMeas.begin(), qMeas.end());
 }
 //////////////////////////////////////////////////////////////////////////
+//功能：添加星敏误差(被动推扫)
+//输入：星敏真实值qSim
+//输出：星敏误差值qSim
+//注意：测量值数量由qSim大小决定
+//作者：GZC
+//日期：2020.09.25
+//////////////////////////////////////////////////////////////////////////
+void attSim::addErrorForQuatLaser(vector<Quat> &qTrue, vector<Quat>& qMeas)
+{
+	int m = (qTrue[qTrue.size()-1].UT-qTrue[0].UT)*attDat.freqQ+1;
+	double sig_tracker = 0.5 * attDat.sig_ST / 3600 * PI / 180;//0.5原因是a（角度）=2q（四元数）
+	double* noise1 = new double[m];
+	double* noise2 = new double[m];
+	double* noise3 = new double[m];
+	//设置星敏噪声
+	mBase.RandomDistribution(0, sig_tracker / 3, m, 0, noise1);
+	mBase.RandomDistribution(0, sig_tracker / 3, m, 0, noise2);
+	mBase.RandomDistribution(0, sig_tracker / 3, m, 0, noise3);
+	vector<Quat>qInter(m);
+	vector<double>ut(m);
+	for (int i = 0; i < m; i++)
+	{
+		ut[i] = qTrue[0].UT + i * 1.0 / attDat.freqQ;
+		qMeas[i].UT = ut[i];
+	}
+	mBase.QuatInterpolationVector(qTrue, ut, qInter);
+	qTrue.clear();
+	qTrue.assign(qInter.begin(),qInter.end());
+	for (int i = 0; i < m; i++)
+	{	
+		Quat q2;
+		q2.q1 = noise1[i]; q2.q2 = noise2[i]; q2.q3 = noise3[i], q2.q4 = 1;
+		mBase.quatMult(qInter[i], q2, qMeas[i]);
+		double q3norm = sqrt(pow(qMeas[i].q1, 2) + pow(qMeas[i].q2, 2) +
+			pow(qMeas[i].q3, 2) + pow(qMeas[i].q4, 2));
+
+		qMeas[i].q1 /= q3norm; qMeas[i].q2 /= q3norm;
+		qMeas[i].q3 /= q3norm; qMeas[i].q4 /= q3norm;
+	}
+	delete[]noise1, noise2, noise3; noise1 = noise2 = noise3 = NULL;
+
+}
+//////////////////////////////////////////////////////////////////////////
 //功能：添加陀螺误差(被动推扫)
 //输入：陀螺真实值wSim
 //输出：陀螺误差值wSim
@@ -2832,6 +2903,56 @@ void attSim::addErrorForGyro(vector<double>&wSim)
 	delete[]bias1; bias1 = NULL;
 	delete[]wn1; wn1 = NULL;
 }
+
+//////////////////////////////////////////////////////////////////////////
+//功能：添加陀螺误差
+//输入：陀螺真实值wSim
+//输出：陀螺误差值wSim
+//注意：考虑稳定度
+//作者：GZC
+//日期：2018.01.11
+//更新：2020.09.25
+//////////////////////////////////////////////////////////////////////////
+void attSim::addErrorForGyroLaser(vector<Gyro> wTrue, vector<Gyro> &wMeas)
+{
+	//设置常值漂移和随机漂移噪声
+	double dtG = 1. / attDat.freqG, dtQ = 1. / attDat.freqQ+1;
+	int n = wTrue.size();
+	double wbias1 = attDat.wBiasA[0]; double wbias2 = attDat.wBiasA[1]; double wbias3 = attDat.wBiasA[2];
+	double* bias1 = new double[n]; double* bias2 = new double[n]; double* bias3 = new double[n];
+	double* wn1 = new double[n]; double* wn2 = new double[n]; double* wn3 = new double[n];
+	mBase.RandomDistribution(wbias1 * PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), n, 0, bias1);//注意是*dt，matlab中是/dt
+	mBase.RandomDistribution(wbias2 * PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), n, 0, bias2);
+	mBase.RandomDistribution(wbias3 * PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG), n, 0, bias3);
+	mBase.RandomDistribution(0, sqrt(attDat.sigv * attDat.sigv * dtG + 1 / 12 * attDat.sigu * attDat.sigu * dtG), n, 0, wn1);
+	mBase.RandomDistribution(0, sqrt(attDat.sigv * attDat.sigv * dtG + 1 / 12 * attDat.sigu * attDat.sigu * dtG), n, 0, wn2);
+	mBase.RandomDistribution(0, sqrt(attDat.sigv * attDat.sigv * dtG + 1 / 12 * attDat.sigu * attDat.sigu * dtG), n, 0, wn3);
+	//添加稳定度
+	double* stab1 = new double[n]; double* stab2 = new double[n]; double* stab3 = new double[n];
+	mBase.RandomDistribution(0, attDat.stabW[0] * PI / 180 * dtG, n, 0, stab1);
+	mBase.RandomDistribution(0, attDat.stabW[1] * PI / 180 * dtG, n, 0, stab2);
+	mBase.RandomDistribution(0, attDat.stabW[2] * PI / 180 * dtG, n, 0, stab3);
+	//陀螺尺度因子和安装误差
+	MatrixXd sArr(3, 3), eye33(3, 3);
+	sArr << attDat.sArr[0], attDat.sArr[1], attDat.sArr[2],
+		attDat.sArr[3], attDat.sArr[4], attDat.sArr[5],
+		attDat.sArr[6], attDat.sArr[7], attDat.sArr[8];
+	eye33 << MatrixXd::Identity(3, 3);
+
+	for (int i = 0; i < n; i++)
+	{
+		MatrixXd wScaleAli(3, 1), wTrueTmp(3, 1);
+		wTrueTmp << wTrue[i].wx + stab1[i], wTrue[i].wy + stab2[i], wTrue[i].wz + stab3[i];
+		wScaleAli = (eye33 + sArr) * wTrueTmp;
+		wMeas[i].UT = wTrue[i].UT;
+		wMeas[i].wx = wScaleAli(0) + wn1[i] + bias1[i];
+		wMeas[i].wy = wScaleAli(1) + wn2[i] + bias2[i];
+		wMeas[i].wz = wScaleAli(2) + wn3[i] + bias3[i];
+	}
+	delete[]bias1, bias2, bias3; bias1 = bias2 = bias3 = NULL;
+	delete[]wn1, wn2, wn3; wn1 = wn2 = wn3 = NULL;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //功能：添加星敏误差(主动推扫)
 //输入：星敏真实值qSim
@@ -3101,6 +3222,56 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy)
 	{
 		GFDM.EKF6StateForStarOpticAxis(BmIm, wMeas, q0);//主要为了输出常规滤波结果		
 		GFDM.compareTureEKF("\\compareEKFvsTure.txt");
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+//功能：姿态仿真程序（仅仿真四元数和陀螺数据）
+//输入：AttParm结构体，包含下列参数
+//			 dt：姿态间隔时长（单位：秒）；		tf：总时长（单位：秒）
+//			 qInitial[4]：初始姿态四元数，最后为标量；		sig_ST：星敏误差（单位：角秒）
+//			 wBiasA[3]：陀螺漂移理论值（单位：°/Hr）；		sigu，sigv：陀螺常值漂移误差，陀螺误差
+//			 sArr[9]：陀螺尺度因子和安装误差，对角线表示尺度因子，上下三角表示上下安装误差
+//输出：真实和测量的星敏结构体Quat陀螺结构体Gyro数据qTrueC，qMeasC，wTrueC，wMeasC
+//注意：假定陀螺是稳定输出的，仿真将以陀螺的时间作为基准
+//作者：GZC
+//日期：2017.11.20
+//////////////////////////////////////////////////////////////////////////
+void attitudeSimulationStructForLaser(AttParm mAtt, char* workpath,
+	double* qTrueC, double* qMeasC, double* wTrueC, double* wMeasC, double* qNoise)
+{
+	//读取激光姿态数据，并仿真真实的角速度，这里陀螺数量不一定对
+	ExtData Laser;
+	vector<Quat>qTrue;
+	vector<Gyro>wTrue;
+	Laser.m_AttParm = mAtt;
+	Laser.ReadAttAndTransToOmega2(workpath,mAtt,qTrue,wTrue);
+
+	attSim LaserSim;
+	int m = (qTrue[qTrue.size() - 1].UT - qTrue[0].UT) * mAtt.freqQ + 1;
+	vector<Quat>qMeas(m);
+	vector<Gyro>wMeas(wTrue);
+	LaserSim.getAttParam(mAtt, workpath);
+	LaserSim.addErrorForQuatLaser(qTrue,qMeas);
+	LaserSim.addErrorForGyroLaser(wTrue,wMeas);
+
+	int nQuat = mAtt.nQuat; int nGyro = mAtt.nGyro;
+	LaserSim.compareTrueNoiseVec(qTrue, qMeas, qNoise);
+	for (int i = 0; i < nQuat; i++)
+	{
+		qTrueC[5 * i] = qTrue[i].UT;
+		qTrueC[5 * i + 1] = qTrue[i].q1; qTrueC[5 * i + 2] = qTrue[i].q2;
+		qTrueC[5 * i + 3] = qTrue[i].q3; qTrueC[5 * i + 4] = qTrue[i].q4;
+		qMeasC[5 * i] = qMeas[i].UT;
+		qMeasC[5 * i + 1] = qMeas[i].q1; qMeasC[5 * i + 2] = qMeas[i].q2;
+		qMeasC[5 * i + 3] = qMeas[i].q3; qMeasC[5 * i + 4] = qMeas[i].q4;
+	}
+	for (int i = 0; i < nGyro; i++)
+	{
+		wTrueC[4 * i] = wTrue[i].UT;
+		wTrueC[4 * i + 1] = wTrue[i].wx; wTrueC[4 * i + 2] = wTrue[i].wy; wTrueC[4 * i + 3] = wTrue[i].wz;
+		wMeasC[4 * i] = wMeas[i].UT;
+		wMeasC[4 * i + 1] = wMeas[i].wx; wMeasC[4 * i + 2] = wMeas[i].wy; wMeasC[4 * i + 3] = wMeas[i].wz;
 	}
 }
 

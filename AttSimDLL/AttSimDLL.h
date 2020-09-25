@@ -2,6 +2,7 @@
 #include "BaseFunc.h"
 #include "SateBase.h"
 #include "DateTime.h"
+#include "ExtData.h"
 #ifdef ATTSIMDLL
 #define ATTSIMDLL extern "C" _declspec(dllimport) 
 #else
@@ -30,6 +31,10 @@
 //	double BeforeAfterT[2],	char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 //	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
 
+//仿真函数2020.09.25，激光点云仿真
+ATTSIMDLL void attitudeSimulationStructForLaser(AttParm mAtt, char* workpath,
+	double* qTrueC, double* qMeasC, double* wTrueC, double* wMeasC, double* qNoise);
+
 //仿真函数2017.11.20，改变传入参数方式
 ATTSIMDLL void attitudeSimulationStruct(AttParm mAtt, char* workpath,
 	double *qTrueC, double *qMeasC, double *wTrueC, double *wMeasC, double *qNoise);
@@ -57,6 +62,7 @@ public:
 	//姿态仿真和确定和比较
 	void simQuatAndGyro15State(Quat *&qTrue, Quat *&qMeas, Gyro *&wTrue, Gyro *&wMeas);
 	void compareTrueNoise(Quat *qTrue, Quat *qMeas, double *qNoise);
+	void compareTrueNoiseVec(vector<Quat> qTrue, vector<Quat> qMeas, double* qNoise);
 	void compareTrueEKF15State(string pathekf, string pathb, Quat *qTrue, Quat *qEst, double *dqOut, double *xest_store);
 	void ExtendedKalmanFilter15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
 	void EKFForwardAndBackforward15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
@@ -78,7 +84,9 @@ public:
 	void transCrj2StarGyro(vector<Quat>qTrueInter1,vector<Gyro>wTrue,attGFDM &attMeas,bool isErr);
 	//增加误差
 	void addErrorForQuat(vector<Quat>&qSim);
+	void addErrorForQuatLaser(vector<Quat> &qTrue, vector<Quat>& qMeas);//激光平台
 	void addErrorForGyro(vector<double>&wSim);
+	void addErrorForGyroLaser(vector<Gyro>wTrue, vector<Gyro>& wMeas);//激光平台，考虑姿态稳定度
 	void addErrorForQuatActive(vector<Quat>&qSim);
 	void addErrorForTriGyroActive(vector<double>&wSim);
 	void addErrorForFiberGyroActive(vector<double>&wSim);

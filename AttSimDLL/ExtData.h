@@ -14,13 +14,20 @@ public:
 	ExtData();
 	~ExtData();
 	bool ReadAttAndTransToOmega(string sworkpath, AttParm gyroParm);
-private:
+	bool ReadAttAndTransToOmega2(string sworkpath, AttParm gyroParm,vector<Quat>& qTrue, vector<Gyro>& wTrue);
 	bool ReadZY3AttData();
+	bool WriteZY3AttData();
 	void TransToOmega();
-	string sAtt, sGyroReal, sGyroMeas;
+	void TransToOmegaTrue();
 	vector<Quat>arr_att; vector < Gyro>wMeas;
-	BaseFunc m_base;
+	string sAtt, sAttErr;
 	AttParm m_AttParm;
+
+private:
+	string sGyroReal, sGyroMeas;
+	BaseFunc m_base;
 };
 
 ATTSIMDLL void  ExternalData(char *workpath, AttParm mAtt);
+ATTSIMDLL double  totalTime(char* workpath);
+ATTSIMDLL void  writeData(char* workpath);
