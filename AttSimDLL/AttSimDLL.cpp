@@ -2842,7 +2842,7 @@ void attSim::addErrorForGyro(vector<double>&wSim)
 //////////////////////////////////////////////////////////////////////////
 void attSim::addErrorForQuatActive(vector<Quat>&qSim)
 {
-	double sig_tracker = 1, vel, sig_trackerFact;
+	double sig_tracker = 2, vel, sig_trackerFact;
 	double *noise = new double[qSim.size()];
 	mBase.RandomDistribution(0, sig_tracker / 3, qSim.size(), 0, noise);
 	Gyro vOmega;
@@ -3119,9 +3119,6 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy)
 void attitudeSimulationStruct(AttParm mAtt, char * workpath,
 	double *qTrueC, double *qMeasC, double *wTrueC, double *wMeasC, double * qNoise)
 {
-	attSim ZY3;
-	ZY3.getAttParam(mAtt, workpath);
-	int nQuat = mAtt.nQuat; int nGyro = mAtt.nGyro;
 	//设置随机初始四元数
 	if (mAtt.qInitial[0] == 0.5)//如果用默认参数的，四元数则为随机
 	{
@@ -3131,7 +3128,9 @@ void attitudeSimulationStruct(AttParm mAtt, char * workpath,
 		mAtt.qInitial[0] = qRand[0] / qAll; mAtt.qInitial[1] = qRand[1] / qAll;
 		mAtt.qInitial[2] = qRand[2] / qAll; mAtt.qInitial[3] = qRand[3] / qAll;
 	}
-
+	attSim ZY3;
+	ZY3.getAttParam(mAtt, workpath);
+	int nQuat = mAtt.nQuat; int nGyro = mAtt.nGyro;
 	//四元数在Matrix矩阵中顺序为1234, qTrue(0,0)对应1,qTrue(0,3)对应4，为标量
 	Quat *qTrue = new Quat[nQuat]; Quat *qMeas = new Quat[nQuat];
 	Gyro *wTrue = new Gyro[nGyro]; Gyro *wMeas = new Gyro[nGyro];

@@ -160,7 +160,7 @@ namespace AttSimCPP
             }
             if (nSim1 == 0)
             {
-                button1.Text = "被动重新仿真";
+                button1.Text = "姿态重新仿真";
                 nSim1++;
             }
 
@@ -218,7 +218,7 @@ namespace AttSimCPP
             //sigu = Math.Sqrt(sigu) * 1e-9;
 
             //陀螺噪声
-            mAtt.sigv = double.Parse(textBox7.Text) * 1e-5;
+            mAtt.sigv = double.Parse(textBox7.Text) * 1e-6;
             //sigv = Math.Sqrt(sigv) * 1e-5;
 
             //陀螺尺度和安装
@@ -275,13 +275,13 @@ namespace AttSimCPP
             textBox2.ForeColor = Color.Gray;
             textBox3.Text = "0.5,0.5,0.5,0.5";
             textBox3.ForeColor = Color.Gray;
-            textBox4.Text = "8";
+            textBox4.Text = "3";
             textBox4.ForeColor = Color.Gray;
-            textBox5.Text = "0.5,0.1,-0.1";
+            textBox5.Text = "0.01,0.01,-0.01";
             textBox5.ForeColor = Color.Gray;
             textBox6.Text = "1";
             textBox6.ForeColor = Color.Gray;
-            textBox7.Text = "0.1";
+            textBox7.Text = "0.4";
             textBox7.ForeColor = Color.Gray;
             textBox8.Text = "4";
             textBox8.ForeColor = Color.Gray;
