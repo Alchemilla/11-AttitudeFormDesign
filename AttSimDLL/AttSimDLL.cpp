@@ -1491,7 +1491,8 @@ void attSim::compareTrueEKF15State(string pathekf, string pathb, Quat *qTrue, Qu
 		rmsQ2 += pow(dq3[i].q2 - aveQ2, 2);
 		rmsQ3 += pow(dq3[i].q3 - aveQ3, 2);
 	}
-	rmsQ1 = sqrt(rmsQ1 / (nQuat - 1)); rmsQ2 = sqrt(rmsQ2 / (nQuat - 1)); rmsQ3 = sqrt(rmsQ3 / (nQuat - 1));
+	//2020.09.25都乘以3，表示3sigma
+	rmsQ1 = 3*sqrt(rmsQ1 / (nQuat - 1)); rmsQ2 = 3*sqrt(rmsQ2 / (nQuat - 1)); rmsQ3 = 3*sqrt(rmsQ3 / (nQuat - 1));
 	double rmsAll = sqrt(rmsQ1*rmsQ1 + rmsQ2*rmsQ2 + rmsQ3*rmsQ3);
 	fprintf(fpEKF, "%.9f\t%.9f\t%.9f\t%.9f\n", rmsQ1, rmsQ2, rmsQ3, rmsAll);
 	fclose(fpEKF);
@@ -2854,6 +2855,13 @@ void attSim::addErrorForQuatLaser(vector<Quat> &qTrue, vector<Quat>& qMeas)
 	mBase.RandomDistribution(0, sig_tracker / 3, m, 0, noise1);
 	mBase.RandomDistribution(0, sig_tracker / 3, m, 0, noise2);
 	mBase.RandomDistribution(0, sig_tracker / 3, m, 0, noise3);
+	//低频误差
+	Quat lq;
+	double rlq[9];
+	double rpy = sqrt(attDat.lowfreq * attDat.lowfreq / 3)/3600/180*PI;
+	mBase.Eulor2Matrix(rpy, rpy, rpy, 312, rlq);
+	mBase.matrix2quat(rlq, lq.q1, lq.q2, lq.q3, lq.q4);
+	//
 	vector<Quat>qInter(m);
 	vector<double>ut(m);
 	for (int i = 0; i < m; i++)
@@ -2866,9 +2874,10 @@ void attSim::addErrorForQuatLaser(vector<Quat> &qTrue, vector<Quat>& qMeas)
 	qTrue.assign(qInter.begin(),qInter.end());
 	for (int i = 0; i < m; i++)
 	{	
-		Quat q2;
+		Quat q2,q3;
 		q2.q1 = noise1[i]; q2.q2 = noise2[i]; q2.q3 = noise3[i], q2.q4 = 1;
-		mBase.quatMult(qInter[i], q2, qMeas[i]);
+		mBase.quatMult(qInter[i], q2, q3);
+		mBase.quatMult(q3,lq,qMeas[i]);
 		double q3norm = sqrt(pow(qMeas[i].q1, 2) + pow(qMeas[i].q2, 2) +
 			pow(qMeas[i].q3, 2) + pow(qMeas[i].q4, 2));
 

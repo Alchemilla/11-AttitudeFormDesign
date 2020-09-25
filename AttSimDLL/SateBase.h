@@ -17,6 +17,7 @@ struct AttParm
 	double qInitial[4], wBiasA[3];//初始四元数，陀螺漂移
 	double sArr[9];//陀螺尺度因子和安装偏差
 	double sig_ST, sigu, sigv;//星敏陀螺参数
+	double lowfreq;//低频误差
 	int ADSfreq;
 	char install[512],quatPath[512], JitterPath[512];
 
@@ -33,6 +34,7 @@ struct AttParm
 		this->sig_ST = s.sig_ST;
 		this->sigu = s.sigu;
 		this->sigv = s.sigv;
+		this->lowfreq = s.lowfreq;
 		this->ADSfreq = s.ADSfreq;
 		memcpy(this->install, s.install, sizeof(char) * 512);
 		memcpy(this->quatPath, s.quatPath, sizeof(char) * 512);

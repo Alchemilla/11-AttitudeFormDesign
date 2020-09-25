@@ -173,9 +173,10 @@ namespace AttSimCPP
             //获取星敏陀螺频率和总时长
             mAtt.freqQ = Convert.ToInt32(textBox8.Text);//string转数值的第1种转换方式
             mAtt.freqG = Convert.ToInt32(textBox9.Text);
-            mAtt.totalT = int.Parse(textBox2.Text);                       //string转数值的第2种转换方式
-            mAtt.nQuat = mAtt.freqQ * mAtt.totalT;//四元数个数
-            mAtt.nGyro = mAtt.freqG * mAtt.totalT;//陀螺个数，一般较四元数多
+            //mAtt.totalT = int.Parse(textBox2.Text);                       //string转数值的第2种转换方式
+            //mAtt.nQuat = mAtt.freqQ * mAtt.totalT;//四元数个数
+            //mAtt.nGyro = mAtt.freqG * mAtt.totalT;//陀螺个数，一般较四元数多
+            mAtt.lowfreq= int.Parse(textBox2.Text); //此处为低频姿态误差
 
             //姿态稳定度
             string[] strStab = textBox1.Text.Split(',');
@@ -277,19 +278,19 @@ namespace AttSimCPP
         /// </summary>
         private void SetDefaultText()
         {
-            textBox1.Text = "5,5,5";//稳定度（°/s)
+            textBox1.Text = "2,2,2";//稳定度（°/s)
             textBox1.ForeColor = Color.Gray;
-            textBox2.Text = "500";
+            textBox2.Text = "3";
             textBox2.ForeColor = Color.Gray;
             textBox3.Text = "0.5,0.5,0.5,0.5";
             textBox3.ForeColor = Color.Gray;
             textBox4.Text = "3";
             textBox4.ForeColor = Color.Gray;
-            textBox5.Text = "0.01,0.01,-0.01";
+            textBox5.Text = "0.1,0.1,-0.1";
             textBox5.ForeColor = Color.Gray;
-            textBox6.Text = "1";
+            textBox6.Text = "5";
             textBox6.ForeColor = Color.Gray;
-            textBox7.Text = "0.4";
+            textBox7.Text = "10";
             textBox7.ForeColor = Color.Gray;
             textBox8.Text = "4";
             textBox8.ForeColor = Color.Gray;

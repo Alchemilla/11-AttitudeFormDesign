@@ -23,6 +23,7 @@ namespace AttSimCPP
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 9)]
         public double[] sArr;//陀螺尺度因子和安装偏差
         public double sig_ST, sigu, sigv;//星敏陀螺参数    
+        public double lowfreq;//低频姿态误差
         public int ADSfreq;//高频角位移测量频率
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 512)]
         public string install;//星敏安装矩阵路径
