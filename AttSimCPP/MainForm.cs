@@ -214,11 +214,11 @@ namespace AttSimCPP
             mAtt.wBiasA = wBias;
 
             //漂移噪声
-            mAtt.sigu = double.Parse(textBox6.Text) * 1e-10 / 180 * 3.1415926;
+            mAtt.sigu = double.Parse(textBox6.Text) / 180 * 3.1415926 / 3600 / 60 * 3;
             //sigu = Math.Sqrt(sigu) * 1e-9;
 
             //陀螺噪声
-            mAtt.sigv = double.Parse(textBox7.Text) * 1e-5 / 180 * 3.1415926;
+            mAtt.sigv = double.Parse(textBox7.Text) / 180 * 3.1415926 / 60 *3;
             //sigv = Math.Sqrt(sigv) * 1e-5;
 
             //陀螺尺度和安装
@@ -277,11 +277,11 @@ namespace AttSimCPP
             textBox3.ForeColor = Color.Gray;
             textBox4.Text = "0.15";
             textBox4.ForeColor = Color.Gray;
-            textBox5.Text = "0.001,0.001,-0.001";
+            textBox5.Text = "0.01,0.01,-0.01";
             textBox5.ForeColor = Color.Gray;
-            textBox6.Text = "1";
+            textBox6.Text = "0.001";
             textBox6.ForeColor = Color.Gray;
-            textBox7.Text = "5";
+            textBox7.Text = "0.0002";
             textBox7.ForeColor = Color.Gray;
             textBox8.Text = "8";
             textBox8.ForeColor = Color.Gray;
