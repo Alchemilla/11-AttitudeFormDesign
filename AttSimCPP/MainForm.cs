@@ -215,11 +215,9 @@ namespace AttSimCPP
 
             //漂移噪声
             mAtt.sigu = double.Parse(textBox6.Text) / 180 * 3.1415926 / 3600 / 60 * 3;
-            //sigu = Math.Sqrt(sigu) * 1e-9;
 
             //陀螺噪声
             mAtt.sigv = double.Parse(textBox7.Text) / 180 * 3.1415926 / 60 *3;
-            //sigv = Math.Sqrt(sigv) * 1e-5;
 
             //陀螺尺度和安装
             string[] strSarr = textBox10.Text.Split(',');
