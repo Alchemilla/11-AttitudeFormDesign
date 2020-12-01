@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace AttSimCPP
 {
@@ -281,7 +282,7 @@ namespace AttSimCPP
             textBox5.ForeColor = Color.Gray;
             textBox6.Text = "1";
             textBox6.ForeColor = Color.Gray;
-            textBox7.Text = "0.4";
+            textBox7.Text = "5";
             textBox7.ForeColor = Color.Gray;
             textBox8.Text = "4";
             textBox8.ForeColor = Color.Gray;
@@ -291,6 +292,7 @@ namespace AttSimCPP
             textBox10.Enabled = false;
             textBox18.Text = "10,10";
             textBox18.ForeColor = Color.Gray;
+
             ShowInfo("已加载姿态仿真默认参数!");
             if (path == null)
             {                ShowInfo("请设置仿真文件保存目录！!");            }
@@ -310,6 +312,32 @@ namespace AttSimCPP
             radioButton1.Enabled = false;
             radioButton2.Enabled = false;
         }
+
+        /// <summary>
+        /// 功能：设置星图默认参数
+        /// </summary>
+        public bool setParam()
+        {
+            string filePath = Directory.GetCurrentDirectory() + "\\config\\lowfreq.config";
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+            FileStream fs = new FileStream(filePath, FileMode.Create);
+            //获得字节数组
+            string a = string.Format("{0} {1} {2} {3} {4} {5}", textBox31.Text.ToString(), textBox30.Text.ToString(),
+                textBox29.Text.ToString(), textBox28.Text.ToString(), "0", "0");//基本仿真参数
+            string b = string.Format("\n{0} {1} {2} {3} {4}", "0", "0", "0", "0", "0");
+            string c = string.Format("\n{0} {1} {2} {3} {4}", "0", "0", "0", "0", "0");
+            string d = string.Format("\n{0} {1} {2} {3} {4}", textBox14.Text.ToString(), textBox16.Text.ToString(),
+                textBox19.Text.ToString(), textBox26.Text.ToString(),"0");//星敏参数
+            string e = string.Format("\n{0} {1} {2}", "0", "0", "0");//匹配参数
+            byte[] data = System.Text.Encoding.Default.GetBytes(a + b + c + d + e);
+            //开始写入
+            fs.Write(data, 0, data.Length);
+            //清空缓冲区、关闭流
+            fs.Flush();
+            fs.Close();
+            return true;
+        }
         /// <summary>
         /// 功能：记录日志
         /// </summary>
@@ -327,6 +355,7 @@ namespace AttSimCPP
             ShowInfo("欢迎来到姿态确定仿真程序！");
             SetDefaultText();
             SetTabPage3Default();
+            SetTabPage2Default();
         }
         /// <summary>
         /// 功能：设置保存目录
@@ -435,6 +464,32 @@ namespace AttSimCPP
             textBox10.ForeColor = Color.Gray;
             button1.Enabled = true;
         }
+
+        private void button18_Click(object sender, EventArgs e)
+        {
+            setParam();
+            string strArgu = "-j1 " + path;
+
+            progressBar1.Minimum = 0;
+            progressBar1.Maximum = 100;
+
+            //开始执行姿态仿真
+            Process exep = new Process();
+            exep.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "StarTracker.exe";
+            exep.StartInfo.Arguments = strArgu;
+            exep.StartInfo.CreateNoWindow = true;
+            exep.StartInfo.UseShellExecute = false;
+            exep.StartInfo.RedirectStandardOutput = true;
+            exep.Start();
+
+            progressBar1.Value = 100;
+            exep.WaitForExit();
+            if (exep.ExitCode == 0)
+            { ShowInfo("姿态仿真处理完毕"); }
+            else
+            { ShowInfo("姿态仿真处理出错"); }
+        }
+
         /// <summary>
         /// 功能：不考虑陀螺安装和尺度
         /// </summary>
@@ -444,7 +499,110 @@ namespace AttSimCPP
             textBox10.Text = "0,0,0,0,0,0,0,0,0";
             textBox10.Enabled = false;
             button1.Enabled = true;
-        }        
+        }
+
+        private void button19_Click(object sender, EventArgs e)
+        {
+            ShowInfo("设置输出文件保存目录");
+            SaveFileDialog saveDlg = new SaveFileDialog();
+            if (saveDlg.ShowDialog() == DialogResult.OK)
+            {
+                string localFilePath = saveDlg.FileName.ToString(); //获得文件路径 
+                path = localFilePath.Substring(0, localFilePath.LastIndexOf("\\")); ;
+                ShowInfo("成功设置文件保存路径：" + path);
+                textBox27.Text = path;
+            }
+            else
+                ShowInfo("失败未设置文件保存路径");
+
+        }
+
+        private void tabPage2_Click(object sender, EventArgs e)
+        {
+            SetTabPage2Default();
+        }
+
+        private void button20_Click(object sender, EventArgs e)
+        {
+            string strArgu = "-j2 " + path;
+
+            progressBar1.Minimum = 0;
+            progressBar1.Maximum = 100;
+
+            //开始执行姿态仿真
+            Process exep = new Process();
+            exep.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "StarTracker.exe";
+            exep.StartInfo.Arguments = strArgu;
+            exep.StartInfo.CreateNoWindow = true;
+            exep.StartInfo.UseShellExecute = false;
+            exep.StartInfo.RedirectStandardOutput = true;
+            exep.Start();
+
+            progressBar1.Value = 100;
+            exep.WaitForExit();
+            if (exep.ExitCode == 0)
+            { ShowInfo("星相机定标完毕"); }
+            else
+            { ShowInfo("星相机定标出错"); }
+        }
+
+        private void button21_Click(object sender, EventArgs e)
+        {
+            string strArgu = "-j3 " + path;
+
+            progressBar1.Minimum = 0;
+            progressBar1.Maximum = 100;
+
+            //开始执行姿态仿真
+            Process exep = new Process();
+            exep.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "StarTracker.exe";
+            exep.StartInfo.Arguments = strArgu;
+            exep.StartInfo.CreateNoWindow = true;
+            exep.StartInfo.UseShellExecute = false;
+            exep.StartInfo.RedirectStandardOutput = true;
+            exep.Start();
+
+            progressBar1.Value = 100;
+            exep.WaitForExit();
+            if (exep.ExitCode == 0)
+            { ShowInfo("姿态确定完毕"); }
+            else
+            { ShowInfo("姿态确定出错"); }
+        }
+
+        private void button22_Click(object sender, EventArgs e)
+        {
+            string path2; string strArgu;
+
+            OpenFileDialog openDlg = new OpenFileDialog();
+            if (openDlg.ShowDialog() == DialogResult.OK)
+            {
+                path2 = openDlg.FileName.ToString(); //获得文件路径 
+                ShowInfo("成功找到路径：" + path2);
+                strArgu = path2 + " " + path + "\\att.txt ";
+                progressBar1.Minimum = 0;
+                progressBar1.Maximum = 100;
+
+                //开始执行姿态仿真
+                Process exep = new Process();
+                exep.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "PAD.exe";
+                exep.StartInfo.Arguments = strArgu;
+                exep.StartInfo.CreateNoWindow = true;
+                exep.StartInfo.UseShellExecute = false;
+                exep.StartInfo.RedirectStandardOutput = true;
+                exep.Start();
+
+                progressBar1.Value = 100;
+                exep.WaitForExit();
+                if (exep.ExitCode == 0)
+                { ShowInfo("真实姿态数据处理完毕"); }
+                else
+                { ShowInfo("真实姿态数据处理出错"); }
+            }
+            else
+                ShowInfo("失败：未设置路径");
+        }
+
         /// <summary>
         /// 功能：主动推扫模式仿真
         /// 日期：2017.10.18
@@ -599,6 +757,20 @@ namespace AttSimCPP
             DLLImport.ExternalData(path,mAtt);
         }
 
+        private void SetTabPage2Default()
+        {
+            //星敏默认参数
+            textBox14.Text = "512";
+            textBox16.Text = "512";
+            textBox19.Text = "43.3";
+            textBox26.Text = "0.015";
+
+            //初始参数
+            textBox31.Text = "100";
+            textBox30.Text = "10";
+            textBox29.Text = "20";
+            textBox28.Text = "5";
+        }
 
         private void SetTabPage3Default()
         {

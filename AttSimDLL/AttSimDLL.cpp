@@ -2921,7 +2921,7 @@ void attSim::compareTureEKF(string outName)
 	string strpath, strpath1;
 	if (starGyro.isJitter==false)
 	{
-		strpath1 = path + "\\EKFquater.txt";	strpath = path + "\\ATT.txt";
+		strpath1 = path + "\\EKFquater.txt";	strpath = path + "\\qTrue.txt";
 	}
 	else
 	{
@@ -2979,7 +2979,7 @@ void attSim::compareTureEKF(string outName)
 	}
 	rmsQ1 = sqrt(rmsQ1 / (num2 - 1)); rmsQ2 = sqrt(rmsQ2 / (num2 - 1)); rmsQ3 = sqrt(rmsQ3 / (num2 - 1));
 	double rmsAll = sqrt(rmsQ1*rmsQ1 + rmsQ2*rmsQ2 + rmsQ3*rmsQ3);
-	//fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\n", rmsQ1, rmsQ2, rmsQ3, rmsAll);
+	fprintf(fp, "%.9f\t%.9f\t%.9f\t%.9f\n", rmsQ1, rmsQ2, rmsQ3, rmsAll);
 	fclose(fp);
 	delete[] UT; UT = NULL;
 	delete[] dq3, qEKF, qTrue, qEKFInter; dq3 = qEKF = qEKFInter = qTrue = NULL;
