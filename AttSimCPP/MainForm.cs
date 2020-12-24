@@ -280,7 +280,7 @@ namespace AttSimCPP
         {
             textBox1.Text = "2,2,2";//稳定度（°/s)
             textBox1.ForeColor = Color.Gray;
-            textBox2.Text = "3";
+            textBox2.Text = "0";
             textBox2.ForeColor = Color.Gray;
             textBox3.Text = "0.5,0.5,0.5,0.5";
             textBox3.ForeColor = Color.Gray;
@@ -290,7 +290,7 @@ namespace AttSimCPP
             textBox5.ForeColor = Color.Gray;
             textBox6.Text = "5";
             textBox6.ForeColor = Color.Gray;
-            textBox7.Text = "10";
+            textBox7.Text = "0.5";
             textBox7.ForeColor = Color.Gray;
             textBox8.Text = "4";
             textBox8.ForeColor = Color.Gray;
