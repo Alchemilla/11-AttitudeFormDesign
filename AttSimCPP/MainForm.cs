@@ -324,7 +324,7 @@ namespace AttSimCPP
         /// </summary>
         private void MainForm_Load(object sender, EventArgs e)
         {
-            ShowInfo("欢迎来到姿态确定仿真程序！");
+            ShowInfo("欢迎来到多星敏感器陀螺联合姿态确定软件！");
             SetDefaultText();
             SetTabPage3Default();
         }
