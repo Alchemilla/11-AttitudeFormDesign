@@ -324,7 +324,7 @@ namespace AttSimCPP
         /// </summary>
         private void MainForm_Load(object sender, EventArgs e)
         {
-            ShowInfo("欢迎来到姿态确定仿真程序！");
+            ShowInfo("欢迎来到彩虹处理仿真程序！");
             SetDefaultText();
             SetTabPage3Default();
         }
