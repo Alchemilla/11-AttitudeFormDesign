@@ -17,8 +17,7 @@ namespace AttSimCPP
         public MainForm(string[] args)
         {
             InitializeComponent();
-            if (args.Length == 2)
-            { path = args[1]; }
+           //path = args[1];//path路径是程序的路径
         }
         public AttParm mAtt;
         public isStarGyro starGyro;
@@ -605,17 +604,17 @@ namespace AttSimCPP
         /// <param name="e"></param>
         private void SetTabPage3Default()
         {
-            checkBox1.Checked = checkBox2.Checked = checkBox4.Checked = 
-                checkBox5.Checked = checkBox6.Checked = true;
-            textBox15.Text = "10";//星敏测量频率
-            textBox17.Text = "100";//陀螺测量频率
-            textBox16.Text = "1";//星敏噪声
-            textBox19.Text = "0.06";//陀螺噪声
-            textBox20.Text = "3";//常值漂移
-            textBox21.Text = "0.005";//随机游走
+            checkBox1.Checked = checkBox2.Checked = checkBox3.Checked = 
+                checkBox4.Checked = checkBox5.Checked = checkBox6.Checked = true;
+            textBox15.Text = "8";//星敏测量频率
+            textBox17.Text = "8";//陀螺测量频率
+            textBox16.Text = "10";//星敏噪声
+            textBox19.Text = "0.001";//陀螺噪声
+            textBox20.Text = "1";//常值漂移
+            textBox21.Text = "0.0002";//随机游走
             textBox22.Text = path;
             textBox25.Text = "1000";
-            textBox12.Text = "0.000005";//稳定度
+            textBox12.Text = "0.0005";//稳定度
         }
         /// <summary>
         /// 规划姿态路径
@@ -682,14 +681,14 @@ namespace AttSimCPP
             //星敏参数
             mAtt.sig_ST = double.Parse(textBox16.Text);//星敏误差(单位：角秒) 
             //陀螺噪声
-            mAtt.sigv = double.Parse(textBox19.Text) * 1e-4;
+            mAtt.sigv = double.Parse(textBox19.Text) / 180 * 3.14159;
             //陀螺漂移
             double[] wBias = new double[3];
             for (int i = 0; i < 3; i++)
                 wBias[i] = double.Parse(textBox20.Text);
             mAtt.wBiasA = wBias;
             //漂移噪声
-            mAtt.sigu = double.Parse(textBox21.Text) * 1e-5;
+            mAtt.sigu = double.Parse(textBox21.Text) / 180 * 3.14159;
             //高频角位移测量频率
             mAtt.ADSfreq = int.Parse(textBox25.Text);
             //星敏安装矩阵
@@ -701,23 +700,26 @@ namespace AttSimCPP
             for (int i = 0; i < 3; i++)
                 stable[i] = double.Parse(textBox12.Text);
             mAtt.stabW = stable;
+            //工程路径
+            path= textBox11.Text;
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 50;
 
-            if (!File.Exists(mAtt.sSimAtt))
+            if (!Directory.Exists(path))
             {
-                if (!File.Exists(path + "\\ManeuverData_All.txt"))
-                {
-                    ShowInfo("没有ManeuverData_All.txt文件");
-                    MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
-                    return;
-                }
+                ShowInfo("没有设置工程路径");
+                MessageBox.Show("请设置工程路径（包含csv文件）", "警告", MessageBoxButtons.OK);
+                return;
+            }
+            else
+            {
+                ShowInfo("已经设置工程路径");
             }
            
             ShowInfo("开始姿态仿真，生成星敏四元数和陀螺角速度");
-            DLLImport.ExternalFileAttitudeSim(path,mAtt, starGyro);
+            DLLImport.ExternalFileAttitudeSim(path, mAtt, starGyro);
             progressBar1.Value = 100;
             ShowInfo("姿态仿真完毕");
         }
@@ -782,11 +784,12 @@ namespace AttSimCPP
             mAtt.install = textBox23.Text;
             //仿真姿态文件路径
             mAtt.sSimAtt = textBox11.Text;
+            path = mAtt.sSimAtt;
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 40;
-            if (!File.Exists(mAtt.sSimAtt))
+            if (!Directory.Exists(mAtt.sSimAtt))
             {
                 if (!File.Exists(path + "\\ManeuverData_All.txt"))
                 {

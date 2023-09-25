@@ -64,6 +64,7 @@ public:
 	//以下为主动推扫相关函数
 	//////////////////////////////////////////////////////////////////////////
 	void EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);
+	void EKF6StateForStarOpticAxisForCH(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);//彩虹定姿，考虑星敏精度变化
 	void EKFForAndBackStarOpticAxis(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
 	void simAttparam(vector<Quat>qTrue,attGFDM &attMeas);
@@ -75,6 +76,14 @@ public:
 	void preAttparam(attGFDM attMeas,Quat &q0, vector<vector<BmImStar>>&BmIm, vector<Gyro>&wMeas);
 	void predictQuat(Gyro wMeas, Quat &Qk, double dt);
 	void calcuOmega(Quat qL, Quat qR, Gyro &wTrue);
+	//彩虹处理
+	bool simQTrue(vector<Gyro>euler, vector<Orbit>orbJ2000, vector<Quat>& qTrue);//彩虹仿真真实姿态
+	void preAttparamForCH(attCH attMeas, Quat& q0, vector<vector<BmImStar>>& BmIm, vector<Gyro>& wMeas);//彩虹定姿
+	void calcuOmegaForABC(vector<Quat>qstar, vector<Gyro>& wTrue,int starIndex);//分别根据星敏ABC计算角速度
+	//读取csv文件
+	bool ReadCHcsv(string chcsv, vector<Quat>& att, vector<Quat>& sa, vector<Quat>& sb, vector<Quat>& sc,
+		vector< Gyro>&chgy1, vector< Gyro>& chgy2, vector<Gyro>&cheu1, vector<Gyro>& cheu2, vector<Orbit>& chorb);
+
 	//转换数据
 	void transCrj2StarGyro(vector<Quat>qTrueInter1,vector<Gyro>wTrue,attGFDM &attMeas,bool isErr);
 	//增加误差
@@ -84,6 +93,7 @@ public:
 	void addErrorForTriGyroActive(vector<double>&wSim);
 	void addErrorForFiberGyroActive(vector<double>&wSim);
 	double starErrorModel(double sig);
+	double starErrorModelForCH(double omega);//彩虹的星敏精度
 	double triGyroErrorModel(double sig);
 	double fiberGyroErrorModel(double sig);
 	//增加姿态稳定度函数

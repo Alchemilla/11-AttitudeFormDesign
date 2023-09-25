@@ -81,6 +81,13 @@ struct attGFDM
 	vector<double>UT, gy11, gy12, gy13, gy21, gy22, gy23, gy31, gy32, gy33;//两组三浮陀螺，一组光纤陀螺
 };
 
+//彩虹星敏陀螺参数
+struct attCH
+{
+	vector<Quat> qA, qB, qC;//三颗星敏
+	vector<Gyro>gy1, gy2;//两组三浮陀螺;
+};
+
 //轨道离散点信息
 struct orbGFDM
 {
@@ -94,6 +101,17 @@ struct orbGFDM
 		memset(X, 0, sizeof(double) * 6);
 		UT = second = 0.0;
 		year = month = day = hour = minute = 0;
+	}
+};
+//轨道离散点信息
+struct Orbit
+{
+	double X, Y, Z, Xv, Yv, Zv;
+	double UT;
+									// 重载构造函数
+	Orbit()
+	{
+		X = Y = Z = Xv = Yv = Zv = UT = 0;
 	}
 };
 //星敏陀螺选择状态
