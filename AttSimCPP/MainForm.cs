@@ -610,7 +610,7 @@ namespace AttSimCPP
             textBox17.Text = "8";//陀螺测量频率
             textBox16.Text = "10";//星敏噪声
             textBox19.Text = "0.001";//陀螺噪声
-            textBox20.Text = "0.03";//常值漂移
+            textBox20.Text = "0.1";//常值漂移
             textBox21.Text = "0.0002";//随机游走
             textBox22.Text = path;
             textBox25.Text = "1000";
@@ -716,6 +716,13 @@ namespace AttSimCPP
             else
             {
                 ShowInfo("已经设置工程路径");
+                if (!File.Exists(path + "\\STData.csv") || !File.Exists(path + "\\OrbData.csv") || !File.Exists(path + "\\GyrData.csv") 
+                    || !File.Exists(path + "\\AttRefData.csv"))
+                {
+                    ShowInfo("没有仿真数据文件csv文件");
+                    MessageBox.Show("请检查路径下csv文件是否齐全", "警告", MessageBoxButtons.OK);
+                    return;
+                }
             }
            
             ShowInfo("开始姿态仿真，生成星敏四元数和陀螺角速度");
@@ -791,10 +798,10 @@ namespace AttSimCPP
             progressBar1.Value = 40;
             if (!Directory.Exists(mAtt.sSimAtt))
             {
-                if (!File.Exists(path + "\\ManeuverData_All.txt"))
+                if (!File.Exists(path + "\\SateQuat.txt")|| !File.Exists(path + "\\STSQuatErr.txt") || !File.Exists(path + "\\GyroErr.txt"))
                 {
-                    ShowInfo("没有ManeuverData_All.txt文件");
-                    MessageBox.Show("请设置真实数据路径（包含ManeuverData_All.txt文件）", "警告", MessageBoxButtons.OK);
+                    ShowInfo("没有仿真数据文件.txt文件");
+                    MessageBox.Show("请点击仿真按钮", "警告", MessageBoxButtons.OK);
                     return;
                 }
             }

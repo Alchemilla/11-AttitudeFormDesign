@@ -3046,7 +3046,7 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 	vector<Quat>att;
 	vector< Gyro>cheu1, cheu2;
 	vector<Orbit> chorb;
-	CH.ReadCHcsv(workpath, 3000, att, attMeas.qA, attMeas.qB, attMeas.qC, attMeas.gy1, attMeas.gy2, cheu1, cheu2, chorb);
+	CH.ReadCHcsv(workpath, 5000, att, attMeas.qA, attMeas.qB, attMeas.qC, attMeas.gy1, attMeas.gy2, cheu1, cheu2, chorb);
 	//获取星敏陀螺参数
 	CH.getAttParam(mAtt, workpath, starGy);
 	//获取星敏的安装
