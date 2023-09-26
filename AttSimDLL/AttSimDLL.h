@@ -76,13 +76,16 @@ public:
 	void preAttparam(attGFDM attMeas,Quat &q0, vector<vector<BmImStar>>&BmIm, vector<Gyro>&wMeas);
 	void predictQuat(Gyro wMeas, Quat &Qk, double dt);
 	void calcuOmega(Quat qL, Quat qR, Gyro &wTrue);
+
 	//彩虹处理
 	bool simQTrue(vector<Gyro>euler, vector<Orbit>orbJ2000, vector<Quat>& qTrue);//彩虹仿真真实姿态
-	void preAttparamForCH(attCH attMeas, Quat& q0, vector<vector<BmImStar>>& BmIm, vector<Gyro>& wMeas);//彩虹定姿
+	void preAttparamForCH(attCH attMeas, Quat& q0, vector<vector<BmImStar>>& BmIm, vector<Gyro>& wMeas);//彩虹定姿准备
 	void calcuOmegaForABC(vector<Quat>qstar, vector<Gyro>& wTrue,int starIndex);//分别根据星敏ABC计算角速度
-	//读取csv文件
-	bool ReadCHcsv(string chcsv, vector<Quat>& att, vector<Quat>& sa, vector<Quat>& sb, vector<Quat>& sc,
+	void calcuAttDeterForABC(vector<Quat>qstar, string filepath, int starIndex);
+	//读取csv,txt文件
+	bool ReadCHcsv(string chcsv, int index, vector<Quat>& att, vector<Quat>& sa, vector<Quat>& sb, vector<Quat>& sc,
 		vector< Gyro>&chgy1, vector< Gyro>& chgy2, vector<Gyro>&cheu1, vector<Gyro>& cheu2, vector<Orbit>& chorb);
+	bool ReadSimTXT(string chtxt, attCH &attMeas);
 
 	//转换数据
 	void transCrj2StarGyro(vector<Quat>qTrueInter1,vector<Gyro>wTrue,attGFDM &attMeas,bool isErr);

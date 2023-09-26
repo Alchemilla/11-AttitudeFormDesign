@@ -610,7 +610,7 @@ namespace AttSimCPP
             textBox17.Text = "8";//陀螺测量频率
             textBox16.Text = "10";//星敏噪声
             textBox19.Text = "0.001";//陀螺噪声
-            textBox20.Text = "1";//常值漂移
+            textBox20.Text = "0.03";//常值漂移
             textBox21.Text = "0.0002";//随机游走
             textBox22.Text = path;
             textBox25.Text = "1000";

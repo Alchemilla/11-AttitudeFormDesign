@@ -1052,6 +1052,7 @@ void attSim::EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm,vector<Gyro>
 //////////////////////////////////////////////////////////////////////////
 void attSim::EKF6StateForStarOpticAxisForCH(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0)
 {
+	//BmIm.erase(BmIm.begin()+200,BmIm.end());
 	int nQ = BmIm.size();
 	int nG = wMeas.size();
 	//删掉四元数之前的陀螺数据
@@ -1139,24 +1140,27 @@ void attSim::EKF6StateForStarOpticAxisForCH(vector<vector<BmImStar>>BmIm, vector
 			b++;
 
 			/****************星敏测量值更新***************/
-			double Cbj[9];
-			mBase.quat2matrix(Qest(b, 0), Qest(b, 1), Qest(b, 2), Qest(b, 3), Cbj);//Cbj
-			int num = BmIm[a].size();
-			MatrixXd mH(3 * num, 6), mDetZ(3 * num, 1), k(6, 3 * num);
-			sig= starErrorModelForCH(w);			
-			MatrixXd r1 = pow(sig, 2) * MatrixXd::Identity(3 * num, 3 * num);
-			Measurement(BmIm[a], Cbj, mH, mDetZ);
-			k = p * mH.transpose() * (mH * p * mH.transpose() + r1).inverse();//k(6*6)
-			p = (eye66 - k * mH) * p;
-			xest.row(b) = xest.row(b) + (k * mDetZ).transpose();
-			xe = 0.5 * xest.row(b).head(3);
-			qe11 = Qest(b, 0) + xe(2) * Qest(b, 1) - xe(1) * Qest(b, 2) + xe(0) * Qest(b, 3);
-			qe22 = -xe(2) * Qest(b, 0) + Qest(b, 1) + xe(0) * Qest(b, 2) + xe(1) * Qest(b, 3);
-			qe33 = xe(1) * Qest(b, 0) - xe(0) * Qest(b, 1) + Qest(b, 2) + xe(2) * Qest(b, 3);
-			qe44 = -xe(0) * Qest(b, 0) - xe(1) * Qest(b, 1) - xe(2) * Qest(b, 2) + Qest(b, 3);
-			tempqe << qe11, qe22, qe33, qe44;
-			tempqe.normalize();
-			Qest.row(b) << tempqe(0), tempqe(1), tempqe(2), tempqe(3);
+			//if (w<0.1/180*PI)//仅在w比较小的时候，才利用星敏更新参数
+			{
+				double Cbj[9];
+				mBase.quat2matrix(Qest(b, 0), Qest(b, 1), Qest(b, 2), Qest(b, 3), Cbj);//Cbj
+				int num = BmIm[a].size();
+				MatrixXd mH(3 * num, 6), mDetZ(3 * num, 1), k(6, 3 * num);
+				sig = starErrorModelForCH(w);
+				MatrixXd r1 = pow(sig, 2) * MatrixXd::Identity(3 * num, 3 * num);
+				Measurement(BmIm[a], Cbj, mH, mDetZ);
+				k = p * mH.transpose() * (mH * p * mH.transpose() + r1).inverse();//k(6*6)
+				p = (eye66 - k * mH) * p;
+				xest.row(b) = xest.row(b) + (k * mDetZ).transpose();
+				xe = 0.5 * xest.row(b).head(3);
+				qe11 = Qest(b, 0) + xe(2) * Qest(b, 1) - xe(1) * Qest(b, 2) + xe(0) * Qest(b, 3);
+				qe22 = -xe(2) * Qest(b, 0) + Qest(b, 1) + xe(0) * Qest(b, 2) + xe(1) * Qest(b, 3);
+				qe33 = xe(1) * Qest(b, 0) - xe(0) * Qest(b, 1) + Qest(b, 2) + xe(2) * Qest(b, 3);
+				qe44 = -xe(0) * Qest(b, 0) - xe(1) * Qest(b, 1) - xe(2) * Qest(b, 2) + Qest(b, 3);
+				tempqe << qe11, qe22, qe33, qe44;
+				tempqe.normalize();
+				Qest.row(b) << tempqe(0), tempqe(1), tempqe(2), tempqe(3);
+			}
 
 			a++;
 		}
@@ -1505,7 +1509,7 @@ void attSim::Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, Matri
 //输出：指定星敏陀螺的测量输出值
 //注意：只仿真需要的测量值
 //作者：GZC
-//日期：2018.01.10  更新2018.09.05
+//日期：2018.01.10 ->2018.09.05->2023.09.26
 //////////////////////////////////////////////////////////////////////////
 void attSim::simAttparam(vector<Quat>qTrue, attGFDM &attMeas)
 {
@@ -2005,7 +2009,7 @@ void attSim::preAttparamForCH(attCH attMeas, Quat &q0,vector<vector<BmImStar>>&B
 		mBase.Multi(AT, L, ATL, 3, num / 3, 1);
 		mBase.Multi(ATA, ATL, LS, 3, 3, 1);
 		Gyro wTmp;
-		wTmp.UT = attMeas.gy1[a].UT; wTmp.wx = LS[0], wTmp.wy = LS[1], wTmp.wz = LS[2];
+		wTmp.UT = attMeas.gy1[a].UT; wTmp.wx = LS[0] / 180 * PI, wTmp.wy = LS[1] / 180 * PI, wTmp.wz = LS[2] / 180 * PI;
 		wMeas.push_back(wTmp);
 	}
 
@@ -2180,7 +2184,7 @@ void attSim::calcuOmega(Quat qL, Quat qR, Gyro &wTrue)
 //输出：角速度wTrue
 //注意：wx,wy,wz可能在不同转序时候不同；陀螺数据获取时间和左q一致
 //作者：GZC
-//日期：2023.08.25
+//日期：2023.09.25
 //////////////////////////////////////////////////////////////////////////
 void attSim::calcuOmegaForABC(vector<Quat>qstar, vector<Gyro>&wTrue, int starIndex)
 {
@@ -2218,14 +2222,72 @@ void attSim::calcuOmegaForABC(vector<Quat>qstar, vector<Gyro>&wTrue, int starInd
 	}
 }
 //////////////////////////////////////////////////////////////////////////
+//功能：根据原始四元数计算单星敏精度
+//输入：单颗星敏四元数
+//输出：定姿精度txt
+//作者：GZC
+//日期：2023.09.25
+//////////////////////////////////////////////////////////////////////////
+void attSim::calcuAttDeterForABC(vector<Quat>qstar,string filepath , int starIndex)
+{
+	string qtruepath = filepath + "\\SateQuat.txt";
+	FILE* fp = fopen(qtruepath.c_str(),"r");
+	int num;
+	char tmp[128];
+	fscanf(fp, "%d\n", &num);
+	fscanf(fp, "%[^\n]\n", tmp);
+	vector<Quat>qtrue(num);
+	for (int i = 0; i < num; i++)
+	{
+		fscanf(fp, "%lf\t%lf\t%lf\t%lf\t%lf\n", &qtrue[i].UT, &qtrue[i].q1, &qtrue[i].q2, &qtrue[i].q3, &qtrue[i].q4);
+	}
+	fclose(fp);
+
+	string outpath;
+	double Cbj[9], Crj[9], Cbr[9];
+	if (starIndex == 1)
+	{
+		memcpy(Cbr, starAali, sizeof(double) * 9);//Crb
+		outpath= filepath + "\\compareStarA_Noise.txt";
+	}
+	if (starIndex == 2)
+	{
+		memcpy(Cbr, starBali, sizeof(double) * 9);//Crb
+		outpath = filepath + "\\compareStarB_Noise.txt";
+	}
+	if (starIndex == 3)
+	{
+		memcpy(Cbr, starCali, sizeof(double) * 9);//Crb
+		outpath = filepath + "\\compareStarC_Noise.txt";
+	}
+	mBase.invers_matrix(Cbr, 3);//Cbr
+
+	fp = fopen(outpath.c_str(), "w");
+	Quat qMeas,qErr;
+	for (int a = 0; a < qstar.size(); a++)
+	{
+		mBase.quat2matrix(qstar[a].q1, qstar[a].q2, qstar[a].q3, qstar[a].q4, Crj);
+		mBase.Multi(Cbr, Crj, Cbj, 3, 3, 3);//Cbj
+		mBase.matrix2quat(Cbj, qMeas.q1, qMeas.q2, qMeas.q3, qMeas.q4);
+
+		Quat qN;
+		qMeas.q4 = -qMeas.q4;
+		mBase.quatMult(qtrue[a], qMeas, qN);
+		qErr.q1 = qN.q1 * 2 / PI * 180 * 3600;
+		qErr.q2 = qN.q2 * 2 / PI * 180 * 3600;
+		qErr.q3 = qN.q3 * 2 / PI * 180 * 3600;
+		fprintf(fp, "%.3f\t%.9f\t%.9f\t%.9f\n", qtrue[a].UT, qErr.q1, qErr.q2, qErr.q3);
+	}
+	fclose(fp);
+}
+//////////////////////////////////////////////////////////////////////////
 //功能：读取吉林一号07星csv文件内容//06星也可以用这个
 //输入：csv文件路径
 //输出：吉林一号成像时间，J2000姿态，星敏ABC姿态，轨道参数
 //作者：GZC
-//日期：2020.11.22
-// 更新：2022.07.29
+//日期：2020.11.22->2022.07.29->2023.09.25
 //////////////////////////////////////////////////////////////////////////
-bool attSim::ReadCHcsv(string chcsv, vector<Quat>& att, vector<Quat>& sa, vector<Quat>& sb, vector<Quat>& sc, 
+bool attSim::ReadCHcsv(string chcsv, int index, vector<Quat>& att, vector<Quat>& sa, vector<Quat>& sb, vector<Quat>& sc, 
 	vector< Gyro>& chgy1, vector< Gyro>& chgy2, vector<Gyro>& cheu1, vector<Gyro>& cheu2, vector<Orbit>& chorb)
 {
 	string stpath = chcsv + "\\STData.csv";
@@ -2236,6 +2298,7 @@ bool attSim::ReadCHcsv(string chcsv, vector<Quat>& att, vector<Quat>& sa, vector
 	FILE* fp = NULL;
 	char* line, * record;
 	char buffer[8192];
+	int nindex = 1;
 	//读取星敏
 	Quat qtm1,qtm2,qtm3;
 	if ((fp = fopen(stpath.c_str(), "r")) != NULL)
@@ -2282,12 +2345,15 @@ bool attSim::ReadCHcsv(string chcsv, vector<Quat>& att, vector<Quat>& sa, vector
 			record = strtok(NULL, ",");
 			qtm3.q4 = atof(record);
 			sc.push_back(qtm3);
+			if (nindex++>=index)
+				break;			
 		}
 	}
 	fclose(fp);
 
 	//读取欧拉角
-	Gyro attm1, attm2;
+	Gyro attm1, attm2; 
+	nindex = 1;
 	if ((fp = fopen(attpath.c_str(), "r")) != NULL)
 	{
 		line = fgets(buffer, sizeof(buffer), fp);  //跳过第一行
@@ -2320,12 +2386,16 @@ bool attSim::ReadCHcsv(string chcsv, vector<Quat>& att, vector<Quat>& sa, vector
 			record = strtok(NULL, ",");
 			attm2.wz = atof(record) / 180 * PI;
 			cheu2.push_back(attm2);
+
+			if (nindex++ >= index)
+				break;
 		}
 	}
 	fclose(fp);
 
 	//读取轨道
 	Orbit otm;
+	nindex = 1;
 	if ((fp = fopen(orbpath.c_str(), "r")) != NULL)
 	{
 		line = fgets(buffer, sizeof(buffer), fp);  //跳过第一行
@@ -2352,12 +2422,16 @@ bool attSim::ReadCHcsv(string chcsv, vector<Quat>& att, vector<Quat>& sa, vector
 			record = strtok(NULL, ",");
 			otm.Zv = atof(record) * 1000;
 			chorb.push_back(otm);
+
+			if (nindex++ >= index)
+				break;
 		}
 	}
 	fclose(fp);
 
 	//读取陀螺
 	Gyro gtm1, gtm2;
+	nindex = 1;
 	if ((fp = fopen(gypath.c_str(), "r")) != NULL)
 	{
 		line = fgets(buffer, sizeof(buffer), fp);  //跳过第一行
@@ -2385,7 +2459,67 @@ bool attSim::ReadCHcsv(string chcsv, vector<Quat>& att, vector<Quat>& sa, vector
 			record = strtok(NULL, ",");
 			gtm2.wz = atof(record) * 8 / 180 * PI;
 			chgy2.push_back(gtm2);
+
+			if (nindex++ >= index)
+				break;
 		}
+	}
+	fclose(fp);
+
+	fp = NULL;
+	return true;
+}
+//////////////////////////////////////////////////////////////////////////
+//功能：读取彩虹仿真星敏和陀螺数据
+//输入：txt文件路径
+//输出：星敏和陀螺测量值
+//作者：GZC
+//日期：2020.11.22->2022.07.29->2023.09.25
+//////////////////////////////////////////////////////////////////////////
+bool attSim::ReadSimTXT(string chtxt, attCH &attMeas)
+{
+	string stpath = chtxt + "\\STSQuatErr.txt";
+	string gypath = chtxt + "\\GyroErr.txt";
+	int num;
+	char tmp[256];
+
+	Quat qtmp1, qtmp2, qtmp3;
+	FILE* fp = NULL;
+	fp = fopen(stpath.c_str(),"r");
+	fscanf(fp, "%d\n", &num);
+	fscanf(fp, "%[^\n]\n",tmp);
+	for (int a = 0; a < num; a++)
+	{
+		fscanf(fp, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", 
+			&qtmp1.UT, &qtmp1.q1, &qtmp1.q2, &qtmp1.q3, &qtmp1.q4,
+			&qtmp2.q1, &qtmp2.q2, &qtmp2.q3, &qtmp2.q4, &qtmp3.q1, &qtmp3.q2, &qtmp3.q3, &qtmp3.q4);
+		double sum1 = pow(qtmp1.q1, 2) + pow(qtmp1.q2, 2) + pow(qtmp1.q3, 2) + pow(qtmp1.q4, 2);
+		double sum2 = pow(qtmp2.q1, 2) + pow(qtmp2.q2, 2) + pow(qtmp2.q3, 2) + pow(qtmp2.q4, 2);
+		double sum3 = pow(qtmp3.q1, 2) + pow(qtmp3.q2, 2) + pow(qtmp3.q3, 2) + pow(qtmp3.q4, 2);
+		qtmp2.UT = qtmp3.UT = qtmp1.UT;
+		if (sum1 > 0.99 && sum1 < 1.01)
+			attMeas.qA.push_back(qtmp1);
+		if (sum2 > 0.99 && sum2 < 1.01)
+			attMeas.qB.push_back(qtmp2);
+		if (sum3 > 0.99 && sum3 < 1.01)
+			attMeas.qC.push_back(qtmp3);
+	}
+	fclose(fp);
+
+	Gyro gy1, gy2;
+	fp = fopen(gypath.c_str(), "r");
+	fscanf(fp, "%d\n", &num);
+	fscanf(fp, "%[^\n]\n", tmp);
+	for (int a = 0; a < num; a++)
+	{
+		fscanf(fp, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n",&gy1.UT, &gy1.wx, &gy1.wy, &gy1.wz, &gy2.wx, &gy2.wy, &gy2.wz);
+		double sum1 = pow(gy1.wx, 2) + pow(gy1.wy, 2) + pow(gy1.wz, 2);
+		double sum2 = pow(gy2.wx, 2) + pow(gy2.wy, 2) + pow(gy2.wz, 2);
+		gy2.UT = gy1.UT;
+		if (sum1 > 0.00001)
+			attMeas.gy1.push_back(gy1);
+		if (sum2 > 0.00001)
+			attMeas.gy2.push_back(gy2);
 	}
 	fclose(fp);
 
@@ -2503,27 +2637,27 @@ void attSim::transCrj2StarGyro(vector<Quat>qTrueInter1,
 		else
 			attMeas.gy23.push_back(0);
 
-		if (starGyro.isG31 == true)
-		{
-			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
-			mBase.Multi(G31, XYZ, &omega, 1, 3, 1); attMeas.gy31.push_back(omega);
-		}
-		else
-			attMeas.gy31.push_back(0);
-		if (starGyro.isG32 == true)
-		{
-			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
-			mBase.Multi(G32, XYZ, &omega, 1, 3, 1); attMeas.gy32.push_back(omega);
-		}
-		else
-			attMeas.gy32.push_back(0);
-		if (starGyro.isG33 == true)
-		{
-			XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
-			mBase.Multi(G33, XYZ, &omega, 1, 3, 1); attMeas.gy33.push_back(omega);
-		}
-		else
-			attMeas.gy33.push_back(0);
+		//if (starGyro.isG31 == true)
+		//{
+		//	XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+		//	mBase.Multi(G31, XYZ, &omega, 1, 3, 1); attMeas.gy31.push_back(omega);
+		//}
+		//else
+		//	attMeas.gy31.push_back(0);
+		//if (starGyro.isG32 == true)
+		//{
+		//	XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+		//	mBase.Multi(G32, XYZ, &omega, 1, 3, 1); attMeas.gy32.push_back(omega);
+		//}
+		//else
+		//	attMeas.gy32.push_back(0);
+		//if (starGyro.isG33 == true)
+		//{
+		//	XYZ[0] = wTrue[a].wx, XYZ[1] = wTrue[a].wy, XYZ[2] = wTrue[a].wz;
+		//	mBase.Multi(G33, XYZ, &omega, 1, 3, 1); attMeas.gy33.push_back(omega);
+		//}
+		//else
+		//	attMeas.gy33.push_back(0);
 	}
 	//判断是否添加误差
 	if (isErr == true && starGyro.isG11 == true)		addErrorForTriGyroActive(attMeas.gy11);
@@ -2532,9 +2666,9 @@ void attSim::transCrj2StarGyro(vector<Quat>qTrueInter1,
 	if (isErr == true && starGyro.isG21 == true)		addErrorForTriGyroActive(attMeas.gy21);
 	if (isErr == true && starGyro.isG22 == true)		addErrorForTriGyroActive(attMeas.gy22);
 	if (isErr == true && starGyro.isG23 == true)		addErrorForTriGyroActive(attMeas.gy23);
-	if (isErr == true && starGyro.isG31 == true)		addErrorForFiberGyroActive(attMeas.gy31);
-	if (isErr == true && starGyro.isG32 == true)		addErrorForFiberGyroActive(attMeas.gy32);
-	if (isErr == true && starGyro.isG33 == true)		addErrorForFiberGyroActive(attMeas.gy33);
+	//if (isErr == true && starGyro.isG31 == true)		addErrorForFiberGyroActive(attMeas.gy31);
+	//if (isErr == true && starGyro.isG32 == true)		addErrorForFiberGyroActive(attMeas.gy32);
+	//if (isErr == true && starGyro.isG33 == true)		addErrorForFiberGyroActive(attMeas.gy33);
 }
 //////////////////////////////////////////////////////////////////////////
 //功能：添加星敏误差(被动推扫)
@@ -2613,7 +2747,7 @@ void attSim::addErrorForQuatActive(vector<Quat>&qSim)
 	{
 		calcuOmega(qSim[a], qSim[a + 1], vOmega);
 		vel = sqrt(pow(vOmega.wx / PI * 180, 2) + pow(vOmega.wy / PI * 180, 2) + pow(vOmega.wz / PI * 180, 2));
-		sig_trackerFact = starErrorModel(vel)*attDat.sig_ST;//和实际sigma关联起来的公式
+		sig_trackerFact = starErrorModel(vel);//和实际sigma关联起来的公式
 		noise[a] *= 0.5 / 3600 * PI / 180 * sig_trackerFact;
 		//noise[a] *= 0.5 / 3600 * PI / 180 * attDat.sig_ST;//不与速度关联
 		Quat q2;
@@ -2633,18 +2767,18 @@ void attSim::addErrorForQuatActive(vector<Quat>&qSim)
 //输出：陀螺误差值wSim
 //注意：根据卫星机动速度加随机噪声
 //作者：GZC
-//日期：2018.01.11
+//日期：2018.01.11->2023.09.26
 //////////////////////////////////////////////////////////////////////////
 void attSim::addErrorForTriGyroActive(vector<double>&wSim)
 {
 	//设置常值漂移和随机漂移噪声
 	double dtG = 1. / attDat.freqG;
-	double wbias = attDat.wBiasA[0];
+	double wbias = attDat.wBiasA[0];//单位是度
 	double *wn = new double[wSim.size()];
 	double *bias = new double[wSim.size()];
-	double sigv = 5e-5 / 180 * PI, sigvFact;
+	double sigv = attDat.sigv / 180 * PI, sigvFact;
 	mBase.RandomDistribution(0, sqrt(sigv*sigv *dtG + 1 / 12 * attDat.sigu *attDat.sigu * dtG) / 3, wSim.size(), 0, wn);
-	mBase.RandomDistribution(wbias*PI / 180 / 3600 * dtG, attDat.sigu / sqrt(1 * dtG) / 3, wSim.size(), 0, bias);//注意是*dt，matlab中是/dt
+	mBase.RandomDistribution(wbias*PI / 180 * dtG, attDat.sigu / sqrt(1 * dtG) / 3, wSim.size(), 0, bias);//注意是*dt，matlab中是/dt
 
 	for (int a = 0; a < wSim.size(); a++)
 	{
@@ -2668,7 +2802,7 @@ void attSim::addErrorForFiberGyroActive(vector<double>&wSim)
 }
 double attSim::starErrorModel(double sig)
 {
-	return abs(3.3643*sig*sig + 11.298*sig - 0.0526);
+	return abs(4.8087 * sig * sig + 8.2699 * sig + 1.7889);
 }
 double attSim::starErrorModelForCH(double omega)
 {
@@ -2710,7 +2844,7 @@ void attSim::addAttStable(vector<Quat>& qTrue)
 		wTrue.wx += stab1[i] * dtQ;//增加了姿态稳定度
 		wTrue.wy += stab2[i] * dtQ;;
 		wTrue.wz += stab3[i] * dtQ;;
-		if (i == nGyro - 1) { break; }
+		//if (i == nGyro - 1) { break; }
 		double ww = sqrt(pow(wTrue.wx, 2) + pow(wTrue.wy, 2) + pow(wTrue.wz, 2));
 		double co = cos(0.5*ww*dtQ);
 		double si = sin(0.5*ww*dtQ);
@@ -2818,20 +2952,21 @@ void attSim::outputQuatGyroTXT(attGFDM attMeas, string out1, string out2)
 	fprintf(fp1, "---时间--------星敏Aq1----星敏Aq2----星敏Aq3----星敏Aqs------星敏Bq1----星敏Bq2----星敏Bq3----星敏Bqs------星敏Cq1----星敏Cq2----星敏Cq3----星敏Cqs\n");
 	for (int a = 0; a < attMeas.qA.size(); a++)
 	{
-		fprintf(fp1, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n", attMeas.qA[a].UT,
+		fprintf(fp1, "%.5f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n", attMeas.qA[a].UT,
 			attMeas.qA[a].q1, attMeas.qA[a].q2, attMeas.qA[a].q3, attMeas.qA[a].q4, attMeas.qB[a].q1, attMeas.qB[a].q2,
 			attMeas.qB[a].q3, attMeas.qB[a].q4, attMeas.qC[a].q1, attMeas.qC[a].q2, attMeas.qC[a].q3, attMeas.qC[a].q4);
 	}
+	fclose(fp1);
 	FILE *fp2 = fopen(gyroPath.c_str(), "w");
 	fprintf(fp2, "%d\n", attMeas.gy11.size());
-	fprintf(fp2, "---时间----------G11(°/s)------G12(°/s)------G13(°/s)------G21(°/s)------G22(°/s)------G23(°/s)------G31(°/s)------G32(°/s)------G33(°/s)\n");
+	fprintf(fp2, "---Time-------G11(deg/s)----G12(deg/s)----G13(deg/s)----G21(deg/s)----G22(deg/s)----G23(deg/s)\n");
 	for (int a = 0; a < attMeas.gy11.size(); a++)
 	{
-		fprintf(fp2, "%.3f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n", attMeas.UT[a], attMeas.gy11[a]/PI*180,
+		fprintf(fp2, "%.5f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n", attMeas.UT[a], attMeas.gy11[a]/PI*180,
 			attMeas.gy12[a] / PI * 180, attMeas.gy13[a] / PI * 180, attMeas.gy21[a] / PI * 180, attMeas.gy22[a] / PI * 180, 
-			attMeas.gy23[a] / PI * 180, attMeas.gy31[a] / PI * 180,	 attMeas.gy32[a] / PI * 180, attMeas.gy33[a] / PI * 180);
+			attMeas.gy23[a] / PI * 180);
 	}
-	fclose(fp1), fclose(fp2);
+	fclose(fp2);
 }
 void attSim::outputQuat(vector<Quat> qOut, string name)
 {
@@ -2911,7 +3046,7 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 	vector<Quat>att;
 	vector< Gyro>cheu1, cheu2;
 	vector<Orbit> chorb;
-	CH.ReadCHcsv(workpath, att, attMeas.qA, attMeas.qB, attMeas.qC, attMeas.gy1, attMeas.gy2, cheu1, cheu2, chorb);
+	CH.ReadCHcsv(workpath, 3000, att, attMeas.qA, attMeas.qB, attMeas.qC, attMeas.gy1, attMeas.gy2, cheu1, cheu2, chorb);
 	//获取星敏陀螺参数
 	CH.getAttParam(mAtt, workpath, starGy);
 	//获取星敏的安装
@@ -2921,13 +3056,14 @@ void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy)
 	vector<Quat>qTrue;
 	CH.simQTrue(cheu1,chorb,qTrue);
 	
-	if (mAtt.sJitter[0]!=0)
-	{
-		//读取高频抖动数据
-		vector<AttJitter>vecJitter;
-		CH.readAttJitterparam(vecJitter);
-		CH.simAttJitterparam(qTrue, vecJitter);	//在真实四元数上加高频抖动，并且得到高频角位移数据
-	}
+	//if (mAtt.sJitter[0]!=0)
+	//{
+	//	//读取高频抖动数据
+	//	vector<AttJitter>vecJitter;
+	//	CH.readAttJitterparam(vecJitter);
+	//	CH.simAttJitterparam(qTrue, vecJitter);	//在真实四元数上加高频抖动，并且得到高频角位移数据
+	//}
+
 	//仿真带误差四元数
 	attGFDM measGFDM;
 	CH.simAttparam(qTrue, measGFDM);
@@ -2945,10 +3081,18 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy,
 	attSim CH;
 	//获取星敏陀螺轨道欧拉角数据
 	attCH attMeas;
-	vector<Quat>att;
-	vector< Gyro>cheu1,cheu2;
-	vector<Orbit> chorb;
-	CH.ReadCHcsv(workpath,att, attMeas.qA, attMeas.qB, attMeas.qC, attMeas.gy1, attMeas.gy2,cheu1,cheu2,chorb);
+	if (false)//通过csv文件读取
+	{
+		vector<Quat>att;
+		vector< Gyro>cheu1, cheu2;
+		vector<Orbit> chorb;
+		CH.ReadCHcsv(workpath, 3000, att, attMeas.qA, attMeas.qB, attMeas.qC, attMeas.gy1, attMeas.gy2, cheu1, cheu2, chorb);
+	}
+	else
+	{
+		CH.ReadSimTXT(workpath, attMeas);
+	}
+
 	//获取星敏陀螺参数
 	CH.getAttParam(mAtt, workpath, starGy);
 	//获取星敏的安装
@@ -2960,6 +3104,13 @@ void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy,
 		CH.calcuOmegaForABC(attMeas.qA, w1, 1);
 		CH.calcuOmegaForABC(attMeas.qB, w2, 1);
 		CH.calcuOmegaForABC(attMeas.qC, w3, 1);
+	}
+
+	if (true)
+	{
+		CH.calcuAttDeterForABC(attMeas.qA, workpath, 1);
+		CH.calcuAttDeterForABC(attMeas.qB, workpath, 2);
+		CH.calcuAttDeterForABC(attMeas.qC, workpath, 3);
 	}
 	
 	//根据姿态数据得到初始四元数、光轴矢量、陀螺测量值；
