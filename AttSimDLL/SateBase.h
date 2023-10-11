@@ -12,6 +12,8 @@ struct AttParm
 {
 	int freqG, freqQ;//星敏陀螺采样频率
 	int totalT;//总仿真时长
+	double startT, endT;//仿真起始终止时间
+	double imgTs, imgTe;//成像起始和终止时刻
 	int nQuat, nGyro;//星敏和陀螺数据个数
 	double stabW[3];//姿态稳定度
 	double qInitial[4], wBiasA[3];//初始四元数，陀螺漂移
@@ -25,6 +27,7 @@ struct AttParm
 	{
 		this->freqG = s.freqG;		this->freqQ = s.freqQ;
 		this->totalT = s.totalT;
+		this->startT = s.startT;		this->endT = s.endT;
 		this->nQuat = s.nQuat; this->nGyro = s.nGyro;
 		memcpy(this->stabW, s.stabW, sizeof(double) * 3);
 		memcpy(this->qInitial, s.qInitial, sizeof(double) * 4);

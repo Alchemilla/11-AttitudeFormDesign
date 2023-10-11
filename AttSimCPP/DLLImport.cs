@@ -13,6 +13,8 @@ namespace AttSimCPP
     {
         public int freqG, freqQ;//星敏陀螺采样频率
         public int totalT;//总仿真时长
+        public double startT, endT;//仿真起始和终止时刻
+        public double imgTs, imgTe;//成像起始和终止时刻
         public int nQuat, nGyro;//星敏和陀螺总个数
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         public double[] stabW;//姿态稳定度

@@ -39,6 +39,9 @@ ATTSIMDLL void attitudeDeterminationStruct(AttParm mAtt,
 ATTSIMDLL void attitudeDeterActivePushbroomStruct(AttParm mAtt,
 	double BeforeAfterT[2], char* workpath, double *qTrueC, double *qMeasC, int isBinEKF,
 	double *wTrueC, double *wMeasC, double *dqOut, double *xest_store);
+//原始备份
+ATTSIMDLL void ExternalFileAttitudeSim2(char* workpath, AttParm mAtt, isStarGyro starGy);
+ATTSIMDLL void ExternalFileAttitudeDeter2(char* workpath, AttParm mAtt, isStarGyro starGy, BOOL isBinFilter);
 //读取外部数据（包括主动推扫）然后仿真姿态
 ATTSIMDLL void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy);
 ATTSIMDLL void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy, BOOL isBinFilter);
@@ -66,6 +69,7 @@ public:
 	void EKF6StateForStarOpticAxis(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);
 	void EKF6StateForStarOpticAxisForCH(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);//彩虹定姿，考虑星敏精度变化
 	void EKFForAndBackStarOpticAxis(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);
+	void EKFForAndBackStarOpticAxisForCH(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);//彩虹双向定姿，考虑星敏精度变化
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
 	void simAttparam(vector<Quat>qTrue,attGFDM &attMeas);
 	void simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter);
@@ -85,7 +89,10 @@ public:
 	//读取csv,txt文件
 	bool ReadCHcsv(string chcsv, int index, vector<Quat>& att, vector<Quat>& sa, vector<Quat>& sb, vector<Quat>& sc,
 		vector< Gyro>&chgy1, vector< Gyro>& chgy2, vector<Gyro>&cheu1, vector<Gyro>& cheu2, vector<Orbit>& chorb);
-	bool ReadSimTXT(string chtxt, attCH &attMeas);
+	bool ReadCHcsv2(string chcsv, double startT, double endT, vector<Quat>& guihuaQuat, vector<Gyro>& guihuaGy, attCH &attMeas);
+	bool ReadCHcsv3(string chcsv, double startT, double endT, vector<Quat>& guihuaQuat, vector<Gyro>& guihuaGy, attCH& attMeas);
+	bool ReadCHcsv4(string chcsv, AttParm para, vector<Quat>& guihuaQuat);
+	bool ReadSimTXT(string chtxt, attCH& attMeas);
 
 	//转换数据
 	void transCrj2StarGyro(vector<Quat>qTrueInter1,vector<Gyro>wTrue,attGFDM &attMeas,bool isErr);
@@ -103,6 +110,7 @@ public:
 	void addAttStable(vector<Quat>&qTrue);
 	//比较函数
 	void compareTureEKF(string outName);
+	void compareTureEKFforImg(AttParm mAtt, string outName);//彩虹成像段精度
 	//各种输出函数
 	void outputQuatGyroTXT(attGFDM attMeas, string out1, string out2);
 	void outputQuat(vector<Quat>qOut, string name);
