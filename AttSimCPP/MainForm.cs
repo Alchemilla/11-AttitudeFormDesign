@@ -613,7 +613,7 @@ namespace AttSimCPP
             else
             {
                 ShowInfo("已经设置工程路径");
-                if (!File.Exists(path + "\\STData.csv") || !File.Exists(path + "\\OrbData.csv") || !File.Exists(path + "\\GyrData.csv") 
+                if (!File.Exists(path + "\\STData.csv") || !File.Exists(path + "\\OrbData.csv") || !File.Exists(path + "\\GyrData.csv")
                     || !File.Exists(path + "\\AttRefData.csv"))
                 {
                     ShowInfo("没有仿真数据文件csv文件");

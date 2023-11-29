@@ -42,6 +42,7 @@ ATTSIMDLL void attitudeDeterActivePushbroomStruct(AttParm mAtt,
 //原始备份
 ATTSIMDLL void ExternalFileAttitudeSim2(char* workpath, AttParm mAtt, isStarGyro starGy);
 ATTSIMDLL void ExternalFileAttitudeDeter2(char* workpath, AttParm mAtt, isStarGyro starGy, BOOL isBinFilter);
+ATTSIMDLL void ExternalFileAttitudeDeter3(char* workpath, AttParm mAtt, isStarGyro starGy, BOOL isBinFilter);
 //读取外部数据（包括主动推扫）然后仿真姿态
 ATTSIMDLL void ExternalFileAttitudeSim(char * workpath, AttParm mAtt, isStarGyro starGy);
 ATTSIMDLL void ExternalFileAttitudeDeter(char * workpath, AttParm mAtt, isStarGyro starGy, BOOL isBinFilter);
@@ -62,6 +63,7 @@ public:
 	void compareTrueNoise(Quat *qTrue, Quat *qMeas, double *qNoise);
 	void compareTrueEKF15State(string pathekf, string pathb, Quat *qTrue, Quat *qEst, double *dqOut, double *xest_store);
 	void ExtendedKalmanFilter15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
+	void ExtendedKalmanFilter15StateForCH(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);
 	void EKFForwardAndBackforward15State(Quat *qMeas, Gyro *wMeas, Quat *&quatEst, double *xest_store);
 	//////////////////////////////////////////////////////////////////////////
 	//以下为主动推扫相关函数
@@ -71,6 +73,7 @@ public:
 	void EKFForAndBackStarOpticAxis(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);
 	void EKFForAndBackStarOpticAxisForCH(vector<vector<BmImStar>>BmIm, vector<Gyro>wMeas, Quat q0);//彩虹双向定姿，考虑星敏精度变化
 	void Measurement(vector<BmImStar> BmIm, double *Att, MatrixXd &mH, MatrixXd &mDetZ);
+	void Measurement15State(vector<BmImStar> BmIm, double* Att, MatrixXd& mH, MatrixXd& mDetZ);
 	void simAttparam(vector<Quat>qTrue,attGFDM &attMeas);
 	void simAttJitterparam(vector<Quat>&qTrue, vector<AttJitter>vecJitter);
 	bool readAttparam(string pushbroomDat, vector<Quat>&qTrue);
@@ -116,6 +119,7 @@ public:
 	void outputQuat(vector<Quat>qOut, string name);
 	void outputQuatZY3(vector<Quat>qOut, string name);
 	void outputBias(double *Bias, int num, string name);
+	void outputXest(double* Xest, int num, string name);
 private:
 	int nQuat, nGyro;//全局变量，四元数和陀螺的数量
 	AttParm attDat;	isStarGyro starGyro;
